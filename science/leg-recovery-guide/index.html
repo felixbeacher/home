@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leg Surgery Wound Recovery Guide</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        teal: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        medical: {
+                            bg: '#F8FAFC',
+                            card: '#FFFFFF',
+                            primary: '#0F766E',
+                            accent: '#0284C7',
+                            dark: '#1E293B',
+                            light: '#E0F2FE'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .category-btn.active {
+            background-color: #0f766e;
+            color: #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(15, 118, 110, 0.3), 0 4px 6px -2px rgba(15, 118, 110, 0.05);
+            border-color: #0f766e;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col py-8">
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 flex-grow w-full space-y-8">
+
+        <!-- Page Header Title -->
+        <header class="text-center sm:text-left border-b border-slate-200 pb-5">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center sm:justify-start gap-3">
+                <i class="fa-solid fa-notes-medical text-teal-600"></i>
+                Leg Surgery Recovery Guide
+            </h1>
+        </header>
+
+        <!-- Category Navigation Buttons -->
+        <section aria-label="Recovery Categories">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-teal-600"></i> Select Advice Category
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="categoryButtonsContainer">
+                <!-- Buttons injected by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Category Content Display Area -->
+        <section id="categoryContentSection" class="transition-all duration-300">
+            <!-- Dynamic Content Injected Here -->
+        </section>
+
+        <!-- Interactive Daily Checklist & Recovery Tracker -->
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-teal-600"></i> Daily Recovery Checklist
+                    </h2>
+                    <p class="text-sm text-slate-500 mt-1">Track your daily post-surgery habits to encourage optimal wound healing.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-xs font-semibold text-slate-600">Progress: <span id="progressPercent" class="text-teal-700 font-bold">0%</span></div>
+                    <div class="w-32 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div id="progressBar" class="bg-teal-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <button onclick="resetChecklist()" class="text-xs text-slate-400 hover:text-slate-600 underline ml-2">Reset</button>
+                </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3" id="checklistContainer">
+                <!-- Dynamic Checklist Items -->
+            </div>
+        </section>
+
+        <!-- FAQs / Need To Know Accordion -->
+        <section class="bg-gradient-to-br from-teal-900 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+            <div class="max-w-3xl">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 text-teal-300">
+                    <i class="fa-solid fa-circle-question"></i> Essential Things to Keep in Mind
+                </h2>
+
+                <div class="space-y-3" id="accordionContainer">
+                    <!-- Accordion Item 1 -->
+                    <div class="border border-slate-700/60 rounded-xl overflow-hidden bg-slate-800/40">
+                        <button onclick="toggleAccordion(1)" class="w-full px-5 py-4 text-left flex items-center justify-between font-medium text-slate-200 hover:text-teal-300 transition-colors">
+                            <span>How long should I keep my surgical dressing dry?</span>
+                            <i id="acc-icon-1" class="fa-solid fa-chevron-down text-teal-400 transition-transform"></i>
+                        </button>
+                        <div id="acc-content-1" class="hidden px-5 pb-4 text-sm text-slate-300 leading-relaxed border-t border-slate-700/40 pt-3">
+                            Usually, dressings must remain strictly dry for the first 48 hours post-operation. After this period, follow your surgeon's specific discharge instructions regarding waterproof dressings or showering rules. Never submerge the leg in a bath or swimming pool until the wound is fully closed and stitches/staples are removed.
+                        </div>
+                    </div>
+
+                    <!-- Accordion Item 2 -->
+                    <div class="border border-slate-700/60 rounded-xl overflow-hidden bg-slate-800/40">
+                        <button onclick="toggleAccordion(2)" class="w-full px-5 py-4 text-left flex items-center justify-between font-medium text-slate-200 hover:text-teal-300 transition-colors">
+                            <span>Why is leg elevation so crucial for healing?</span>
+                            <i id="acc-icon-2" class="fa-solid fa-chevron-down text-teal-400 transition-transform"></i>
+                        </button>
+                        <div id="acc-content-2" class="hidden px-5 pb-4 text-sm text-slate-300 leading-relaxed border-t border-slate-700/40 pt-3">
+                            Gravity causes fluid to accumulate in the lower limb. Elevating your leg above the level of your heart encourages venous return, reduces swelling (oedema), relieves throbbing pain, and reduces tension on your surgical stitches, which prevents wound gapping.
+                        </div>
+                    </div>
+
+                    <!-- Accordion Item 3 -->
+                    <div class="border border-slate-700/60 rounded-xl overflow-hidden bg-slate-800/40">
+                        <button onclick="toggleAccordion(3)" class="w-full px-5 py-4 text-left flex items-center justify-between font-medium text-slate-200 hover:text-teal-300 transition-colors">
+                            <span>When are stitches or staples typically removed?</span>
+                            <i id="acc-icon-3" class="fa-solid fa-chevron-down text-teal-400 transition-transform"></i>
+                        </button>
+                        <div id="acc-content-3" class="hidden px-5 pb-4 text-sm text-slate-300 leading-relaxed border-t border-slate-700/40 pt-3">
+                            Non-dissolvable sutures or metal staples on the leg are usually removed 10 to 14 days after surgery by a practice nurse or district nurse. Dissolvable stitches usually fade within 2 to 6 weeks.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data for Categories
+        const categories = [
+            {
+                id: 'wound-care',
+                title: 'Wound Care & Hygiene',
+                icon: 'fa-hand-holding-medical',
+                badge: 'Essential Daily Care',
+                description: 'Guidelines for keeping your incision clean, maintaining sterile dressings, and encouraging proper tissue repair.',
+                awareOf: [
+                    'Slight serous exudate (clear/pale yellow fluid) is normal during the first 2-3 days.',
+                    'Keep spare sterile dressings at home as supplied by your discharge team or district nurse.',
+                    'Itching around the surgical site is often a normal sign of healing, but severe itchiness with redness could indicate an allergic reaction to adhesive tape.'
+                ],
+                dos: [
+                    'Wash hands thoroughly with soap and warm water for at least 20 seconds before touching your wound or dressing.',
+                    'Keep your surgical dressing clean and dry at all times unless instructed otherwise by your surgeon.',
+                    'Pat the surrounding skin dry gently with a clean towel; never rub near the incision.',
+                    'Store replacement dressing materials in a clean, dust-free box or drawer.'
+                ],
+                donts: [
+                    'Do not soak your leg in a bath, hot tub, or swimming pool until the incision is completely healed and stitches are out.',
+                    'Do not pick, scratch, or peel at scabs, steri-strips, stitches, or surgical glue.',
+                    'Do not apply unprescribed creams, ointments, antiseptic sprays, or oils directly onto a fresh surgical wound.',
+                    'Do not leave a wet or soiled dressing over your wound; request a dressing change from your care team.'
+                ]
+            },
+            {
+                id: 'pain-swelling',
+                title: 'Pain & Swelling Management',
+                icon: 'fa-ice-cream',
+                badge: 'Comfort & Circulation',
+                description: 'Effective methods to reduce leg swelling (oedema), manage surgical discomfort, and use elevation correctly.',
+                awareOf: [
+                    'Swelling in the foot, ankle, and lower leg is very common after leg surgery due to gravity.',
+                    'Pain should steadily lessen over time. A sudden surge in severe throbbing pain requires medical evaluation.',
+                    'Take pain relief medication on a regular schedule initially, rather than waiting for severe pain to start.'
+                ],
+                dos: [
+                    'Elevate your leg so that your ankle and knee are resting above the level of your heart using pillows.',
+                    'Apply an ice pack (or bag of frozen peas wrapped in a clean tea towel) for 15–20 minutes at a time to reduce swelling.',
+                    'Take prescribed painkillers strictly according to your doctor’s instructions.',
+                    'Perform gentle ankle pump movements (pointing and flexing toes) while elevated to keep blood circulating.'
+                ],
+                donts: [
+                    'Do not place ice directly on bare skin, as this can cause cold burns or tissue damage.',
+                    'Do not let your leg dangle over the edge of a chair or bed for prolonged periods.',
+                    'Do not exceed the maximum daily dose of paracetamol or prescribed analgesics.',
+                    'Do not ignore persistent throbbing pain that fails to improve after taking prescribed pain relief and elevating.'
+                ]
+            },
+            {
+                id: 'mobility',
+                title: 'Mobility & Activity',
+                icon: 'fa-crutch',
+                badge: 'Safe Rehabilitation',
+                description: 'Rehabilitation guidelines on weight-bearing status, using crutches safely, and avoiding strain on your healing leg.',
+                awareOf: [
+                    'Your discharge letter will specify your weight-bearing status: Non-Weight Bearing (NWB), Partial (PWB), or Full (FWB).',
+                    'Feeling fatigued early in your recovery is normal; your body spends significant energy repairing tissue.',
+                    'Trip hazards at home (rugs, loose cables) are the primary cause of post-operative stumbles.'
+                ],
+                dos: [
+                    'Strictly follow the weight-bearing instructions given by your physiotherapist or surgeon.',
+                    'Use your prescribed walking aids (crutches, frame, or cane) correctly at all times when moving.',
+                    'Wear supportive, non-slip, well-fitting footwear on your non-operated foot.',
+                    'Take short, regular walks around the house if permitted to encourage circulation and prevent blood clots.'
+                ],
+                donts: [
+                    'Do not attempt to walk without your aids until explicitly cleared by your physiotherapist.',
+                    'Do not pivot, twist rapidly, or make sudden sharp turns on your operated leg.',
+                    'Do not drive until your surgeon confirms it is safe and you can comfortably perform an emergency stop.',
+                    'Do not lift heavy objects, push furniture, or engage in high-impact exercises.'
+                ]
+            },
+            {
+                id: 'nutrition',
+                title: 'Nutrition & Hydration',
+                icon: 'fa-apple-whole',
+                badge: 'Cellular Healing',
+                description: 'Fuelling your body with essential proteins, vitamins, and fluids to support rapid tissue repair and immune defence.',
+                awareOf: [
+                    'Surgical recovery increases your body’s metabolic rate and demand for high-quality protein.',
+                    'Pain medication (especially codeine/morphine) can cause sluggish bowel movements and constipation.',
+                    'Dehydration reduces tissue perfusion and delays the delivery of oxygen to your healing wound.'
+                ],
+                dos: [
+                    'Prioritise lean protein sources (chicken, fish, eggs, tofu, beans, dairy) in every meal to rebuild tissue.',
+                    'Drink 1.5 to 2 litres of water daily to maintain hydration and encourage healthy circulation.',
+                    'Consume foods rich in Vitamin C (citrus fruits, berries, peppers) and Zinc to support collagen formation.',
+                    'Eat fiber-rich foods (whole grains, oats, fruit) to prevent post-operative constipation.'
+                ],
+                donts: [
+                    'Do not skip meals, even if your appetite is lower than usual after surgery.',
+                    'Do not drink alcohol, especially while taking prescribed painkillers or blood thinners.',
+                    'Do not rely heavily on sugary, processed snacks that provide minimal nutritional value for healing.',
+                    'Do not start crash dieting or extreme calorie restriction during the surgical recovery phase.'
+                ]
+            },
+            {
+                id: 'warning-signs',
+                title: 'Warning Signs & Urgent Help',
+                icon: 'fa-triangle-exclamation',
+                badge: 'Red Flag Symptoms',
+                description: 'Recognising signs of wound infection, Deep Vein Thrombosis (DVT), or surgical complications early.',
+                awareOf: [
+                    'Infections and blood clots (DVT) are potential complications of lower limb surgery that require rapid medical intervention.',
+                    'Redness that spreads outward from the wound edges over time is a key indicator of infection.',
+                    'Knowing who to contact (Ward unit, NHS 111, District Nurse, or 999) gives peace of mind.'
+                ],
+                dos: [
+                    'Inspect the skin around your dressing daily for expanding redness, warmth, or increased swelling.',
+                    'Contact your GP or hospital discharge ward immediately if you notice foul-smelling discharge or pus.',
+                    'Monitor your temperature using a thermometer if you feel feverish, flushed, or experience chills.',
+                    'Seek urgent emergency care if you develop severe calf tenderness, chest pain, or shortness of breath.'
+                ],
+                donts: [
+                    'Do not wait several days hoping severe symptoms or worsening pain will resolve on its own.',
+                    'Do not squeeze, press, or attempt to drain any pockets of fluid or pus near the wound.',
+                    'Do not ignore sudden swelling or tight pain in your calf muscle on either leg.',
+                    'Do not hesitate to seek medical advice if you feel genuinely unwell or concerned.'
+                ]
+            }
+        ];
+
+        // Daily Checklist Items
+        const checklistItems = [
+            { id: 1, text: 'Inspect dressing for leaks, moisture or heavy staining', checked: false },
+            { id: 2, text: 'Elevate operated leg on pillows above heart level (30+ mins)', checked: false },
+            { id: 3, text: 'Perform prescribed ankle pump or wiggle toe exercises', checked: false },
+            { id: 4, text: 'Take prescribed analgesics on time as instructed', checked: false },
+            { id: 5, text: 'Drink at least 1.5 - 2 Litres of water throughout the day', checked: false },
+            { id: 6, text: 'Eat a protein-rich meal (e.g. eggs, fish, lean meat, lentils)', checked: false }
+        ];
+
+        let activeCategoryId = 'wound-care';
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategoryButtons();
+            renderCategoryContent(activeCategoryId);
+            renderChecklist();
+        });
+
+        // Render Category Nav Buttons
+        function renderCategoryButtons() {
+            const container = document.getElementById('categoryButtonsContainer');
+            container.innerHTML = categories.map(cat => {
+                const isActive = cat.id === activeCategoryId;
+                return `
+                    <button 
+                        onclick="switchCategory('${cat.id}')"
+                        class="category-btn ${isActive ? 'active' : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'} border p-3 rounded-xl font-medium text-xs sm:text-sm flex flex-col items-center justify-center text-center gap-2 transition-all duration-200 shadow-sm"
+                        id="btn-${cat.id}"
+                    >
+                        <i class="fa-solid ${cat.icon} text-lg ${isActive ? 'text-white' : 'text-teal-600'}"></i>
+                        <span class="line-clamp-2">${cat.title}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Switch Active Category
+        function switchCategory(categoryId) {
+            activeCategoryId = categoryId;
+            renderCategoryButtons();
+            renderCategoryContent(categoryId);
+        }
+
+        // Render Category Content Panel
+        function renderCategoryContent(categoryId) {
+            const cat = categories.find(c => c.id === categoryId);
+            const container = document.getElementById('categoryContentSection');
+
+            if (!cat) return;
+
+            const isWarning = cat.id === 'warning-signs';
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden transition-all duration-300">
+                    <!-- Category Header -->
+                    <div class="p-6 sm:p-8 ${isWarning ? 'bg-rose-50/70 border-b border-rose-100' : 'bg-teal-50/50 border-b border-teal-100/60'} flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full ${isWarning ? 'bg-rose-100 text-rose-800' : 'bg-teal-100 text-teal-800'} mb-2">
+                                ${cat.badge}
+                            </span>
+                            <h2 class="text-2xl sm:text-3xl font-bold ${isWarning ? 'text-rose-950' : 'text-slate-800'} flex items-center gap-3">
+                                <i class="fa-solid ${cat.icon} ${isWarning ? 'text-rose-600' : 'text-teal-600'}"></i>
+                                ${cat.title}
+                            </h2>
+                            <p class="text-slate-600 text-sm mt-1 max-w-3xl">${cat.description}</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 sm:p-8 space-y-8">
+                        <!-- Things to be aware of -->
+                        <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-5">
+                            <h3 class="text-sm font-bold text-amber-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-lightbulb text-amber-600"></i> Things to Be Aware Of
+                            </h3>
+                            <ul class="space-y-2">
+                                ${cat.awareOf.map(item => `
+                                    <li class="text-sm text-amber-950 flex items-start gap-2.5">
+                                        <i class="fa-solid fa-circle-info text-amber-600 text-xs mt-1 shrink-0"></i>
+                                        <span>${item}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+
+                        <!-- Dos and Don'ts Split Grid -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Dos Column -->
+                            <div class="bg-emerald-50/50 border border-emerald-200/80 rounded-xl p-5 sm:p-6 space-y-4">
+                                <div class="flex items-center gap-2 text-emerald-800 border-b border-emerald-200/60 pb-3">
+                                    <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold">DOs — Recommended Actions</h3>
+                                </div>
+                                <ul class="space-y-3">
+                                    ${cat.dos.map(doItem => `
+                                        <li class="flex items-start gap-3 text-sm text-emerald-950">
+                                            <i class="fa-solid fa-circle-check text-emerald-600 text-base mt-0.5 shrink-0"></i>
+                                            <span class="leading-relaxed">${doItem}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+
+                            <!-- Don'ts Column -->
+                            <div class="bg-rose-50/50 border border-rose-200/80 rounded-xl p-5 sm:p-6 space-y-4">
+                                <div class="flex items-center gap-2 text-rose-800 border-b border-rose-200/60 pb-3">
+                                    <div class="w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold">DON'Ts — Things to Avoid</h3>
+                                </div>
+                                <ul class="space-y-3">
+                                    ${cat.donts.map(dontItem => `
+                                        <li class="flex items-start gap-3 text-sm text-rose-950">
+                                            <i class="fa-solid fa-circle-xmark text-rose-500 text-base mt-0.5 shrink-0"></i>
+                                            <span class="leading-relaxed">${dontItem}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+
+                        ${isWarning ? `
+                            <!-- Special Red Flag Callout Card -->
+                            <div class="bg-rose-900 text-white p-6 rounded-xl space-y-3 shadow-sm border border-rose-800">
+                                <h4 class="text-lg font-bold flex items-center gap-2 text-rose-200">
+                                    <i class="fa-solid fa-bell text-amber-400 animate-bounce"></i> Immediate NHS Contact Protocol
+                                </h4>
+                                <p class="text-sm text-rose-100 leading-relaxed">
+                                    If you notice a sudden calf pain, heat, redness in the calf, or difficulty breathing, call <strong>999</strong> or go to your nearest A&E immediately as these can be symptoms of a Deep Vein Thrombosis (DVT) or Pulmonary Embolism (PE). For wound redness or pus, contact your GP or surgical ward within 24 hours.
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render Checklist
+        function renderChecklist() {
+            const container = document.getElementById('checklistContainer');
+            container.innerHTML = checklistItems.map(item => `
+                <label class="flex items-start gap-3 p-3.5 rounded-xl border ${item.checked ? 'bg-teal-50/60 border-teal-200 text-teal-900' : 'bg-slate-50 border-slate-200/80 text-slate-700'} hover:border-teal-300 cursor-pointer transition-all">
+                    <input 
+                        type="checkbox" 
+                        ${item.checked ? 'checked' : ''} 
+                        onchange="toggleChecklist(${item.id})"
+                        class="mt-1 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                    >
+                    <span class="text-xs sm:text-sm font-medium leading-snug ${item.checked ? 'line-through text-teal-700/80' : ''}">${item.text}</span>
+                </label>
+            `).join('');
+
+            updateProgress();
+        }
+
+        function toggleChecklist(id) {
+            const item = checklistItems.find(i => i.id === id);
+            if (item) {
+                item.checked = !item.checked;
+                renderChecklist();
+            }
+        }
+
+        function updateProgress() {
+            const completed = checklistItems.filter(i => i.checked).length;
+            const percent = Math.round((completed / checklistItems.length) * 100);
+            
+            document.getElementById('progressPercent').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        function resetChecklist() {
+            checklistItems.forEach(i => i.checked = false);
+            renderChecklist();
+        }
+
+        // Accordion Toggle
+        function toggleAccordion(id) {
+            const content = document.getElementById(`acc-content-${id}`);
+            const icon = document.getElementById(`acc-icon-${id}`);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+    </script>
+</body>
+</html>
