@@ -223,7 +223,7 @@ function drawTopology(){
  for(const edge of segments){
   const depth=Math.max(0,Math.min(1,(edge.z+2.7)/5.4));
   const alpha=(edge.along?.14:.10)+depth*(edge.along?.6:.37);
-  const hue=(angle*12+(edge.along?94:188)+depth*65)%360;
+  const hue=(angle*44+(edge.along?94:188)+depth*65)%360;
   const saturation=edge.along?75:80;
   const lightness=(edge.along?66:72)+depth*12;
   ctx.strokeStyle='hsla('+hue+','+saturation+'%,'+lightness+'%,'+alpha+')';
