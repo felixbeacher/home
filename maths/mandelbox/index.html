@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Mandelbox Explorer - Deep Zoom</title>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; background: #000; font-family: system-ui, -apple-system, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    
+    #ui {
+      position: absolute; top: 16px; left: 16px;
+      background: rgba(18, 20, 26, 0.90); backdrop-filter: blur(14px);
+      padding: 18px 20px; border-radius: 12px; color: #eee; font-size: 13px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6); user-select: none; width: 330px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      max-height: calc(100vh - 40px); overflow-y: auto;
+    }
+    .header-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+    .title { font-weight: 700; font-size: 15px; color: #fff; }
+    .stat { color: #88c0d0; font-family: monospace; font-size: 13px; font-weight: bold; }
+    
+    .control-group { margin-bottom: 12px; }
+    .label-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+    .parenthesis { color: #8fa1b3; font-size: 11px; }
+    .val { color: #81a1c1; font-family: monospace; }
+    input[type=range] { width: 100%; height: 5px; accent-color: #88c0d0; cursor: pointer; }
+    
+    .btn-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 4px;
+      background: rgba(163, 190, 140, 0.15); color: #a3be8c;
+      font-size: 11px; font-weight: 600;
+    }
+    button {
+      background: rgba(136, 192, 208, 0.2); border: 1px solid #88c0d0;
+      color: #88c0d0; padding: 4px 10px; border-radius: 6px; cursor: pointer;
+      font-size: 11.5px; font-weight: 500;
+    }
+    button:hover { background: rgba(136, 192, 208, 0.35); }
+
+    details {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px; border-left: 3px solid #88c0d0;
+      margin-bottom: 12px; font-size: 12px;
+    }
+    summary {
+      padding: 10px 12px; cursor: pointer; font-weight: 600; color: #eceff4;
+      list-style: none; display: flex; justify-content: space-between; align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '▾'; color: #88c0d0; transition: transform 0.2s; }
+    details[open] summary::after { transform: rotate(180deg); }
+    
+    .info-content { padding: 0 12px 12px 12px; line-height: 1.5; color: #d8dee9; }
+    .info-content h4 { margin: 8px 0 3px 0; font-size: 12px; color: #88c0d0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-content p { margin: 0 0 8px 0; font-size: 11.5px; }
+    .info-content ul { margin: 0 0 8px 0; padding-left: 16px; font-size: 11.5px; }
+    .info-content li { margin-bottom: 4px; }
+    
+    .instructions { display: block; font-size: 11px; color: #8fa1b3; line-height: 1.4; text-align: center; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<canvas id="glcanvas"></canvas>
+
+<div id="ui">
+  <div class="header-row">
+    <span class="title">3D Mandelbox Explorer</span>
+    <span class="stat" id="zoom-stat">1.0×</span>
+  </div>
+
+  <div class="control-group">
+    <div class="label-row">
+      <span>Folding Scale <span class="parenthesis">(morphs architecture)</span></span>
+      <span class="val" id="scale-val">-2.00</span>
+    </div>
+    <input id="scale" type="range" min="-3.0" max="-1.2" step="0.02" value="-2.0">
+  </div>
+
+  <div class="control-group">
+    <div class="label-row">
+      <span>Inner Sphere Radius <span class="parenthesis">(core spherical fold)</span></span>
+      <span class="val" id="minr-val">0.50</span>
+    </div>
+    <input id="minr" type="range" min="0.1" max="1.0" step="0.02" value="0.5">
+  </div>
+
+  <div class="control-group">
+    <div class="label-row">
+      <span>Colour Shift <span class="parenthesis">(cycles colour spectrum)</span></span>
+      <span class="val" id="shift-val">0.00</span>
+    </div>
+    <input id="shift" type="range" min="0" max="1" step="0.01" value="0.00">
+  </div>
+
+  <div class="btn-row">
+    <span class="badge">Adaptive Raymarching &bull; 10,000× Depth</span>
+    <button id="reset-cam">Reset View</button>
+  </div>
+
+  <details open>
+    <summary>About the Mandelbox</summary>
+    <div class="info-content">
+      <h4>What is it?</h4>
+      <p>
+        Discovered by Tom Lowe in 2010, the Mandelbox is a true <strong>3D fractal</strong>. Each 3D point is recursively reflected through a cube (<strong>box fold</strong>) and inverted through a sphere (<strong>sphere fold</strong>), then scaled and translated.
+      </p>
+
+      <h4>Why is it special?</h4>
+      <ul>
+        <li><strong>Alien Architecture:</strong> Geometry forms vast colonnades, organic cathedrals, structural pillars, and mechanical grids.</li>
+        <li><strong>Infinite 3D Depth:</strong> Zooming in reveals that every pillar and beam is constructed from smaller pillars and beams, echoing endlessly inwards.</li>
+      </ul>
+    </div>
+  </details>
+
+  <span class="instructions">
+    Left-drag: Orbit &bull; Right-drag (or Shift-drag): Pan target<br>
+    Scroll: Zoom deep into structures
+  </span>
+</div>
+
+<script>
+const canvas = document.getElementById('glcanvas');
+const gl = canvas.getContext('webgl2');
+if (!gl) alert('WebGL 2 required!');
+
+const vsSource = `#version 300 es
+in vec2 position;
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+}`;
+
+// Deep-Zoom Adaptive Raymarcher Fragment Shader
+const fsSource = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+
+uniform vec2 u_res;
+uniform vec2 u_rot; // yaw, pitch
+uniform vec3 u_target;
+uniform float u_dist;
+uniform float u_scale;
+uniform float u_min_radius;
+uniform float u_shift;
+
+vec3 palette(float t) {
+    vec3 a = vec3(0.5);
+    vec3 b = vec3(0.5);
+    vec3 c = vec3(1.0);
+    vec3 d = vec3(0.0, 0.33, 0.67);
+    return a + b * cos(6.28318 * (c * t + d + u_shift));
+}
+
+// Mandelbox Distance Estimator (DE)
+float map(vec3 p, out float trap) {
+    vec3 offset = p;
+    float dr = 1.0;
+    float minR2 = u_min_radius * u_min_radius;
+    float fixedR2 = 1.0;
+    float minTrap = 1e5;
+
+    for (int i = 0; i < 15; i++) {
+        // Box Fold
+        p = clamp(p, -1.0, 1.0) * 2.0 - p;
+
+        // Sphere Fold
+        float r2 = dot(p, p);
+        if (r2 < minR2) {
+            float temp = fixedR2 / minR2;
+            p *= temp;
+            dr *= temp;
+        } else if (r2 < fixedR2) {
+            float temp = fixedR2 / r2;
+            p *= temp;
+            dr *= temp;
+        }
+
+        // Scale & Translate
+        p = p * u_scale + offset;
+        dr = dr * abs(u_scale) + 1.0;
+
+        minTrap = min(minTrap, length(p));
+    }
+
+    trap = minTrap;
+    return (length(p) - 1.0) / abs(dr);
+}
+
+// Adaptive surface normal vector calculation based on ray distance
+vec3 calcNormal(vec3 p, float t) {
+    float dummy;
+    float d = map(p, dummy);
+    // Scales normal epsilon so close-up surfaces stay sharp
+    float eps = max(0.000005, t * 0.0004);
+    vec2 e = vec2(eps, 0.0);
+    return normalize(vec3(
+        map(p + e.xyy, dummy) - d,
+        map(p + e.yxy, dummy) - d,
+        map(p + e.yyx, dummy) - d
+    ));
+}
+
+void main() {
+    vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+
+    float yaw = u_rot.x;
+    float pitch = u_rot.y;
+
+    // Camera ray origin orbiting around u_target
+    vec3 ro = u_target + vec3(
+        u_dist * cos(pitch) * sin(yaw),
+        u_dist * sin(pitch),
+        u_dist * cos(pitch) * cos(yaw)
+    );
+
+    vec3 ww = normalize(u_target - ro);
+    vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
+    vec3 vv = cross(uu, ww);
+    vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.35 * ww);
+
+    float t = 0.0;
+    float trap = 0.0;
+    float hit = 0.0;
+    int stepCount = 0;
+
+    // Adaptive hit threshold: scales smoothly down to sub-micron distances
+    float minHit = max(0.000002, u_dist * 0.00015);
+
+    for (int i = 0; i < 150; i++) {
+        vec3 pos = ro + rd * t;
+        float d = map(pos, trap);
+        if (d < max(minHit, 0.0006 * t)) {
+            hit = 1.0;
+            break;
+        }
+        t += d * 0.75; // 0.75 step damping prevents clipping through thin pillars
+        stepCount = i;
+        if (t > 30.0) break;
+    }
+
+    if (hit > 0.5) {
+        vec3 pos = ro + rd * t;
+        vec3 nor = calcNormal(pos, t);
+
+        vec3 lightDir = normalize(vec3(0.6, 0.8, 0.5));
+        float diff = max(dot(nor, lightDir), 0.0);
+        float ao = clamp(1.0 - float(stepCount) / 100.0, 0.0, 1.0);
+
+        vec3 col = palette(trap * 0.15) * (diff * 0.8 + 0.25) * ao;
+        col = mix(col, vec3(0.02, 0.03, 0.05), smoothstep(12.0, 30.0, t));
+        
+        fragColor = vec4(col, 1.0);
+    } else {
+        vec3 bg = mix(vec3(0.02, 0.03, 0.06), vec3(0.0, 0.0, 0.01), uv.y + 0.5);
+        fragColor = vec4(bg, 1.0);
+    }
+}`;
+
+function createShader(gl, type, source) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, source);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    alert(gl.getShaderInfoLog(s));
+  }
+  return s;
+}
+
+const program = gl.createProgram();
+gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+gl.linkProgram(program);
+gl.useProgram(program);
+
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+const posLoc = gl.getAttribLocation(program, "position");
+gl.enableVertexAttribArray(posLoc);
+gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+const uRes = gl.getUniformLocation(program, "u_res");
+const uRot = gl.getUniformLocation(program, "u_rot");
+const uTarget = gl.getUniformLocation(program, "u_target");
+const uDist = gl.getUniformLocation(program, "u_dist");
+const uScale = gl.getUniformLocation(program, "u_scale");
+const uMinRadius = gl.getUniformLocation(program, "u_min_radius");
+const uShift = gl.getUniformLocation(program, "u_shift");
+
+// Camera and Fractal State
+let rot = [0.8, 0.4];
+let target = [0.0, 0.0, 0.0];
+let camDist = 5.5;
+let scale = -2.0;
+let minRadius = 0.5;
+let shift = 0.0;
+
+let isOrbiting = false;
+let isPanning = false;
+let lastMouse = [0, 0];
+
+function formatZoom(mag) {
+  if (mag < 10) return mag.toFixed(1) + '×';
+  if (mag < 1000) return Math.round(mag) + '×';
+  return Math.round(mag).toLocaleString('en-GB') + '×';
+}
+
+function render() {
+  if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+
+  gl.uniform2f(uRes, canvas.width, canvas.height);
+  gl.uniform2f(uRot, rot[0], rot[1]);
+  gl.uniform3f(uTarget, target[0], target[1], target[2]);
+  gl.uniform1f(uDist, camDist);
+  gl.uniform1f(uScale, scale);
+  gl.uniform1f(uMinRadius, minRadius);
+  gl.uniform1f(uShift, shift);
+
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  const zoomFactor = 5.5 / camDist;
+  document.getElementById('zoom-stat').innerText = formatZoom(zoomFactor);
+}
+
+// Camera Mouse Controls (Orbit + Pan)
+window.addEventListener('mousedown', e => {
+  if (e.target.closest('#ui')) return;
+  if (e.button === 2 || e.shiftKey) {
+    isPanning = true;
+  } else {
+    isOrbiting = true;
+  }
+  lastMouse = [e.clientX, e.clientY];
+});
+
+window.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('mouseup', () => { isOrbiting = false; isPanning = false; });
+
+window.addEventListener('mousemove', e => {
+  if (!isOrbiting && !isPanning) return;
+  const dx = e.clientX - lastMouse[0];
+  const dy = e.clientY - lastMouse[1];
+
+  if (isOrbiting) {
+    rot[0] -= dx * 0.008;
+    rot[1] = Math.max(-1.45, Math.min(1.45, rot[1] + dy * 0.008));
+  } else if (isPanning) {
+    // Pan target point along the camera's local right and up axes
+    const yaw = rot[0];
+    const pitch = rot[1];
+    const panSpeed = camDist * 0.0016;
+
+    // Camera coordinate frame vectors
+    const rX = Math.cos(yaw);
+    const rZ = -Math.sin(yaw);
+
+    const uX = -Math.sin(pitch) * Math.sin(yaw);
+    const uY = Math.cos(pitch);
+    const uZ = -Math.sin(pitch) * Math.cos(yaw);
+
+    target[0] += (-rX * dx + uX * dy) * panSpeed;
+    target[1] += uY * dy * panSpeed;
+    target[2] += (-rZ * dx + uZ * dy) * panSpeed;
+  }
+
+  lastMouse = [e.clientX, e.clientY];
+  render();
+});
+
+window.addEventListener('wheel', e => {
+  const factor = e.deltaY < 0 ? 0.88 : 1.14;
+  // Allows zooming all the way down to 0.0005 (over 10,000x magnification)
+  camDist = Math.max(0.0005, Math.min(22.0, camDist * factor));
+  render();
+}, { passive: true });
+
+// UI Reset button
+document.getElementById('reset-cam').addEventListener('click', () => {
+  rot = [0.8, 0.4];
+  target = [0.0, 0.0, 0.0];
+  camDist = 5.5;
+  render();
+});
+
+document.getElementById('scale').addEventListener('input', e => {
+  scale = parseFloat(e.target.value);
+  document.getElementById('scale-val').innerText = scale.toFixed(2);
+  render();
+});
+
+document.getElementById('minr').addEventListener('input', e => {
+  minRadius = parseFloat(e.target.value);
+  document.getElementById('minr-val').innerText = minRadius.toFixed(2);
+  render();
+});
+
+document.getElementById('shift').addEventListener('input', e => {
+  shift = parseFloat(e.target.value);
+  document.getElementById('shift-val').innerText = shift.toFixed(2);
+  render();
+});
+
+window.addEventListener('resize', render);
+
+render();
+</script>
+</body>
+</html>
