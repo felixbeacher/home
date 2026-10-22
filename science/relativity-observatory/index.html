@@ -142,33 +142,91 @@ function frame(ts){let dt=last?(ts-last)/1000:0;last=ts;advance(Math.min(dt,.07)
 function sync(){init=+$('distance').value;mass=+$('mass').value;speed=+$('speed').value;disk=+$('disk').value/100;lensing=+$('lens').value/100;starBrightness=+$('starfield').value/100;mode=$('mode').value;$('distanceOut').textContent=init.toFixed(1)+' rₛ';$('massOut').textContent=mass+' M☉';$('speedOut').textContent=speed.toFixed(1)+'×';$('diskOut').textContent=Math.round(disk*100)+'%';$('lensOut').textContent=Math.round(lensing*100)+'%';$('starOut').textContent=Math.round(starBrightness*100)+'%';$('modeOut').textContent=mode==='fall'?'Radial freefall':mode==='orbit'?'Illustrative orbit':'Hover';readouts()}function reset(){r=init;now=proper=far=shipPhase=0;playing=true;$('play').textContent='Ⅱ Pause';$('play').classList.add('selected');readouts()}for(const id of ['distance','mass','speed','disk','lens','starfield','mode'])$(id).addEventListener('input',()=>{sync();if(id==='distance')reset()});$('bh').onclick=()=>{body='bh';$('bh').classList.add('selected');$('ns').classList.remove('selected');r=Math.max(r,3);reset()};$('ns').onclick=()=>{body='ns';$('ns').classList.add('selected');$('bh').classList.remove('selected');r=Math.max(r,3);reset()};$('play').onclick=()=>{if((body==='bh'&&r<=1.01)||(body==='ns'&&r<=2.35))reset();else playing=!playing;$('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').classList.toggle('selected',playing)};$('reset').onclick=reset;$('orbit').onclick=()=>{theta=.5;phi=.65;zoom=1;pan=[0,0]};$('follow').onclick=()=>{follow=!follow;$('follow').classList.toggle('selected',follow)};
 $('singleView').onclick=()=>{split=false;$('singleView').classList.add('selected');$('splitView').classList.remove('selected');$('splitLabels').hidden=true};
 $('splitView').onclick=()=>{split=true;$('splitView').classList.add('selected');$('singleView').classList.remove('selected');$('splitLabels').hidden=false};
-const audio=()=>{
+// Generative, non-diegetic soundtrack: space itself is silent.
+let audioWanted=true, audioMaster=null, audioDrone=null, audioPulse=null, audioShimmer=null, audioFilter=null;
+function setupAudio(){
  if(actx)return;
- const AC=window.AudioContext||window.webkitAudioContext;
- if(!AC)throw Error('Web Audio API unavailable');
+ const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw Error('Web Audio unsupported');
  actx=new AC();
- const mix=actx.createGain();mix.gain.value=.18;mix.connect(actx.destination);
- for(const freq of [55,82.41,110,164.81]){
-  const o=actx.createOscillator(),g=actx.createGain(),f=actx.createBiquadFilter();
-  o.type='sine';o.frequency.value=freq;f.type='lowpass';f.frequency.value=550;
-  g.gain.value=.16;o.connect(f);f.connect(g);g.connect(mix);o.start();nodes.push(o,g);
+ audioMaster=actx.createGain();audioMaster.gain.value=.52;
+ const compressor=actx.createDynamicsCompressor();compressor.threshold.value=-21;compressor.ratio.value=2.5;
+ audioMaster.connect(compressor);compressor.connect(actx.destination);
+ audioDrone=actx.createGain();audioDrone.gain.value=.24;audioDrone.connect(audioMaster);
+ audioPulse=actx.createGain();audioPulse.gain.value=.12;audioPulse.connect(audioMaster);
+ audioShimmer=actx.createGain();audioShimmer.gain.value=.11;audioShimmer.connect(audioMaster);
+ audioFilter=actx.createBiquadFilter();audioFilter.type='lowpass';audioFilter.frequency.value=550;audioFilter.Q.value=.65;
+ const fundamentals=[41.2,55,61.73,82.41,123.47,164.81];
+ fundamentals.forEach((f,i)=>{
+  const osc=actx.createOscillator(),g=actx.createGain(),pan=actx.createStereoPanner();
+  osc.type=i%3===0?'triangle':'sine';osc.frequency.value=f;osc.detune.value=(i%2?1:-1)*(2+i);
+  g.gain.value=[.13,.09,.07,.035,.025,.018][i];pan.pan.value=(i%2?1:-1)*(.12+i*.09);
+  osc.connect(g);g.connect(pan);pan.connect(audioFilter);osc.start();nodes.push(osc);
+ });
+ audioFilter.connect(audioDrone);
+ // Filter movement and slow amplitude swelling.
+ const lfo=actx.createOscillator(),depth=actx.createGain();lfo.frequency.value=.083;depth.gain.value=180;
+ lfo.connect(depth);depth.connect(audioFilter.frequency);lfo.start();nodes.push(lfo);
+ const breath=actx.createOscillator(),breathDepth=actx.createGain();breath.frequency.value=.047;breathDepth.gain.value=.065;
+ breath.connect(breathDepth);breathDepth.connect(audioDrone.gain);breath.start();nodes.push(breath);
+ // Slow radio pulse with a descending resonance.
+ const beat=actx.createOscillator(),beatGain=actx.createGain();beat.type='sine';beat.frequency.value=73.42;beatGain.gain.value=0;
+ beat.connect(beatGain);beatGain.connect(audioPulse);beat.start();nodes.push(beat);
+ // Fine, airy, stereo filtered noise texture.
+ const len=Math.round(actx.sampleRate*2),buf=actx.createBuffer(2,len,actx.sampleRate);
+ for(let ch=0;ch<2;ch++){const arr=buf.getChannelData(ch);let last=0;for(let i=0;i<len;i++){last=(last+(Math.random()*2-1)*.028)*.987;arr[i]=last*.55}}
+ const noise=actx.createBufferSource(),high=actx.createBiquadFilter(),low=actx.createBiquadFilter();
+ noise.buffer=buf;noise.loop=true;high.type='highpass';high.frequency.value=190;low.type='lowpass';low.frequency.value=2500;
+ noise.connect(high);high.connect(low);low.connect(audioShimmer);noise.start();nodes.push(noise);
+ // Harmonic bell grains scheduled ahead using the audio clock.
+ const bells=[220,246.94,329.63,369.99,440,493.88];
+ function bell(at,freq,amp){
+  const o=actx.createOscillator(),g=actx.createGain(),p=actx.createStereoPanner();
+  o.type='sine';o.frequency.setValueAtTime(freq,at);o.frequency.exponentialRampToValueAtTime(freq*.993,at+3);
+  p.pan.value=Math.sin(at*1.73)*.7;g.gain.setValueAtTime(.0001,at);
+  g.gain.exponentialRampToValueAtTime(Math.max(.001,amp),at+.055);
+  g.gain.exponentialRampToValueAtTime(.0001,at+4.8);
+  o.connect(g);g.connect(p);p.connect(audioShimmer);o.start(at);o.stop(at+5);
  }
-};
-$('audio').onclick=async()=>{
- try{
-  audio();
-  if(!sound){
-   await actx.resume();
-   sound=actx.state==='running';
-   if(!sound)throw Error('Audio was blocked');
-  }else{
-   await actx.suspend();sound=false;
+ let next=actx.currentTime+.25,seq=0;
+ function schedule(){
+  if(!actx||actx.state!=='running')return;
+  const t=actx.currentTime;
+  while(next<t+2.5){
+   const distance=Math.max(1,r),tension=Math.max(0,Math.min(1,(9-distance)/8));
+   const interval=2.8-tension*1.25;
+   const p=actx.createOscillator(),g=actx.createGain();p.type='triangle';
+   p.frequency.setValueAtTime(105+tension*55,next);p.frequency.exponentialRampToValueAtTime(67+tension*28,next+.45);
+   g.gain.setValueAtTime(.0001,next);g.gain.exponentialRampToValueAtTime(.08,next+.035);
+   g.gain.exponentialRampToValueAtTime(.0001,next+.65);
+   p.connect(g);g.connect(audioPulse);p.start(next);p.stop(next+.7);
+   if(seq%2===0)bell(next+.32,bells[(seq*3+Math.floor(seq/4))%bells.length],.07);
+   seq++;next+=interval;
   }
-  $('audio').textContent=sound?'♫ Ambience on · tap to mute':'♫ Enable ambience';
-  $('audio').classList.toggle('selected',sound);
-  $('audio').setAttribute('aria-pressed',String(sound));
- }catch(e){sound=false;$('audio').textContent='Audio blocked · retry';console.warn('Relativity ambience',e)}
+ }
+ // Keep scheduler live even if browser throttles a tab; suspend stops audible output.
+ const ticker=setInterval(schedule,550);nodes.push({stop:()=>clearInterval(ticker)});
+ schedule();
+}
+function setAudioButton(){
+ $('audio').textContent=sound?'♫ Ambience on · mute':audioWanted?'♫ Sound ready on interaction':'♫ Ambience off · enable';
+ $('audio').classList.toggle('selected',sound);
+ $('audio').setAttribute('aria-pressed',String(sound));
+}
+async function startAudio(){
+ if(!audioWanted||sound)return;
+ try{setupAudio();await actx.resume();sound=actx.state==='running';setAudioButton()}
+ catch(e){console.warn('Ambient audio could not start',e);setAudioButton()}
+}
+$('audio').onclick=async()=>{
+ if(audioWanted&&sound){audioWanted=false;await actx.suspend();sound=false}
+ else{audioWanted=true;await startAudio()}
+ setAudioButton();
 };
+for(const event of ['pointerdown','keydown','touchstart']){
+ document.addEventListener(event,()=>{if(audioWanted&&!sound)void startAudio()},{capture:true,passive:true});
+}
+setAudioButton();
+void startAudio();
 C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});$('togglePanel').onclick=()=>{const collapsed=$('controls').classList.toggle('collapsed');$('togglePanel').setAttribute('aria-expanded',String(!collapsed))};if(innerWidth<780)$('controls').classList.add('collapsed');sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 })();
 </script></body></html>
