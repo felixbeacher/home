@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <title>Mandelbrot Explorer</title>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; background: #000; font-family: system-ui, -apple-system, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    
+    #ui {
+      position: absolute; top: 16px; left: 16px;
+      background: rgba(18, 20, 26, 0.90); backdrop-filter: blur(14px);
+      padding: 18px 20px; border-radius: 12px; color: #eee; font-size: 13px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6); user-select: none; width: 330px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      max-height: calc(100vh - 40px); overflow-y: auto;
+    }
+    .header-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+    .title { font-weight: 700; font-size: 15px; color: #fff; }
+    .stat { color: #88c0d0; font-family: monospace; font-size: 13px; font-weight: bold; }
+    
+    .control-group { margin-bottom: 12px; }
+    .label-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+    .parenthesis { color: #8fa1b3; font-size: 11px; }
+    .val { color: #81a1c1; font-family: monospace; }
+    input[type=range] { width: 100%; height: 5px; accent-color: #88c0d0; cursor: pointer; }
+    
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 4px;
+      background: rgba(163, 190, 140, 0.15); color: #a3be8c;
+      font-size: 11px; font-weight: 600; margin-bottom: 14px;
+    }
+
+    details {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px; border-left: 3px solid #88c0d0;
+      margin-bottom: 12px; font-size: 12px;
+    }
+    summary {
+      padding: 10px 12px; cursor: pointer; font-weight: 600; color: #eceff4;
+      list-style: none; display: flex; justify-content: space-between; align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '▾'; color: #88c0d0; transition: transform 0.2s; }
+    details[open] summary::after { transform: rotate(180deg); }
+    
+    .info-content { padding: 0 12px 12px 12px; line-height: 1.5; color: #d8dee9; }
+    .info-content h4 { margin: 8px 0 3px 0; font-size: 12px; color: #88c0d0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-content p { margin: 0 0 8px 0; font-size: 11.5px; }
+    .info-content ul { margin: 0 0 8px 0; padding-left: 16px; font-size: 11.5px; }
+    .info-content li { margin-bottom: 4px; }
+
+    .scale-box {
+      background: rgba(136, 192, 208, 0.08); border: 1px solid rgba(136, 192, 208, 0.25);
+      border-radius: 6px; padding: 8px 10px; margin-top: 6px; font-size: 11px; color: #e5e9f0;
+    }
+    
+    .instructions { display: block; font-size: 11px; color: #6c7a89; text-align: center; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<canvas id="glcanvas"></canvas>
+
+<div id="ui">
+  <div class="header-row">
+    <span class="title">Mandelbrot Explorer</span>
+    <span class="stat" id="zoom-depth">1.0×</span>
+  </div>
+
+  <div class="control-group">
+    <div class="label-row">
+      <span>Colour Frequency <span class="parenthesis">(density of repeating colour bands)</span></span>
+      <span class="val" id="freq-val">0.035</span>
+    </div>
+    <input id="freq" type="range" min="0.005" max="0.15" step="0.002" value="0.035">
+  </div>
+
+  <div class="control-group">
+    <div class="label-row">
+      <span>Colour Shift <span class="parenthesis">(cycles through the colour spectrum)</span></span>
+      <span class="val" id="shift-val">0.00</span>
+    </div>
+    <input id="shift" type="range" min="0" max="1" step="0.01" value="0.00">
+  </div>
+
+  <div class="badge">64-Bit Emulated Precision &bull; 2,500 Iterations</div>
+
+  <details open>
+    <summary>About the Fractal</summary>
+    <div class="info-content">
+      <h4>What is it?</h4>
+      <p>
+        Points <em>c</em> on the complex plane calculated with the repeating rule <strong><em>z</em><sub><em>n</em>+1</sub> = <em>z</em><sub><em>n</em></sub><sup>2</sup> + <em>c</em></strong> (starting at 0). 
+        Numbers that remain trapped forever form the black interior; escaping numbers are coloured by how quickly they break free.
+      </p>
+
+      <h4>Why is it special?</h4>
+      <ul>
+        <li><strong>Infinite Depth:</strong> A simple, elementary equation generates an endless, non-repeating boundary.</li>
+        <li><strong>Recursive Copies:</strong> Zooming in reveals miniature Mandelbrot sets ("minibrots"), each subtly sculpted by its local surroundings.</li>
+        <li><strong>Edge of Chaos:</strong> It marks the universal frontier where predictable mathematical order dissolves into deterministic chaos.</li>
+      </ul>
+
+      <div class="scale-box">
+        <strong>A Sense of Scale:</strong> Zooming in by <strong>10<sup>14</sup>&times;</strong> is like shrinking a human being down to the size of an atomic nucleus. This explorer calculates with full double precision, letting you reach that exact subatomic scale seamlessly.
+      </div>
+    </div>
+  </details>
+
+  <span class="instructions">Drag to pan &bull; Scroll to zoom</span>
+</div>
+
+<script>
+const canvas = document.getElementById('glcanvas');
+const gl = canvas.getContext('webgl2');
+if (!gl) alert('WebGL 2 required!');
+
+const vsSource = `#version 300 es
+in vec2 position;
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+}`;
+
+// Compliant GLSL ES 3.00 Double-Single Engine (Bailey / Thasler Algorithms)
+const fsSource = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+
+uniform vec2 u_res;
+uniform vec2 u_offset_hi;
+uniform vec2 u_offset_lo;
+uniform vec2 u_zoom;
+uniform float u_freq;
+uniform float u_shift;
+
+// Double-single addition with carry-over
+vec2 ds_add(vec2 dsa, vec2 dsb) {
+    vec2 dsc;
+    float t1 = dsa.x + dsb.x;
+    float e = t1 - dsa.x;
+    float t2 = ((dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y + dsb.y;
+    dsc.x = t1 + t2;
+    dsc.y = t2 - (dsc.x - t1);
+    return dsc;
+}
+
+// Double-single subtraction
+vec2 ds_sub(vec2 dsa, vec2 dsb) {
+    vec2 dsc;
+    float t1 = dsa.x - dsb.x;
+    float e = t1 - dsa.x;
+    float t2 = ((-dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y - dsb.y;
+    dsc.x = t1 + t2;
+    dsc.y = t2 - (dsc.x - t1);
+    return dsc;
+}
+
+// Double-single multiplication (Veltkamp splitting + Dekker TwoProd)
+vec2 ds_mul(vec2 dsa, vec2 dsb) {
+    vec2 dsc;
+    float cona = dsa.x * 4097.0;
+    float conb = dsb.x * 4097.0;
+    float a1 = cona - (cona - dsa.x);
+    float b1 = conb - (conb - dsb.x);
+    float a2 = dsa.x - a1;
+    float b2 = dsb.x - b1;
+
+    float c11 = dsa.x * dsb.x;
+    float c21 = a2 * b2 + (a1 * b2 + (a2 * b1 + (a1 * b1 - c11)));
+    float c2 = dsa.x * dsb.y + dsa.y * dsb.x;
+
+    float t1 = c11 + c2;
+    float e = t1 - c11;
+    float t2 = dsa.y * dsb.y + ((c2 - e) + (c11 - (t1 - e))) + c21;
+
+    dsc.x = t1 + t2;
+    dsc.y = t2 - (dsc.x - t1);
+    return dsc;
+}
+
+vec3 palette(float t) {
+    vec3 a = vec3(0.5);
+    vec3 b = vec3(0.5);
+    vec3 c = vec3(1.0);
+    vec3 d = vec3(0.0, 0.33, 0.67);
+    return a + b * cos(6.28318 * (c * t + d + u_shift));
+}
+
+void main() {
+    vec2 st = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+
+    // Full 64-bit coordinate generation
+    vec2 cx = ds_add(ds_mul(vec2(st.x, 0.0), u_zoom), vec2(u_offset_hi.x, u_offset_lo.x));
+    vec2 cy = ds_add(ds_mul(vec2(st.y, 0.0), u_zoom), vec2(u_offset_hi.y, u_offset_lo.y));
+
+    vec2 zx = vec2(0.0);
+    vec2 zy = vec2(0.0);
+    float n = 0.0;
+    
+    for (int i = 0; i < 2500; i++) {
+        if (zx.x * zx.x + zy.x * zy.x > 4.0) {
+            n = float(i);
+            break;
+        }
+
+        // z = z^2 + c
+        vec2 zx2 = ds_mul(zx, zx);
+        vec2 zy2 = ds_mul(zy, zy);
+        vec2 zxy = ds_mul(zx, zy);
+
+        zx = ds_add(ds_sub(zx2, zy2), cx);
+        zy = ds_add(ds_add(zxy, zxy), cy);
+    }
+
+    if (zx.x * zx.x + zy.x * zy.x <= 4.0) {
+        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    } else {
+        float log_zn = log(zx.x * zx.x + zy.x * zy.x) * 0.5;
+        float nu = log(log_zn / log(2.0)) / log(2.0);
+        float iter = n + 1.0 - nu;
+
+        fragColor = vec4(palette(iter * u_freq), 1.0);
+    }
+}`;
+
+function createShader(gl, type, source) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, source);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    const info = gl.getShaderInfoLog(s);
+    alert('Shader compile error:\n' + info);
+    console.error(info);
+  }
+  return s;
+}
+
+const program = gl.createProgram();
+gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+gl.linkProgram(program);
+
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+  alert('Program link error:\n' + gl.getProgramInfoLog(program));
+}
+
+gl.useProgram(program);
+
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+const posLoc = gl.getAttribLocation(program, "position");
+gl.enableVertexAttribArray(posLoc);
+gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+const uRes = gl.getUniformLocation(program, "u_res");
+const uOffsetHi = gl.getUniformLocation(program, "u_offset_hi");
+const uOffsetLo = gl.getUniformLocation(program, "u_offset_lo");
+const uZoom = gl.getUniformLocation(program, "u_zoom");
+const uFreq = gl.getUniformLocation(program, "u_freq");
+const uShift = gl.getUniformLocation(program, "u_shift");
+
+let offset = [-0.7436438870371587, 0.1318259042053119];
+let zoom = 2.5;
+let freq = 0.035;
+let shift = 0.0;
+let isDragging = false;
+let lastMouse = [0, 0];
+
+function splitDouble(val) {
+  const hi = Math.fround(val);
+  const lo = val - hi;
+  return [hi, lo];
+}
+
+function formatZoom(mag) {
+  if (mag < 1000) return mag.toFixed(1) + '×';
+  if (mag < 1e9) return Math.floor(mag).toLocaleString('en-GB') + '×';
+  return (mag / 1e9).toFixed(2) + ' billion×';
+}
+
+function render() {
+  if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+
+  const [oxHi, oxLo] = splitDouble(offset[0]);
+  const [oyHi, oyLo] = splitDouble(offset[1]);
+  const [zHi, zLo] = splitDouble(zoom);
+
+  gl.uniform2f(uRes, canvas.width, canvas.height);
+  gl.uniform2f(uOffsetHi, oxHi, oyHi);
+  gl.uniform2f(uOffsetLo, oxLo, oyLo);
+  gl.uniform2f(uZoom, zHi, zLo);
+  gl.uniform1f(uFreq, freq);
+  gl.uniform1f(uShift, shift);
+
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+  const mag = 2.5 / zoom;
+  document.getElementById('zoom-depth').innerText = formatZoom(mag);
+}
+
+window.addEventListener('mousedown', e => {
+  if (e.target.closest('#ui')) return;
+  isDragging = true;
+  lastMouse = [e.clientX, e.clientY];
+});
+
+window.addEventListener('mouseup', () => isDragging = false);
+
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = (e.clientX - lastMouse[0]) / canvas.height * zoom;
+  const dy = (e.clientY - lastMouse[1]) / canvas.height * zoom;
+  offset[0] -= dx;
+  offset[1] += dy;
+  lastMouse = [e.clientX, e.clientY];
+  render();
+});
+
+window.addEventListener('wheel', e => {
+  const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25;
+
+  const mouseComplexX = ((e.clientX - 0.5 * canvas.width) / canvas.height) * zoom + offset[0];
+  const mouseComplexY = ((-e.clientY + 0.5 * canvas.height) / canvas.height) * zoom + offset[1];
+
+  zoom *= zoomFactor;
+
+  offset[0] = mouseComplexX - ((e.clientX - 0.5 * canvas.width) / canvas.height) * zoom;
+  offset[1] = mouseComplexY - ((-e.clientY + 0.5 * canvas.height) / canvas.height) * zoom;
+
+  render();
+}, { passive: true });
+
+document.getElementById('freq').addEventListener('input', e => {
+  freq = parseFloat(e.target.value);
+  document.getElementById('freq-val').innerText = freq.toFixed(3);
+  render();
+});
+
+document.getElementById('shift').addEventListener('input', e => {
+  shift = parseFloat(e.target.value);
+  document.getElementById('shift-val').innerText = shift.toFixed(2);
+  render();
+});
+
+window.addEventListener('resize', render);
+
+render();
+</script>
+</body>
+</html>
