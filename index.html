@@ -110,29 +110,87 @@ function resizeTopology(){
  canvas.height=Math.round(rect.height*dpr);
  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-function point(u,v,t){
- // A torus-knot centreline with a tubular wireframe around it.
- const p=2,q=3,R=1.72,r=.65;
- const a=p*u,b=q*u;
- const cx=(R+r*Math.cos(b))*Math.cos(a);
- const cy=(R+r*Math.cos(b))*Math.sin(a);
- const cz=r*Math.sin(b);
- const h=.19+.035*Math.sin(6*u+t*1.7);
- const dx=-p*(R+r*Math.cos(b))*Math.sin(a)-r*q*Math.sin(b)*Math.cos(a);
- const dy=p*(R+r*Math.cos(b))*Math.cos(a)-r*q*Math.sin(b)*Math.sin(a);
- const dz=r*q*Math.cos(b);
- const dl=Math.hypot(dx,dy,dz);
- const tx=dx/dl,ty=dy/dl,tz=dz/dl;
- const nl=Math.hypot(-ty,tx);
- const nx=-ty/nl,ny=tx/nl;
- const bx=ty*0-tz*ny,by=tz*nx-tx*0,bz=tx*ny-ty*nx;
- let x=cx+h*(Math.cos(v)*nx+Math.sin(v)*bx);
- let y=cy+h*(Math.cos(v)*ny+Math.sin(v)*by);
- let z=cz+h*Math.sin(v)*bz;
- const ya=t*.32,xa=.56+.22*Math.sin(t*.19);
- const x1=x*Math.cos(ya)+z*Math.sin(ya),z1=-x*Math.sin(ya)+z*Math.cos(ya);
- const y1=y*Math.cos(xa)-z1*Math.sin(xa),z2=y*Math.sin(xa)+z1*Math.cos(xa);
- return [x1,y1,z2];
+
+ function point(u,v,t){
+ // Morph between several topological / sculptural states as the object rotates.
+ const mixA = 0.5 + 0.5 * Math.sin(t * 0.42);
+ const mixB = 0.5 + 0.5 * Math.sin(t * 0.27 + 1.4);
+ const mixC = 0.5 + 0.5 * Math.sin(t * 0.19 + 2.2);
+
+ const p = 2;
+ const q = 3;
+
+ // Main centreline radius breathes slowly
+ const R = 1.55 + 0.28 * mixA;
+ const r = 0.46 + 0.34 * mixB;
+
+ // Torus-knot style centreline
+ const a = p * u;
+ const b = q * u;
+
+ const cx = (R + r * Math.cos(b)) * Math.cos(a);
+ const cy = (R + r * Math.cos(b)) * Math.sin(a);
+ const cz = r * Math.sin(b);
+
+ // Tube thickness changes over time and across the surface
+ const tube =
+   0.12 +
+   0.06 * Math.sin(5 * u + t * 1.2) +
+   0.045 * Math.cos(3 * v - t * 1.6) +
+   0.03 * Math.sin(2 * u + 2 * v + t * 0.9);
+
+ // Tangent on centreline
+ const dx = -p * (R + r * Math.cos(b)) * Math.sin(a) - r * q * Math.sin(b) * Math.cos(a);
+ const dy =  p * (R + r * Math.cos(b)) * Math.cos(a) - r * q * Math.sin(b) * Math.sin(a);
+ const dz =  r * q * Math.cos(b);
+
+ const dl = Math.hypot(dx,dy,dz) || 1;
+ const tx = dx / dl, ty = dy / dl, tz = dz / dl;
+
+ // A stable normal/binormal frame
+ let nx = -ty, ny = tx, nz = 0;
+ let nl = Math.hypot(nx,ny,nz) || 1;
+ nx /= nl; ny /= nl; nz /= nl;
+
+ let bx = ty * nz - tz * ny;
+ let by = tz * nx - tx * nz;
+ let bz = tx * ny - ty * nx;
+ let bl = Math.hypot(bx,by,bz) || 1;
+ bx /= bl; by /= bl; bz /= bl;
+
+ // Cross-section morph:
+ // starts more circular, then becomes squarer / petalled / twisted over time
+ const petal = 1 + 0.35 * mixA * Math.cos(4 * v + t * 1.15);
+ const squareBias = 0.22 * mixB * Math.cos(2 * v);
+ const twist = 0.85 * mixC * Math.sin(u * 1.4 + t * 0.55);
+
+ const radialX = (Math.cos(v + twist) * petal) + squareBias;
+ const radialY = (Math.sin(v + twist) * (1 + 0.28 * Math.sin(3 * v - t))) - squareBias * 0.45;
+
+ let x = cx + tube * (radialX * nx + radialY * bx);
+ let y = cy + tube * (radialX * ny + radialY * by);
+ let z = cz + tube * (radialX * nz + radialY * bz);
+
+ // Global sculptural warp so the object gently morphs overall
+ x += 0.18 * Math.sin(2 * u + t * 0.7) * Math.sin(v);
+ y += 0.16 * Math.cos(3 * u - t * 0.5) * Math.cos(v);
+ z += 0.22 * Math.sin(2 * v + t * 0.8) * (0.4 + 0.6 * mixA);
+
+ // Rotation
+ const ya = t * 0.32;
+ const xa = 0.56 + 0.22 * Math.sin(t * 0.19);
+ const za = 0.18 * Math.sin(t * 0.14);
+
+ const x1 = x * Math.cos(ya) + z * Math.sin(ya);
+ const z1 = -x * Math.sin(ya) + z * Math.cos(ya);
+
+ const y1 = y * Math.cos(xa) - z1 * Math.sin(xa);
+ const z2 = y * Math.sin(xa) + z1 * Math.cos(xa);
+
+ const x2 = x1 * Math.cos(za) - y1 * Math.sin(za);
+ const y2 = x1 * Math.sin(za) + y1 * Math.cos(za);
+
+ return [x2,y2,z2];
 }
 function drawTopology(){
  const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
@@ -142,7 +200,8 @@ function drawTopology(){
  // Draw a faint orbital guide behind the wireframe.
  ctx.strokeStyle='rgba(146,204,176,.10)';ctx.lineWidth=1;
  ctx.beginPath();ctx.ellipse(cx,cy,scale*2.6,scale*.78,-.28,0,PI2);ctx.stroke();
- const longitude=105,latitude=13,segments=[];
+ 
+ const longitude=120, latitude=16, segments=[];
  for(let i=0;i<longitude;i++){
   const u=PI2*i/longitude,u2=PI2*(i+1)/longitude;
   for(let j=0;j<latitude;j++){
