@@ -222,7 +222,10 @@ function drawTopology(){
  for(const edge of segments){
   const depth=Math.max(0,Math.min(1,(edge.z+2.7)/5.4));
   const alpha=(edge.along?.14:.10)+depth*(edge.along?.6:.37);
-  ctx.strokeStyle=edge.along?'rgba(205,240,170,'+alpha+')':'rgba(164,196,245,'+alpha+')';
+  const hue=(angle*12+(edge.along?94:188)+depth*65)%360;
+  const saturation=edge.along?75:80;
+  const lightness=(edge.along?66:72)+depth*12;
+  ctx.strokeStyle='hsla('+hue+','+saturation+'%,'+lightness+'%,'+alpha+')';
   ctx.lineWidth=(edge.along?.9:.65)+(depth*.4);
   ctx.beginPath();ctx.moveTo(edge.a.x,edge.a.y);ctx.lineTo(edge.b.x,edge.b.y);ctx.stroke();
  }
