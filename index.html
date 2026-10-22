@@ -38,6 +38,13 @@
 @media(max-width:600px){h1{font-size:46px}.filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.filters button{padding:14px 12px;font-size:15px}.hero-visual{margin-top:18px}.hero-art{margin-top:0}}
 @media(prefers-reduced-motion:reduce){.filters button{transition:none}.filters button:hover{transform:none}}
 .hero{min-height:0;padding:24px 0 28px}.hero-art{max-height:270px}.hero h1{margin-top:0}.filters{margin-bottom:16px}.github-nav{margin:0 0 28px}.github-nav .external{display:inline-flex;align-items:center}@media(max-width:600px){.hero{padding:24px 0 20px}.hero-art{max-height:180px}.hero-visual{margin-top:8px}}
+
+/* Responsive animated mathematical wireframe sculpture */
+.topology-shell{position:relative;width:100%;aspect-ratio:480/330;overflow:hidden;max-height:none;background:radial-gradient(ellipse at 48% 47%,#29433d 0%,#142524 42%,#101719 78%);border-radius:16px;border:1px solid #345047;box-shadow:inset 0 0 45px #0a151c,0 20px 55px #0003}
+#topology-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.topology-label{position:absolute;left:17px;font:9px ui-monospace,monospace;letter-spacing:1.6px;color:#a4c9b5;pointer-events:none;text-shadow:0 1px 5px #000}
+.topology-label.top{top:15px}.topology-label.bottom{bottom:15px;color:#80998f}
+@media(max-width:600px){.topology-shell{max-height:240px}.topology-label{font-size:8px;left:12px;letter-spacing:1px}}
 </style>
 <noscript><style>.group[hidden]{display:block}</style></noscript>
 </head>
@@ -46,7 +53,7 @@
 <div class="wrap">
 <main>
 <section class="hero" aria-labelledby="intro-title"><div><h1 id="intro-title">The Curiosity<br><em>Cabinet</em></h1><p class="intro">Explore the curiosity cabinet of Felix Beacher. From quarks to the planets, to completely new forms of chess.</p></div>
-<div class="hero-visual"><svg class="hero-art" viewBox="0 0 480 330" fill="none" aria-hidden="true"><defs><radialGradient id="halo"><stop stop-color="#a7c98b" stop-opacity=".13"/><stop offset="1" stop-color="#a7c98b" stop-opacity="0"/></radialGradient><radialGradient id="sphere" cx=".3" cy=".25"><stop stop-color="#ebf5c8"/><stop offset=".5" stop-color="#adc995"/><stop offset="1" stop-color="#355e53"/></radialGradient></defs><circle cx="240" cy="165" r="165" fill="url(#halo)"/><g stroke="#48605a" stroke-width=".6"><circle cx="240" cy="165" r="136" stroke-dasharray="2 7"/><path d="M50 165h380M240 12v306" stroke-dasharray="2 7"/></g><g class="orbit" stroke="#93ac90" stroke-width=".8"><ellipse cx="240" cy="165" rx="180" ry="66" transform="rotate(-28 240 165)"/><ellipse cx="240" cy="165" rx="160" ry="69" transform="rotate(42 240 165)"/><ellipse cx="240" cy="165" rx="142" ry="74" transform="rotate(94 240 165)"/><circle cx="91" cy="218" r="6" fill="#dec59c"/><circle cx="334" cy="257" r="4" fill="#c1ade4"/><circle cx="255" cy="25" r="3" fill="#cce5bd"/></g><circle cx="240" cy="165" r="53" fill="url(#sphere)"/><path d="M203 138q43 41 79 32M199 153q43 42 85 34M210 124q-14 44 36 91" stroke="#f3ffdc" opacity=".2"/><g fill="#849a8d" font-family="monospace" font-size="8" letter-spacing="2"><text x="350" y="70">EXPLORE</text><text x="47" y="289">SCIENCE · PLAY · IDEAS</text></g><path d="M346 76h31M47 271h25" stroke="#849a8d" stroke-width=".6"/></svg><button class="animation-control" type="button" aria-pressed="false">Pause animation</button></div></section>
+<div class="hero-visual"><div class="hero-art topology-shell" role="img" aria-label="Continuously rotating, luminous three-dimensional mathematical wireframe sculpture"><canvas id="topology-canvas"></canvas><span class="topology-label top">CURIOUS GEOMETRIES / 003</span><span class="topology-label bottom">FORM · MOTION · POSSIBILITY</span></div><button class="animation-control" type="button" aria-pressed="false">Pause animation</button></div></section>
 <section id="projects" aria-labelledby="collection-title"><div class="collection-head"><h2 id="collection-title">Open a door:</h2></div>
 <div class="filters" role="group" aria-label="Explore the collection" hidden><button type="button" data-filter="home" aria-pressed="true">Home</button><button type="button" data-filter="science" aria-pressed="false">Science</button><button type="button" data-filter="math" aria-pressed="false">Maths</button><button type="button" data-filter="games" aria-pressed="false">Games</button><button type="button" data-filter="dashboards" aria-pressed="false">Medical AI</button><button type="button" data-filter="spiritual" aria-pressed="false">Soul</button></div>
 <nav class="github-nav" aria-label="GitHub"><a class="external" href="https://github.com/felixbeacher">GitHub ↗</a></nav>
@@ -92,15 +99,92 @@ showCategory('home');
 const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const animationButton=document.querySelector('.animation-control');
 const visual=document.querySelector('.hero-visual');
-let paused=motion.matches;
+const canvas=document.getElementById('topology-canvas');
+const ctx=canvas.getContext('2d');
+let paused=motion.matches, angle=0, lastFrame=0, frameHandle=0, visible=true;
+const PI2=Math.PI*2;
+function resizeTopology(){
+ const rect=canvas.getBoundingClientRect();
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ canvas.width=Math.round(rect.width*dpr);
+ canvas.height=Math.round(rect.height*dpr);
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function point(u,v,t){
+ // A torus-knot centreline with a tubular wireframe around it.
+ const p=2,q=3,R=1.72,r=.65;
+ const a=p*u,b=q*u;
+ const cx=(R+r*Math.cos(b))*Math.cos(a);
+ const cy=(R+r*Math.cos(b))*Math.sin(a);
+ const cz=r*Math.sin(b);
+ const h=.19+.035*Math.sin(6*u+t*1.7);
+ const dx=-p*(R+r*Math.cos(b))*Math.sin(a)-r*q*Math.sin(b)*Math.cos(a);
+ const dy=p*(R+r*Math.cos(b))*Math.cos(a)-r*q*Math.sin(b)*Math.sin(a);
+ const dz=r*q*Math.cos(b);
+ const dl=Math.hypot(dx,dy,dz);
+ const tx=dx/dl,ty=dy/dl,tz=dz/dl;
+ const nl=Math.hypot(-ty,tx);
+ const nx=-ty/nl,ny=tx/nl;
+ const bx=ty*0-tz*ny,by=tz*nx-tx*0,bz=tx*ny-ty*nx;
+ let x=cx+h*(Math.cos(v)*nx+Math.sin(v)*bx);
+ let y=cy+h*(Math.cos(v)*ny+Math.sin(v)*by);
+ let z=cz+h*Math.sin(v)*bz;
+ const ya=t*.32,xa=.56+.22*Math.sin(t*.19);
+ const x1=x*Math.cos(ya)+z*Math.sin(ya),z1=-x*Math.sin(ya)+z*Math.cos(ya);
+ const y1=y*Math.cos(xa)-z1*Math.sin(xa),z2=y*Math.sin(xa)+z1*Math.cos(xa);
+ return [x1,y1,z2];
+}
+function drawTopology(){
+ const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
+ ctx.clearRect(0,0,w,h);
+ const cx=w*.51,cy=h*.51,scale=Math.min(w*.18,h*.29),camera=7.6;
+ const project=a=>{const k=camera/(camera-a[2]);return {x:cx+a[0]*scale*k,y:cy-a[1]*scale*k,z:a[2]}};
+ // Draw a faint orbital guide behind the wireframe.
+ ctx.strokeStyle='rgba(146,204,176,.10)';ctx.lineWidth=1;
+ ctx.beginPath();ctx.ellipse(cx,cy,scale*2.6,scale*.78,-.28,0,PI2);ctx.stroke();
+ const longitude=105,latitude=13,segments=[];
+ for(let i=0;i<longitude;i++){
+  const u=PI2*i/longitude,u2=PI2*(i+1)/longitude;
+  for(let j=0;j<latitude;j++){
+   const v=PI2*j/latitude,v2=PI2*(j+1)/latitude;
+   const a=project(point(u,v,angle));
+   const b=project(point(u2,v,angle));
+   const c=project(point(u,v2,angle));
+   segments.push({a,b,z:(a.z+b.z)/2,along:true});
+   segments.push({a,b:c,z:(a.z+c.z)/2,along:false});
+  }
+ }
+ segments.sort((a,b)=>a.z-b.z);
+ ctx.lineCap='round';
+ for(const edge of segments){
+  const depth=Math.max(0,Math.min(1,(edge.z+2.7)/5.4));
+  const alpha=(edge.along?.14:.10)+depth*(edge.along?.6:.37);
+  ctx.strokeStyle=edge.along?'rgba(205,240,170,'+alpha+')':'rgba(164,196,245,'+alpha+')';
+  ctx.lineWidth=(edge.along?.9:.65)+(depth*.4);
+  ctx.beginPath();ctx.moveTo(edge.a.x,edge.a.y);ctx.lineTo(edge.b.x,edge.b.y);ctx.stroke();
+ }
+}
+function drawFrame(timestamp){
+ frameHandle=0;
+ if(paused||!visible)return;
+ if(lastFrame)angle+=Math.min((timestamp-lastFrame)/1000,.05);
+ lastFrame=timestamp;
+ drawTopology();
+ frameHandle=requestAnimationFrame(drawFrame);
+}
 function updateAnimation(){
  visual.classList.toggle('paused',paused);
- visual.querySelector('.orbit').style.animation=paused?'none':'turn 24s linear infinite';
  animationButton.textContent=paused?'Play animation':'Pause animation';
  animationButton.setAttribute('aria-pressed',String(paused));
+ lastFrame=0;
+ if(frameHandle){cancelAnimationFrame(frameHandle);frameHandle=0}
+ drawTopology();
+ if(!paused&&visible)frameHandle=requestAnimationFrame(drawFrame);
 }
 animationButton.addEventListener('click',()=>{paused=!paused;updateAnimation()});
 motion.addEventListener('change',()=>{paused=motion.matches;updateAnimation()});
-updateAnimation();
+document.addEventListener('visibilitychange',()=>{visible=!document.hidden;updateAnimation()});
+window.addEventListener('resize',()=>{resizeTopology();drawTopology()});
+resizeTopology();updateAnimation();
 </script>
 </body></html>
