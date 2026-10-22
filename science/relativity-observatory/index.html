@@ -30,10 +30,21 @@ function bg(){ctx.fillStyle='#040a13';ctx.fillRect(0,0,w,h);let grad=ctx.createR
 function diskDraw(layer){if(body==='ns'&&disk<.12)return;const arr=[],centerDepth=norm(eye);for(const d of dust){const angle=d.a+now*.12/Math.pow(d.r,1.2),v=[d.r*Math.cos(angle),d.h,d.r*Math.sin(angle)],p=pr(v);if(p&&(layer==='near'?p.z<centerDepth:p.z>=centerDepth)&&p.x>-70&&p.x<w+70&&p.y>-70&&p.y<h+70)arr.push({p,d,v,angle})}arr.sort((a,b)=>b.p.z-a.p.z);ctx.save();ctx.globalCompositeOperation='lighter';for(const {p,d,angle} of arr){const approach=.5+.5*Math.sin(angle+phi);const a=disk*(.12+.55*d.bright)*(.65+.6*approach);ctx.fillStyle=`rgba(${Math.round(220+35*approach)},${Math.round(92+88*approach)},${Math.round(45+75*approach)},${a})`;ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.4,Math.min(3.5,d.size*p.k*.7)),0,TAU);ctx.fill()}ctx.restore()}
 function sphere(B){const p=pr([0,0,0]);if(!p)return;const rr=Math.max(3,B*p.k);glow(p.x,p.y,rr*3,body==='bh'?'255,128,65':'72,179,255',body==='bh'?.13:.17);if(body==='bh'){let ring=rr*(1.26+.22*lensing);const g=ctx.createRadialGradient(p.x,p.y,rr*.9,p.x,p.y,ring*1.6);g.addColorStop(0,'#020509');g.addColorStop(.65,'#020509');g.addColorStop(.81,'#b58b5b');g.addColorStop(.86,'#201827');g.addColorStop(1,'#0000');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,ring*1.6,0,TAU);ctx.fill();ctx.fillStyle='#010307';ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill();ctx.strokeStyle='#fbd69b99';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,ring,0,TAU);ctx.stroke()}else{let g=ctx.createRadialGradient(p.x-rr*.35,p.y-rr*.35,rr*.05,p.x,p.y,rr*1.2);g.addColorStop(0,'#d3f9ff');g.addColorStop(.25,'#72ceef');g.addColorStop(.66,'#2c74a6');g.addColorStop(1,'#041421');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill();ctx.save();ctx.translate(p.x,p.y);ctx.rotate(now*.37);ctx.strokeStyle='#8deaff';ctx.shadowColor='#a2efff';ctx.shadowBlur=17;for(let i=0;i<6;i++){ctx.beginPath();ctx.ellipse(0,0,rr*(.2+.13*i),rr,0,0,TAU);ctx.globalAlpha=.08;ctx.stroke()}ctx.restore();ctx.globalAlpha=1;glow(p.x-rr*.2,p.y-rr*.3,rr*.8,'130,221,255',.22)}}
 function orbitLines(){let path=[];for(let i=0;i<=150;i++){let a=i/150*TAU;path.push([r*Math.cos(a),0,r*Math.sin(a)])}line3(path,'#79dcf1',.14,1);for(let rad of [2,3,5,8,12]){path=[];for(let i=0;i<=130;i++){let a=i/130*TAU;path.push([rad*Math.cos(a),0,rad*Math.sin(a)])}line3(path,'#528ab2',rad===r?.15:.065,.7)}}
+function craftOccluded(P){
+ const radius=body==='bh'?1:2.35;
+ const D=P.map((v,i)=>v-eye[i]),den=dot(D,D);
+ if(den<1e-10)return false;
+ const t=-dot(eye,D)/den;
+ if(t<=0||t>=1)return false;
+ const C=eye.map((v,i)=>v+t*D[i]);
+ return dot(C,C)<radius*radius;
+}
 function craft(){
  if(observer==='onboard')return;
  const a=mode==='orbit'?shipPhase:.38;
- const P=[r*Math.cos(a),.3,r*Math.sin(a)],center=pr(P);if(!center)return;
+ const P=[r*Math.cos(a),.3,r*Math.sin(a)];
+ if(craftOccluded(P))return;
+ const center=pr(P);if(!center)return;
  const size=Math.max(10,Math.min(33,center.k*.66));
  const behind=body==='bh'&&r<1;
  const fade=behind?Math.max(0,Math.min(1,(r-.16)/.84)):1;
