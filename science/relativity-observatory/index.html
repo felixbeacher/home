@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#050b15"><title>FALLING THROUGH SPACETIME — Relativity Observatory</title><style>
 :root{color-scheme:dark;--bg:#050b15;--panel:#101d2adf;--line:#37526780;--ink:#e8f3f8;--muted:#90acbb;--a:#78dfdf;--gold:#fbc88b}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}#viewport{position:fixed;inset:0}#viewport:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,#0009 100%)}.top{position:fixed;top:22px;left:28px;z-index:4;pointer-events:none}.kicker{font:10px ui-monospace,monospace;letter-spacing:3px;color:var(--a)}h1{font:400 clamp(23px,3vw,38px) Georgia,serif;letter-spacing:-.9px;margin:6px 0 3px}.sub{font-size:12px;color:var(--muted)}.panel{position:fixed;z-index:5;right:20px;top:20px;width:316px;max-height:calc(100vh - 40px);overflow:auto;padding:20px;background:var(--panel);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 55px #0009}.panel h2{font:600 11px ui-monospace,monospace;letter-spacing:2px;color:#a6ccd8;text-transform:uppercase;margin:0 0 12px}.panel h2:not(:first-child){margin-top:21px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.buttons button,.transport button,select{border:1px solid #466272;background:#142737;color:#e2f5f9;border-radius:8px;padding:10px 9px;font:600 12px system-ui;cursor:pointer}.buttons button.selected,.transport button.selected{background:#80dedf;color:#07131d;border-color:#80dedf}.buttons button:hover,.transport button:hover{border-color:#80dedf}label{font-size:12px;color:#bad0d8;display:flex;justify-content:space-between;margin:13px 0 6px;gap:10px}output{font:12px ui-monospace,monospace;color:var(--gold)}input[type=range]{width:100%;accent-color:var(--a);cursor:pointer}.transport{display:flex;gap:7px}.transport button{flex:1}.stats{position:fixed;left:28px;bottom:26px;width:350px;max-width:calc(100vw - 390px);z-index:4;pointer-events:none;background:#0d1c2abf;border:1px solid var(--line);border-radius:14px;padding:17px 19px;backdrop-filter:blur(13px)}.stats .small{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#8db6c4}.big{font:300 40px ui-monospace,monospace;letter-spacing:-2px;color:#b4f6e9;margin:5px 0}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:13px}.numbers b{display:block;color:white;font:600 16px ui-monospace,monospace;margin-top:5px}.numbers span{font-size:10px;color:var(--muted)}.warning{color:#f3b687;font-size:11px;line-height:1.5;margin-top:11px}.hint{position:fixed;left:28px;top:116px;font:11px ui-monospace,monospace;color:#91abba;z-index:4;pointer-events:none;line-height:1.8}.badge{font:600 12px/1.4 system-ui,sans-serif;letter-spacing:.2px;border:1px solid #4a7280;border-radius:20px;color:#d3eff1;background:#102a37;padding:6px 13px;display:inline-block;margin-top:12px;white-space:normal}.note{font-size:11px;line-height:1.5;color:#93acb8;border-top:1px solid #355064;margin-top:18px;padding-top:12px}.note a{color:#9fe8ea}#togglePanel{display:block;position:fixed;right:20px;top:20px;z-index:9;background:#173344;color:#e5f7fa;border:1px solid #6c919a;padding:11px 14px;border-radius:9px;cursor:pointer;font:600 12px system-ui;box-shadow:0 5px 24px #0008}#togglePanel:hover{background:#285064}.panel.collapsed{display:none}.panel:not(.collapsed){top:72px}.panel{transition:opacity .18s}#togglePanel:focus-visible{outline:2px solid var(--gold);outline-offset:3px}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}@media(max-width:780px){.top{top:14px;left:15px}h1{font-size:25px}.sub{font-size:10px}.hint{left:15px;top:92px;font-size:9px}.panel{right:8px;top:66px;width:min(295px,calc(100vw - 16px));max-height:calc(100vh - 165px);padding:15px}#togglePanel{right:12px;top:12px;background:#163042;color:white;border:1px solid #6c919a;padding:9px 11px;border-radius:8px}.stats{left:12px;bottom:12px;max-width:calc(100vw - 24px);width:350px;padding:11px 13px}.big{font-size:28px}.numbers{gap:5px;margin-top:7px}.numbers b{font-size:13px}.stats .small{font-size:8px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
  .observerTag{position:absolute;top:12px;left:14px;font:700 10px ui-monospace,monospace;letter-spacing:1px;color:#b9eced;background:#071624dd;border:1px solid #5d91a3;padding:8px;border-radius:7px}.observerTag.right{left:calc(50% + 14px);color:#fbd39f;border-color:#9b795c}.observerDivider{position:absolute;top:0;bottom:0;left:50%;width:1px;background:#64889888}.splitLabels{position:fixed;inset:0;z-index:2;pointer-events:none}.splitLabels[hidden]{display:none}@media(max-width:780px){.observerTag{top:168px;left:5px;font-size:8px;padding:4px}.observerTag.right{left:calc(50% + 5px)}} .descentHud{margin-top:12px}.descentTrack{background:#273d50;border:1px solid #5f8491;border-radius:9px;height:9px;margin:8px 0 5px;overflow:hidden}.descentTrack div{height:100%;width:0;background:linear-gradient(90deg,#6ae9e8,#e6ad71);transition:width .2s}.descentEnds{display:flex;justify-content:space-between;color:#819fac;font:9px ui-monospace,monospace;letter-spacing:1px}.clockpair{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;margin:10px 0}.clockpair span{color:#9ebbc8;font:9px ui-monospace,monospace;letter-spacing:1px}.clockdial{display:block;width:110px;height:110px;margin:6px auto;max-width:100%}.clockExplain{font:11px/1.45 system-ui,sans-serif;color:#abc7d2;letter-spacing:0;margin:5px auto 0;max-width:190px}.clockNote{font:11px/1.5 system-ui,sans-serif;color:#abc7d2;border-top:1px solid #ffffff20;padding-top:10px;margin-top:9px} </style></head><body><div id="viewport"><canvas id="universe" aria-label="Interactive three-dimensional perspective showing a spaceship falling towards a compact object"></canvas></div><div class="splitLabels" id="splitLabels" hidden><div class="observerDivider"></div><div class="observerTag">ONBOARD · PROPER TIME</div><div class="observerTag right">FAR AWAY · REDSHIFT</div></div><header class="top"><h1>Falling through spacetime</h1></header><div class="hint">DRAG · ORBIT CAMERA<br>SCROLL · ZOOM &nbsp; | &nbsp; SHIFT + DRAG · PAN<br>KEYS: SPACE · PAUSE &nbsp; R · RESET</div><button id="togglePanel" aria-controls="controls" aria-expanded="true">Hide controls ×</button><aside id="controls" class="panel"><h2>Destination</h2><div class="buttons"><button id="bh" class="selected">Black hole</button><button id="ns">Neutron star</button></div><h2>Flight control</h2><div class="transport"><button id="play" class="selected">Ⅱ Pause</button><button id="reset">↺ Reset</button><button id="orbit">Orbit view</button></div><div class="buttons" style="margin-top:10px"><button id="singleView" class="selected">Cinematic view</button><button id="splitView">Split observers</button></div><label for="mode">Trajectory <output id="modeOut">Radial freefall</output></label><select id="mode" style="width:100%"><option value="fall">Radial freefall</option><option value="orbit">Circular orbit (visual)</option><option value="hover">Stationary hover</option></select><label for="speed">Simulation speed <output id="speedOut">1.0×</output></label><input id="speed" type="range" min="0.1" max="4" step="0.1" value="1"><label for="distance">Initial distance <output id="distanceOut">12.0 rₛ</output></label><input id="distance" type="range" min="5" max="24" step="0.5" value="12"><label for="mass">Object mass <output id="massOut">10 M☉</output></label><input id="mass" type="range" min="2" max="30" step="1" value="10"><h2>Visual environment</h2><label for="disk">Accretion-disk brightness <output id="diskOut">75%</output></label><input id="disk" type="range" min="0" max="100" step="1" value="75"><label for="lens">Illustrative lensing <output id="lensOut">75%</output></label><input id="lens" type="range" min="0" max="100" step="1" value="75"><label for="starfield">Star brightness <output id="starOut">85%</output></label><input id="starfield" type="range" min="0" max="100" step="1" value="85"><div class="buttons" style="margin-top:13px"><button id="follow" class="selected">Follow craft</button><button id="audio">♫ Enable ambience</button></div><p class="note"><strong>Physics interpretation</strong><br>Live readouts use the Schwarzschild gravitational redshift for <em>stationary</em> clocks, √(1 − rₛ/r). The craft has its own freefall proper-time clock; the two are not interchangeable. Black-hole horizon crossing happens in finite craft proper time, although distant Schwarzschild coordinates behave differently. Orbital motion, lensing and disc light are deliberately illustrative rather than full general-relativistic ray tracing. There is no event horizon around a neutron star.<br><br><a href="https://science.nasa.gov/apod/frequently-asked-questions-faqs-on-black-holes/" target="_blank" rel="noopener">NASA: horizon &amp; time</a> · <a href="https://svs.gsfc.nasa.gov/14619/" target="_blank" rel="noopener">NASA: gravitational lensing</a></p></aside><section class="stats" aria-live="off"><div class="clockpair"><div><span>SPACECRAFT TIME</span><canvas id="properDial" class="clockdial" aria-label="Spacecraft proper-time clock"></canvas><div class="clockExplain">Time experienced aboard the spacecraft (proper time).</div></div><div><span>DISTANT REFERENCE TIME</span><canvas id="farDial" class="clockdial" aria-label="Distant reference-time clock"></canvas><div class="clockExplain">Time measured by a stationary clock far from the gravitational field.</div></div></div><div class="clockNote">The spacecraft experiences its own time normally. The clocks accumulate different amounts of time because of gravity and relative motion.</div><div class="descentHud"><div class="small" id="stage">DESCENT IN PROGRESS</div><div class="descentTrack"><div id="descentProgress"></div></div><div class="descentEnds"><span>START</span><span>HORIZON / SURFACE</span></div></div><div class="numbers"><div><span>RADIAL DISTANCE</span><b id="radius">12.00 rₛ</b></div><div hidden><span>SPACECRAFT PROPER TIME</span><b id="proper">0.0 s</b></div><div hidden><span>FAR-AWAY TIME (MODEL)</span><b id="far">0.0 s</b></div><div><span>STATIC GRAVITATIONAL REDSHIFT</span><b id="redshift">z = 0.044</b></div></div><div class="warning" id="eventStatus">Approaching the gravity well. Look for the glow of the accretion disc.</div></section><script>
-(()=>{'use strict';const C=document.getElementById('universe'),ctx=C.getContext('2d',{alpha:false}),$=s=>document.getElementById(s),TAU=Math.PI*2;let w=1,h=1,dpr=1,last=0,frames=0,playing=!window.matchMedia('(prefers-reduced-motion: reduce)').matches,follow=true,sound=false,actx=null,nodes=[],now=0,proper=0,far=0,r=12,init=12,theta=.24,phi=.65,zoom=1,pan=[0,0],drag=null,shipPhase=0,mode='fall',body='bh',split=false,observer='external',mass=10,speed=1,disk=.75,lensing=.75,starBrightness=.85;let stars=[],dust=[];
+(()=>{'use strict';const C=document.getElementById('universe'),ctx=C.getContext('2d',{alpha:false}),$=s=>document.getElementById(s),TAU=Math.PI*2;let w=1,h=1,dpr=1,last=0,frames=0,playing=!window.matchMedia('(prefers-reduced-motion: reduce)').matches,follow=true,sound=false,actx=null,nodes=[],now=0,proper=0,far=0,r=12,init=12,theta=.24,phi=.65,zoom=1,pan=[0,0],drag=null,shipPhase=0,mode='fall',body='bh',split=false,observer='external',mass=10,speed=1,disk=.75,lensing=.75,starBrightness=.85,interiorElapsed=0,interiorLook=0.15;let stars=[],dust=[];
 let seed=54824;const rand=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};for(let i=0;i<680;i++){const a=rand()*TAU,z=rand()*2-1,s=Math.sqrt(1-z*z);stars.push({v:[s*Math.cos(a),s*Math.sin(a),z],b:rand(),size:.4+rand()*1.3})}for(let i=0;i<1500;i++){const a=rand()*TAU,R=2.1+Math.pow(rand(),.72)*8.5;dust.push({a,r:R,h:(rand()-.5)*.16,bright:rand(),size:.35+rand()*1.4})}
 function resize(){const b=C.getBoundingClientRect();w=Math.max(1,b.width);h=Math.max(1,b.height);dpr=Math.min(devicePixelRatio||1,2);C.width=Math.floor(w*dpr);C.height=Math.floor(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
 const norm=v=>Math.hypot(...v),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];let eye,right,up,forward,origin,scale;
@@ -147,45 +147,48 @@ function craft(){
 // Inside-horizon conceptual scene: tidal light cones narrow, outgoing paths bend inward.
 // An illustrative comoving view, not a literal photograph or ray-traced GR solution.
 function interiorScene(){
- const p=pr([0,0,0]),cx=w*.5,cy=h*.52;
- const depth=Math.max(0,Math.min(1,(1-r)/.85)),t=now;
- ctx.save();
- ctx.fillStyle='#02020b';ctx.fillRect(0,0,w,h);
- const halo=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.72);
- halo.addColorStop(0,'#190b27');halo.addColorStop(.35,'#10091d');halo.addColorStop(1,'#01020b');
- ctx.fillStyle=halo;ctx.fillRect(0,0,w,h);
- // Apparent exterior universe compressed into a warped luminous window.
- const radius=Math.min(w,h)*(.37-.22*depth);
- ctx.save();ctx.translate(cx,cy);ctx.rotate(t*.028);
- for(let k=0;k<45;k++){
-  const a=k/45*TAU+t*.014,warp=Math.sin(a*3+t*.18)*.055;
-  const inner=radius*(.85+warp),outer=radius*(1.03+warp);
-  ctx.strokeStyle='hsla('+(205+75*depth+30*Math.sin(a*2))+',95%,72%,'+(.08+.20*(1-depth))+')';
-  ctx.lineWidth=Math.max(.6,2.5*(1-depth));
-  ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
-  ctx.lineTo(Math.cos(a+.13)*outer,Math.sin(a+.13)*outer);ctx.stroke();
+ const cx=w*.5,cy=h*.52,depth=Math.max(0,Math.min(1,interiorElapsed/85)),t=now;
+ // Drag vertically to turn towards the exterior. Drag down to look forward into the fall.
+ const look=interiorLook;
+ ctx.save();ctx.fillStyle='#02030d';ctx.fillRect(0,0,w,h);
+ const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.8);
+ bg.addColorStop(0,'#211330');bg.addColorStop(.38,'#0b0920');bg.addColorStop(1,'#01020a');
+ ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ // Looking backwards reveals a shrinking patch of the exterior universe.
+ // This is deliberately conceptual rather than a ray-traced Schwarzschild interior.
+ const visibility=Math.max(0,Math.min(1,(look+.15)/1.25));
+ const wx=cx,wy=cy+(1-look)*h*.10;
+ const radius=Math.min(w,h)*(.43-.34*depth)*visibility;
+ if(radius>2){
+  ctx.save();ctx.beginPath();ctx.arc(wx,wy,radius,0,TAU);ctx.clip();
+  let sky=ctx.createRadialGradient(wx,wy,0,wx,wy,radius);
+  sky.addColorStop(0,'#183d63');sky.addColorStop(.56,'#0d2546');sky.addColorStop(.9,'#132045');sky.addColorStop(1,'#050713');
+  ctx.fillStyle=sky;ctx.fillRect(wx-radius,wy-radius,radius*2,radius*2);
+  for(let i=0;i<200;i++){
+   const a=i*2.3999632+t*.002,rad=Math.sqrt(((i*53)%199)/199)*radius*.95;
+   const x=wx+Math.cos(a)*rad,y=wy+Math.sin(a)*rad;
+   ctx.fillStyle='rgba(204,232,255,'+(.25+.55*((i*17)%29)/29)+')';
+   ctx.beginPath();ctx.arc(x,y,Math.max(.35,radius*(.001+.004*((i*7)%17)/17)),0,TAU);ctx.fill();
+  }
+  // The bright exterior boundary is gravitationally distorted, rather than striped.
+  ctx.strokeStyle='rgba(126,195,255,.75)';ctx.lineWidth=Math.max(1,3*(1-depth));ctx.shadowColor='#6cbbff';ctx.shadowBlur=18;ctx.stroke();
+  ctx.restore();
  }
- for(let i=0;i<8;i++){
-  const rad=radius*(.37+i*.10);
-  ctx.beginPath();ctx.ellipse(0,0,rad,rad*(.78+.14*Math.sin(t*.16+i)),t*.016+i*.28,0,TAU);
-  ctx.strokeStyle='hsla('+(190+i*13)+',85%,65%,'+(.08+.12*(1-depth))+')';
-  ctx.lineWidth=1.1;ctx.stroke();
- }
- ctx.restore();
- // The tidal direction becomes increasingly dominant on the way inward.
- for(let i=0;i<95;i++){
+ // Inward-looking tidal streams grow more dominant as the view turns away.
+ for(let i=0;i<110;i++){
   const a=i*2.39996,rad=((i*41)%97)/97;
-  const z=(t*.16*(1+depth*2)+rad)%1;
-  const x=cx+Math.cos(a)*w*.55*(1-z),y=cy+Math.sin(a)*h*.65*(1-z);
-  const length=(6+70*depth)*(1-z);
-  ctx.strokeStyle='rgba(137,186,255,'+(.04+.4*z)+')';
-  ctx.lineWidth=.5+1.8*z;
-  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(cx-x)/(Math.hypot(cx-x,cy-y)||1)*length,y+(cy-y)/(Math.hypot(cx-x,cy-y)||1)*length);ctx.stroke();
+  const z=(t*.035*(1+depth)+rad)%1;
+  const x=cx+Math.cos(a)*w*.6*(1-z),y=cy+Math.sin(a)*h*.66*(1-z);
+  const alpha=(.06+.26*z)*(.32+.68*(1-visibility));
+  ctx.strokeStyle='rgba(158,136,236,'+alpha+')';ctx.lineWidth=.5+z*1.5;
+  ctx.beginPath();ctx.moveTo(x,y);
+  ctx.lineTo(x+(cx-x)*(.07+.15*depth),y+(cy-y)*(.07+.15*depth));ctx.stroke();
  }
- ctx.fillStyle='#c9daee';ctx.font='600 12px system-ui';ctx.textAlign='center';
- ctx.fillText('INSIDE THE EVENT HORIZON · CONCEPTUAL VIEW',cx,Math.max(34,h*.12));
- ctx.font='11px system-ui';ctx.fillStyle='#92a7bd';
- ctx.fillText('All future-directed paths lead towards smaller radius',cx,Math.max(52,h*.12+20));
+ ctx.textAlign='center';ctx.fillStyle='#d5e7fc';ctx.font='600 12px system-ui';
+ ctx.fillText('PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
+ ctx.fillStyle='#a3b7d0';ctx.font='11px system-ui';
+ ctx.fillText('DRAG UP TO LOOK BACK · DRAG DOWN TO LOOK INWARD',cx,Math.max(47,h*.12+21));
+ ctx.fillText('Exterior view is conceptual · elapsed interior time: '+Math.floor(interiorElapsed)+' / 85 s',cx,Math.max(65,h*.12+40));
  ctx.restore();
 }
 function drawScene(){
@@ -213,12 +216,21 @@ const rsSeconds=()=>9.8509819e-6*mass;function advance(dt){
  const d=Math.min(dt,.04)*speed;now+=d;
  shipPhase+=d*.11/Math.pow(Math.max(2,r)/6,1.1);
  if(mode==='fall'){
+  if(body==='bh'&&r<=1){
+   interiorElapsed+=d;
+   // Intentionally stretched cinematic interior duration (~85 simulated seconds).
+   // Radius is an illustrative progress coordinate, not a GR worldline solution.
+   const progress=Math.min(1,interiorElapsed/85);
+   r=Math.max(.12,1-.88*(progress*progress*(3-2*progress)));
+   proper+=d;
+   return;
+  }
   const scaled=d*.86;
   for(let i=0;i<6;i++){
    if(r<=(body==='bh'?.12:2.35))break;
    const falling=Math.sqrt(Math.max(0,1/init-1/Math.max(r,.125)));
    r-=scaled/6*Math.max(.30,falling*3.5);
-   r=Math.max(body==='bh'?.12:2.35,r);
+   r=Math.max(body==='bh'?1:2.35,r);
   }
   proper+=d;
   if(body==='ns'){const lapse=Math.sqrt(Math.max(.000001,1-1/Math.max(r,1.00001)));far+=d/Math.max(.02,lapse)}
@@ -236,8 +248,8 @@ function readouts(){
  drawDial('properDial',proper,'#a8f4e5');
  drawDial('farDial',far,'#ffc995');
  $('eventStatus').textContent=
- isBH&&r<=.15?'Approaching the classical singularity: this model ends here. Real physics becomes uncertain. Reset to repeat.':
- cross?'INTERIOR PHASE · Conceptual comoving perspective. Escape is impossible; future-directed trajectories move inward. The onboard clock continues, but distant Schwarzschild coordinates cannot describe the interior this way.':
+ isBH&&r<=.15?'End of the extended interior journey. The classical singularity is beyond the scope of this visual model. Reset to repeat.':
+ cross?'INTERIOR PHASE · Drag up to look back at the shrinking exterior sky, or down to look inward. This long sequence is cinematic and conceptual, not a literal prediction of interior optics.':
  surface?'Neutron-star surface reached. This is an idealised impact.':
  r<3?'Deep gravity well: strong gravitational effects and tidal forces.':
  r<5?'Near 3 rₛ: the Schwarzschild innermost stable circular orbit.':
@@ -267,7 +279,7 @@ function drawDial(id,seconds,color){
  cctx.fillStyle=color;cctx.beginPath();cctx.arc(x,y,3,0,TAU);cctx.fill();
 }
 function frame(ts){let dt=last?(ts-last)/1000:0;last=ts;advance(Math.min(dt,.07));if(++frames%5===0)readouts();draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
-function sync(){init=+$('distance').value;mass=+$('mass').value;speed=+$('speed').value;disk=+$('disk').value/100;lensing=+$('lens').value/100;starBrightness=+$('starfield').value/100;mode=$('mode').value;$('distanceOut').textContent=init.toFixed(1)+' rₛ';$('massOut').textContent=mass+' M☉';$('speedOut').textContent=speed.toFixed(1)+'×';$('diskOut').textContent=Math.round(disk*100)+'%';$('lensOut').textContent=Math.round(lensing*100)+'%';$('starOut').textContent=Math.round(starBrightness*100)+'%';$('modeOut').textContent=mode==='fall'?'Radial freefall':mode==='orbit'?'Illustrative orbit':'Hover';readouts()}function reset(){r=init;now=proper=far=shipPhase=0;playing=true;$('play').textContent='Ⅱ Pause';$('play').classList.add('selected');readouts()}for(const id of ['distance','mass','speed','disk','lens','starfield','mode'])$(id).addEventListener('input',()=>{sync();if(id==='distance')reset()});$('bh').onclick=()=>{body='bh';$('bh').classList.add('selected');$('ns').classList.remove('selected');r=Math.max(r,3);reset()};$('ns').onclick=()=>{body='ns';$('ns').classList.add('selected');$('bh').classList.remove('selected');r=Math.max(r,3);reset()};$('play').onclick=()=>{if((body==='bh'&&r<=1.01)||(body==='ns'&&r<=2.35))reset();else playing=!playing;$('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').classList.toggle('selected',playing)};$('reset').onclick=reset;$('orbit').onclick=()=>{theta=.5;phi=.65;zoom=1;pan=[0,0]};$('follow').onclick=()=>{follow=!follow;$('follow').classList.toggle('selected',follow)};
+function sync(){init=+$('distance').value;mass=+$('mass').value;speed=+$('speed').value;disk=+$('disk').value/100;lensing=+$('lens').value/100;starBrightness=+$('starfield').value/100;mode=$('mode').value;$('distanceOut').textContent=init.toFixed(1)+' rₛ';$('massOut').textContent=mass+' M☉';$('speedOut').textContent=speed.toFixed(1)+'×';$('diskOut').textContent=Math.round(disk*100)+'%';$('lensOut').textContent=Math.round(lensing*100)+'%';$('starOut').textContent=Math.round(starBrightness*100)+'%';$('modeOut').textContent=mode==='fall'?'Radial freefall':mode==='orbit'?'Illustrative orbit':'Hover';readouts()}function reset(){r=init;now=proper=far=shipPhase=interiorElapsed=0;interiorLook=.15;playing=true;$('play').textContent='Ⅱ Pause';$('play').classList.add('selected');readouts()}for(const id of ['distance','mass','speed','disk','lens','starfield','mode'])$(id).addEventListener('input',()=>{sync();if(id==='distance')reset()});$('bh').onclick=()=>{body='bh';$('bh').classList.add('selected');$('ns').classList.remove('selected');r=Math.max(r,3);reset()};$('ns').onclick=()=>{body='ns';$('ns').classList.add('selected');$('bh').classList.remove('selected');r=Math.max(r,3);reset()};$('play').onclick=()=>{if((body==='bh'&&r<=1.01)||(body==='ns'&&r<=2.35))reset();else playing=!playing;$('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').classList.toggle('selected',playing)};$('reset').onclick=reset;$('orbit').onclick=()=>{theta=.5;phi=.65;zoom=1;pan=[0,0]};$('follow').onclick=()=>{follow=!follow;$('follow').classList.toggle('selected',follow)};
 $('singleView').onclick=()=>{split=false;$('singleView').classList.add('selected');$('splitView').classList.remove('selected');$('splitLabels').hidden=true};
 $('splitView').onclick=()=>{split=true;$('splitView').classList.add('selected');$('singleView').classList.remove('selected');$('splitLabels').hidden=false};
 // Generative, non-diegetic soundtrack: space itself is silent.
@@ -358,6 +370,6 @@ for(const event of ['pointerdown','keydown','touchstart']){
 }
 setAudioButton();
 void startAudio();
-C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
+C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(body==='bh'&&mode==='fall'&&r<=1){interiorLook=Math.max(-.65,Math.min(1.2,interiorLook-dy*.008))}else if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 })();
 </script></body></html>
