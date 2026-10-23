@@ -150,41 +150,79 @@ function craft(){
 // An illustrative comoving view, not a literal photograph or ray-traced GR solution.
 // Final 15%: illustrative tidal stretching and disruption (not a resolved singularity).
 function tidalFinale(cx,cy,depth){
- const q=Math.max(0,Math.min(1,(depth-.84)/.16));if(q<=0)return;
- const smooth=q*q*(3-2*q),breakup=Math.max(0,Math.min(1,(q-.38)/.5));
- const S=Math.min(w,h)/440;
- ctx.save();ctx.translate(cx,cy);ctx.scale(S,S);
- const glow=ctx.createRadialGradient(0,0,3,0,0,170);
- glow.addColorStop(0,'rgba(100,150,255,'+(.25*(1-q))+')');
- glow.addColorStop(.52,'rgba(75,48,155,'+(.2*(1-q))+')');
- glow.addColorStop(1,'rgba(0,0,0,0)');
- ctx.fillStyle=glow;ctx.fillRect(-175,-175,350,350);
- // Longitudinal tidal stretching and transverse compression of a recognizable hull.
- const width=17*(1-.87*smooth),length=47*(1+2.2*smooth);
- ctx.globalAlpha=Math.max(0,1-Math.max(0,(q-.65)/.33));
- ctx.fillStyle='#aecfe5';ctx.strokeStyle='#f0faff';ctx.lineWidth=1.6;
- ctx.beginPath();ctx.moveTo(0,-length);ctx.bezierCurveTo(width,-length*.64,width,length*.68,0,length);
- ctx.bezierCurveTo(-width,length*.68,-width,-length*.64,0,-length);
- ctx.fill();ctx.stroke();
- // Surviving wings deform and pull in towards the body.
- ctx.strokeStyle='#66bfff';ctx.lineWidth=3*(1-.68*smooth);
- ctx.beginPath();ctx.moveTo(-36*(1-smooth),length*.19);ctx.lineTo(36*(1-smooth),length*.19);ctx.stroke();
- ctx.fillStyle='#244d71';ctx.beginPath();ctx.ellipse(0,-length*.38,Math.max(1,width*.55),length*.16,0,0,TAU);ctx.fill();
- ctx.globalAlpha=1;
- // Continuous debris strands become increasingly thin and elongated.
- for(let i=0;i<72;i++){
-  const phase=i*2.399963,spread=(.15+(i%13)/13)*breakup;
-  const x=Math.sin(phase)*58*spread;
-  const y=(Math.cos(phase)*.55+((i%17)/17-.5))*length*(.3+breakup);
-  const dx=x*.5,dy=y+Math.sign(y||1)*(15+105*breakup);
-  ctx.strokeStyle=i%5===0?'rgba(255,179,127,'+(.8*(1-q*.75))+')':'rgba(128,196,255,'+(.85*(1-q*.75))+')';
-  ctx.lineWidth=.5+(i%4)*.35;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.sin(phase)*8,y+30*breakup,dx,dy);ctx.stroke();
+ const q=Math.max(0,Math.min(1,(depth-.84)/.16));
+ if(q<=0)return;
+ const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+ const stretch=smooth(q/.64),broken=smooth((q-.60)/.29),fade=smooth((q-.90)/.10);
+ const unit=Math.max(.48,Math.min(w,h)/510);
+ ctx.save();
+ // Show the craft from outside for clarity. The nose points along the falling direction.
+ ctx.translate(cx,cy);ctx.scale(unit,unit);
+ const length=72*(1+1.75*stretch);
+ const width=22*(1-.76*stretch);
+ const wing=78*(1-.67*stretch);
+ ctx.save();ctx.globalAlpha=1-fade;
+ // Longitudinal and transverse tidal forces are indicated by unmistakable directional arrows.
+ if(q<.84){
+  ctx.strokeStyle='rgba(255,192,117,'+(.35+.5*stretch)+')';
+  ctx.fillStyle=ctx.strokeStyle;ctx.lineWidth=2;
+  for(const sign of [-1,1]){
+   const y=sign*(length+16);
+   ctx.beginPath();ctx.moveTo(0,sign*length*.65);ctx.lineTo(0,y);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(0,y+sign*7);ctx.lineTo(-5,y-sign*2);ctx.lineTo(5,y-sign*2);ctx.closePath();ctx.fill();
+   const x=sign*(wing+18);
+   ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(sign*(width+20),0);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(sign*(width+12),-5);ctx.lineTo(sign*(width+3),0);ctx.lineTo(sign*(width+12),5);ctx.closePath();ctx.fill();
+  }
  }
+ // Recognisable spacecraft silhouette: cockpit, hull, solar arrays, engines.
+ const parts=[
+  {x:0,y:0,sx:1,sy:1},
+  {x:-wing*.60,y:8,sx:1,sy:1},
+  {x:wing*.60,y:8,sx:1,sy:1}
+ ];
+ const offsets=parts.map((p,i)=>({dx:Math.sin(i*2.4+1)*48*broken,dy:(i-1)*85*broken}));
+ // Wings recede gradually into the stretched hull, then detach in the breakup phase.
+ for(const sign of [-1,1]){
+  ctx.save();ctx.translate(sign*wing*.5+sign*32*broken,12+sign*48*broken);
+  ctx.globalAlpha=1-fade;
+  ctx.fillStyle='#245477';ctx.strokeStyle='#8cdaff';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-wing*.50,-11);ctx.lineTo(wing*.50,-11);ctx.lineTo(wing*.50,11);ctx.lineTo(-wing*.50,11);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.strokeStyle='rgba(190,235,255,.65)';
+  for(let i=-2;i<=2;i++){const x=i*wing*.15;ctx.beginPath();ctx.moveTo(x,-10);ctx.lineTo(x,10);ctx.stroke()}
+  ctx.restore();
+ }
+ ctx.save();ctx.translate(offsets[0].dx,offsets[0].dy);ctx.rotate(.12*broken);
+ ctx.fillStyle='#aac5d8';ctx.strokeStyle='#ebf8ff';ctx.lineWidth=2.3;
+ ctx.beginPath();ctx.moveTo(0,-length);ctx.bezierCurveTo(width,-length*.72,width,length*.58,0,length);
+ ctx.bezierCurveTo(-width,length*.58,-width,-length*.72,0,-length);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle='#245976';ctx.strokeStyle='#8edcff';ctx.lineWidth=1.3;
+ ctx.beginPath();ctx.ellipse(0,-length*.47,Math.max(2,width*.62),length*.15,0,0,TAU);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#f8ad78';ctx.fillRect(-width*.55,length*.91,width*.42,8);ctx.fillRect(width*.13,length*.91,width*.42,8);
+ for(let i=-2;i<=2;i++){const y=i*length*.27;ctx.strokeStyle='rgba(60,109,145,.6)';ctx.beginPath();ctx.moveTo(-width*.75,y);ctx.lineTo(width*.75,y);ctx.stroke()}
  ctx.restore();
- if(q>.76){ctx.fillStyle='rgba(0,0,6,'+Math.min(1,(q-.76)/.24)+')';ctx.fillRect(0,0,w,h)}
- ctx.textAlign='center';ctx.fillStyle='#e1edff';ctx.font='600 13px system-ui';
- if(q<.92)ctx.fillText(q<.38?'EXTREME TIDAL STRETCHING':'STRUCTURAL DISRUPTION',cx,h*.83);
- if(q>=.99){ctx.fillText('THE CLASSICAL MODEL ENDS HERE',cx,h*.48);ctx.font='12px system-ui';ctx.fillStyle='#a9c1d5';ctx.fillText('The physical nature of the singularity is unknown.',cx,h*.53)}
+ // Actual fragments appear only after the ship has visibly deformed.
+ if(broken>0){
+  for(let i=0;i<22;i++){
+   const a=i*2.399963,scatter=(.4+(i%7)/7)*broken;
+   const x=Math.sin(a)*55*scatter,y=Math.cos(a)*length*.64*scatter;
+   ctx.strokeStyle=i%4===0?'rgba(255,170,106,.85)':'rgba(157,215,255,.85)';
+   ctx.lineWidth=1.4+(i%3)*.6;
+   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x*.45,y+Math.sign(y||1)*(20+90*broken));ctx.stroke();
+  }
+ }
+ ctx.restore();ctx.restore();
+ if(fade>0){ctx.fillStyle='rgba(0,1,8,'+fade+')';ctx.fillRect(0,0,w,h)}
+ ctx.textAlign='center';
+ if(q<.96){
+  ctx.fillStyle='rgba(225,239,255,'+(1-fade)+')';ctx.font='600 14px system-ui';
+  ctx.fillText(q<.23?'SPACECRAFT ENTERING STRONG TIDAL FIELD':q<.60?'STRETCHED LENGTHWAYS · SQUEEZED SIDEWAYS':'TIDAL FORCES TEAR THE SPACECRAFT APART',cx,h*.86);
+ }else{
+  ctx.fillStyle='#e7edf8';ctx.font='600 13px system-ui';
+  ctx.fillText('THE CLASSICAL MODEL ENDS HERE',cx,h*.49);
+  ctx.font='12px system-ui';ctx.fillStyle='#a5bcd1';
+  ctx.fillText('Physics at a singularity remains unknown.',cx,h*.53);
+ }
 }
 function interiorScene(){
  const cx=w*.5,cy=h*.52,depth=Math.max(0,Math.min(1,interiorElapsed/85)),t=now;
