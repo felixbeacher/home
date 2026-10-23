@@ -275,7 +275,7 @@ const rsSeconds=()=>9.8509819e-6*mass;function advance(dt){
  shipPhase+=d*.11/Math.pow(Math.max(2,r)/6,1.1);
  if(mode==='fall'){
   if(body==='bh'&&r<=1){
-   interiorElapsed+=d;
+   interiorElapsed=Math.min(85,interiorElapsed+d);
    // Intentionally stretched cinematic interior duration (~85 simulated seconds).
    // Radius is an illustrative progress coordinate, not a GR worldline solution.
    const progress=Math.min(1,interiorElapsed/85);
@@ -314,7 +314,7 @@ function readouts(){
  drawDial('properDial',proper,'#a8f4e5');
  drawDial('farDial',far,'#ffc995');
  $('eventStatus').textContent=
- isBH&&r<=.15?'End of the journey: the craft has undergone idealised tidal disruption. What happens at a singularity remains unknown. Reset to repeat.':
+ isBH&&interiorElapsed>=85?'Model endpoint reached. The Kerr-inspired ring is an illustrative classical prediction; the physical endpoint remains unknown. Reset to repeat.':
  cross?(interiorElapsed>72?'FINAL PHASE · Extreme tidal stretching and structural breakup. This is a conceptual cutaway, not a resolved prediction of a singularity.':'INTERIOR PHASE · Light streaks sweep outward across your field of view as the craft falls inward. The scene is conceptual.'):
  surface?'Neutron-star surface reached. This is an idealised impact.':
  r<3?'Deep gravity well: strong gravitational effects and tidal forces.':
@@ -326,9 +326,9 @@ function readouts(){
  $('descentProgress').style.width=(progress*100).toFixed(1)+'%';
  $('progressStart').textContent=interior?'HORIZON':'START';
  $('progressEnd').textContent=interior?'SINGULARITY (MODEL)':'HORIZON / SURFACE';
- $('stage').textContent=isBH&&r<=1?(interiorElapsed>72?'FINAL APPROACH · '+remaining.toFixed(0)+' s LEFT':'TIME TO SINGULARITY · '+remaining.toFixed(0)+' s'):surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
- if(isBH&&r<=.15&&!singularitySoundPlayed){singularitySoundPlayed=true;playSingularityCrash()}
- if((isBH&&r<=.15)||surface){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
+ $('stage').textContent=isBH&&r<=1?(interiorElapsed>=85?'MODEL ENDPOINT REACHED':interiorElapsed>72?'FINAL APPROACH · '+remaining.toFixed(0)+' s LEFT':'TIME TO SINGULARITY · '+remaining.toFixed(0)+' s'):surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
+ if(isBH&&interiorElapsed>=85&&!singularitySoundPlayed){singularitySoundPlayed=true;playSingularityCrash()}
+ if((isBH&&interiorElapsed>=85)||surface){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 }
 function drawDial(id,seconds,color){
  const c=$(id),cctx=c.getContext('2d');if(!cctx)return;
@@ -350,7 +350,7 @@ function drawDial(id,seconds,color){
  cctx.fillStyle=color;cctx.beginPath();cctx.arc(x,y,3,0,TAU);cctx.fill();
 }
 function frame(ts){let dt=last?(ts-last)/1000:0;last=ts;advance(Math.min(dt,.07));if(++frames%5===0)readouts();draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
-function sync(){init=+$('distance').value;mass=+$('mass').value;speed=+$('speed').value;disk=+$('disk').value/100;lensing=+$('lens').value/100;starBrightness=+$('starfield').value/100;mode=$('mode').value;$('distanceOut').textContent=init.toFixed(1)+' rₛ';$('massOut').textContent=mass+' M☉';$('speedOut').textContent=speed.toFixed(1)+'×';$('diskOut').textContent=Math.round(disk*100)+'%';$('lensOut').textContent=Math.round(lensing*100)+'%';$('starOut').textContent=Math.round(starBrightness*100)+'%';$('modeOut').textContent=mode==='fall'?'Radial freefall':mode==='orbit'?'Illustrative orbit':'Hover';readouts()}function reset(){r=init;now=proper=far=shipPhase=interiorElapsed=0;interiorLook=.15;tidalYaw=.6;tidalPitch=.24;singularitySoundPlayed=false;playing=true;$('play').textContent='Ⅱ Pause';$('play').classList.add('selected');readouts()}for(const id of ['distance','mass','speed','disk','lens','starfield','mode'])$(id).addEventListener('input',()=>{sync();if(id==='distance')reset()});$('bh').onclick=()=>{body='bh';$('bh').classList.add('selected');$('ns').classList.remove('selected');r=Math.max(r,3);reset()};$('ns').onclick=()=>{body='ns';$('ns').classList.add('selected');$('bh').classList.remove('selected');r=Math.max(r,3);reset()};$('play').onclick=()=>{if((body==='bh'&&r<=1.01)||(body==='ns'&&r<=2.35))reset();else playing=!playing;$('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').classList.toggle('selected',playing)};$('reset').onclick=reset;$('orbit').onclick=()=>{theta=.5;phi=.65;zoom=1;pan=[0,0]};$('follow').onclick=()=>{follow=!follow;$('follow').classList.toggle('selected',follow)};
+function sync(){init=+$('distance').value;mass=+$('mass').value;speed=+$('speed').value;disk=+$('disk').value/100;lensing=+$('lens').value/100;starBrightness=+$('starfield').value/100;mode=$('mode').value;$('distanceOut').textContent=init.toFixed(1)+' rₛ';$('massOut').textContent=mass+' M☉';$('speedOut').textContent=speed.toFixed(1)+'×';$('diskOut').textContent=Math.round(disk*100)+'%';$('lensOut').textContent=Math.round(lensing*100)+'%';$('starOut').textContent=Math.round(starBrightness*100)+'%';$('modeOut').textContent=mode==='fall'?'Radial freefall':mode==='orbit'?'Illustrative orbit':'Hover';readouts()}function reset(){r=init;now=proper=far=shipPhase=interiorElapsed=0;interiorLook=.15;tidalYaw=.6;tidalPitch=.24;singularitySoundPlayed=false;playing=true;$('play').textContent='Ⅱ Pause';$('play').classList.add('selected');readouts()}for(const id of ['distance','mass','speed','disk','lens','starfield','mode'])$(id).addEventListener('input',()=>{sync();if(id==='distance')reset()});$('bh').onclick=()=>{body='bh';$('bh').classList.add('selected');$('ns').classList.remove('selected');r=Math.max(r,3);reset()};$('ns').onclick=()=>{body='ns';$('ns').classList.add('selected');$('bh').classList.remove('selected');r=Math.max(r,3);reset()};$('play').onclick=()=>{if((body==='bh'&&interiorElapsed>=85)||(body==='ns'&&r<=2.35))reset();else playing=!playing;$('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').classList.toggle('selected',playing)};$('reset').onclick=reset;$('orbit').onclick=()=>{theta=.5;phi=.65;zoom=1;pan=[0,0]};$('follow').onclick=()=>{follow=!follow;$('follow').classList.toggle('selected',follow)};
 $('singleView').onclick=()=>{split=false;$('singleView').classList.add('selected');$('splitView').classList.remove('selected');$('splitLabels').hidden=true};
 $('splitView').onclick=()=>{split=true;$('splitView').classList.add('selected');$('singleView').classList.remove('selected');$('splitLabels').hidden=false};
 // Generative, non-diegetic soundtrack: space itself is silent.
