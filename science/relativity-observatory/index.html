@@ -153,9 +153,9 @@ function tidalFinale(cx,cy,depth){
  const q=Math.max(0,Math.min(1,(depth-.84)/.16));if(!q)return;
  const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
  const impact=ease((q-.78)/.22),fade=ease((q-.94)/.06);
- const R=Math.min(w,h)*.115,minor=R*.14;
- // A projected, depth-sorted torus that can be orbited with mouse dragging.
- // It is symbolic: a Schwarzschild singularity is not a physical ring.
+ const R=Math.min(w,h)*.145,minor=Math.max(.55,R*.012);
+ // An extremely thin, rotatable rendering of the idealised Kerr ring singularity.
+ // Kerr is a rotating solution; the exterior flight model remains Schwarzschild-based.
  const cyaw=Math.cos(tidalYaw),syaw=Math.sin(tidalYaw);
  const cp=Math.cos(tidalPitch),sp=Math.sin(tidalPitch);
  const project=(x,y,z)=>{
@@ -165,7 +165,7 @@ function tidalFinale(cx,cy,depth){
   return {x:cx+X*k,y:cy+Y*k,z:D,k};
  };
  ctx.save();ctx.globalCompositeOperation='lighter';
- const faces=[],N=100,M=12;
+ const faces=[],N=150,M=6;
  for(let i=0;i<N;i++)for(let j=0;j<M;j++){
   const u0=i*TAU/N,u1=(i+1)*TAU/N,v0=j*TAU/M,v1=(j+1)*TAU/M;
   const at=(u,v)=>{const rad=R+minor*Math.cos(v);return project(rad*Math.cos(u),minor*Math.sin(v),rad*Math.sin(u))};
@@ -177,7 +177,7 @@ function tidalFinale(cx,cy,depth){
  for(const face of faces){
   const alpha=(.68+.26*face.light)*(1-.5*impact);
   ctx.fillStyle='hsla('+(210+42*face.light)+',95%,'+(42+38*face.light)+'%,'+alpha+')';
-  ctx.strokeStyle='rgba(179,211,255,.11)';ctx.lineWidth=.35;
+  ctx.strokeStyle='rgba(179,211,255,.07)';ctx.lineWidth=.2;
   ctx.beginPath();face.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();
  }
  ctx.restore();
@@ -189,12 +189,12 @@ function tidalFinale(cx,cy,depth){
  if(fade){ctx.fillStyle='rgba(0,0,6,'+fade+')';ctx.fillRect(0,0,w,h)}
  ctx.textAlign='center';ctx.fillStyle='#e5edff';ctx.font='600 13px system-ui';
  if(q<.97){
-  ctx.fillText('SCHWARZSCHILD SINGULARITY · SYMBOLIC 3D RING',cx,h*.83);
+  ctx.fillText('KERR BLACK HOLE · RING SINGULARITY',cx,h*.83);
   ctx.font='11px system-ui';ctx.fillStyle='#9cb5d1';
-  ctx.fillText('Drag to orbit · the classical Schwarzschild singularity is point-like',cx,h*.83+20);
+  ctx.fillText('Spinning black hole: idealised infinitesimally thin equatorial ring · drag to orbit',cx,h*.83+20);
  }else{
   ctx.fillText('CLASSICAL MODEL ENDPOINT',cx,h*.48);
-  ctx.font='12px system-ui';ctx.fillText('What occurs at the singularity remains unknown.',cx,h*.53);
+  ctx.font='12px system-ui';ctx.fillText('Kerr ring is a classical prediction; the physical endpoint remains unknown.',cx,h*.53);
  }
 }
 function interiorScene(){
