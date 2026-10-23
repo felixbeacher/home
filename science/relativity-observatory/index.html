@@ -154,41 +154,23 @@ function interiorScene(){
  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.8);
  bg.addColorStop(0,'#211330');bg.addColorStop(.38,'#0b0920');bg.addColorStop(1,'#01020a');
  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
- // Looking backwards reveals a shrinking patch of the exterior universe.
- // This is deliberately conceptual rather than a ray-traced Schwarzschild interior.
+ // No circular exterior disc: only directional light trails in the interior.
  const visibility=Math.max(0,Math.min(1,(look+.15)/1.25));
- const wx=cx,wy=cy+(1-look)*h*.10;
- const radius=Math.min(w,h)*(.43-.34*depth)*visibility;
- if(radius>2){
-  ctx.save();ctx.beginPath();ctx.arc(wx,wy,radius,0,TAU);ctx.clip();
-  let sky=ctx.createRadialGradient(wx,wy,0,wx,wy,radius);
-  sky.addColorStop(0,'#183d63');sky.addColorStop(.56,'#0d2546');sky.addColorStop(.9,'#132045');sky.addColorStop(1,'#050713');
-  ctx.fillStyle=sky;ctx.fillRect(wx-radius,wy-radius,radius*2,radius*2);
-  for(let i=0;i<200;i++){
-   const a=i*2.3999632+t*.002,rad=Math.sqrt(((i*53)%199)/199)*radius*.95;
-   const x=wx+Math.cos(a)*rad,y=wy+Math.sin(a)*rad;
-   ctx.fillStyle='rgba(204,232,255,'+(.25+.55*((i*17)%29)/29)+')';
-   ctx.beginPath();ctx.arc(x,y,Math.max(.35,radius*(.001+.004*((i*7)%17)/17)),0,TAU);ctx.fill();
-  }
-  // The bright exterior boundary is gravitationally distorted, rather than striped.
-  ctx.strokeStyle='rgba(126,195,255,.75)';ctx.lineWidth=Math.max(1,3*(1-depth));ctx.shadowColor='#6cbbff';ctx.shadowBlur=18;ctx.stroke();
-  ctx.restore();
- }
  // Inward-looking tidal streams grow more dominant as the view turns away.
  for(let i=0;i<110;i++){
   const a=i*2.39996,rad=((i*41)%97)/97;
-  const z=(t*.035*(1+depth)+rad)%1;
-  const x=cx+Math.cos(a)*w*.6*(1-z),y=cy+Math.sin(a)*h*.66*(1-z);
-  const alpha=(.06+.26*z)*(.32+.68*(1-visibility));
+  const z=(1-((t*.075*(1+depth)+rad)%1));
+  const x=cx+Math.cos(a)*w*.6*z,y=cy+Math.sin(a)*h*.66*z;
+  const alpha=(.08+.38*z)*(.55+.45*(1-visibility));
   ctx.strokeStyle='rgba(158,136,236,'+alpha+')';ctx.lineWidth=.5+z*1.5;
   ctx.beginPath();ctx.moveTo(x,y);
-  ctx.lineTo(x+(cx-x)*(.07+.15*depth),y+(cy-y)*(.07+.15*depth));ctx.stroke();
+  ctx.lineTo(x+(x-cx)*(.07+.15*depth),y+(y-cy)*(.07+.15*depth));ctx.stroke();
  }
  ctx.textAlign='center';ctx.fillStyle='#d5e7fc';ctx.font='600 12px system-ui';
  ctx.fillText('PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
  ctx.fillStyle='#a3b7d0';ctx.font='11px system-ui';
- ctx.fillText('DRAG UP TO LOOK BACK · DRAG DOWN TO LOOK INWARD',cx,Math.max(47,h*.12+21));
- ctx.fillText('Exterior view is conceptual · elapsed interior time: '+Math.floor(interiorElapsed)+' / 85 s',cx,Math.max(65,h*.12+40));
+ ctx.fillText('DRAG TO CHANGE VIEW · INWARD FALL VISUALISATION',cx,Math.max(47,h*.12+21));
+ ctx.fillText('Conceptual interior · elapsed time: '+Math.floor(interiorElapsed)+' / 85 s',cx,Math.max(65,h*.12+40));
  ctx.restore();
 }
 function drawScene(){
@@ -249,7 +231,7 @@ function readouts(){
  drawDial('farDial',far,'#ffc995');
  $('eventStatus').textContent=
  isBH&&r<=.15?'End of the extended interior journey. The classical singularity is beyond the scope of this visual model. Reset to repeat.':
- cross?'INTERIOR PHASE · Drag up to look back at the shrinking exterior sky, or down to look inward. This long sequence is cinematic and conceptual, not a literal prediction of interior optics.':
+ cross?'INTERIOR PHASE · Light streaks now sweep outward across your field of view, conveying forward motion towards the singularity. The scene is conceptual, not a literal prediction of interior optics.':
  surface?'Neutron-star surface reached. This is an idealised impact.':
  r<3?'Deep gravity well: strong gravitational effects and tidal forces.':
  r<5?'Near 3 rₛ: the Schwarzschild innermost stable circular orbit.':
@@ -370,6 +352,6 @@ for(const event of ['pointerdown','keydown','touchstart']){
 }
 setAudioButton();
 void startAudio();
-C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(body==='bh'&&mode==='fall'&&r<=1){interiorLook=Math.max(-.65,Math.min(1.2,interiorLook-dy*.008))}else if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
+C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(body==='bh'&&mode==='fall'&&r<=1){interiorLook=Math.max(-.65,Math.min(1.2,interiorLook-dy*.008))}else if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();if(body==='bh'&&mode==='fall'&&r<=1)return;zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 })();
 </script></body></html>
