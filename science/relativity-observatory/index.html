@@ -152,38 +152,50 @@ function craft(){
 function tidalFinale(cx,cy,depth){
  const q=Math.max(0,Math.min(1,(depth-.84)/.16));if(!q)return;
  const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
- const approach=ease(q/.78),impact=ease((q-.78)/.22),fade=ease((q-.94)/.06);
- // Symbolic luminous target, NOT a literal Schwarzschild ring singularity.
- const ringR=Math.max(12,Math.min(w,h)*(.12-.05*approach));
- const haloR=ringR*(2.4-.9*approach);
- ctx.save();
- if(q>.55){ctx.fillStyle='rgba(0,0,8,'+(.16+.44*approach)+')';ctx.fillRect(0,0,w,h)}
- ctx.translate(cx,cy);ctx.rotate(now*.22);
- const glow=ctx.createRadialGradient(0,0,ringR*.15,0,0,haloR);
- glow.addColorStop(0,'rgba(255,255,255,0)');
- glow.addColorStop(.25,'rgba(90,130,255,'+(.10*(1-impact))+')');
- glow.addColorStop(.55,'rgba(120,55,180,'+(.14*(1-impact))+')');
- glow.addColorStop(1,'rgba(0,0,0,0)');
- ctx.fillStyle=glow;ctx.fillRect(-haloR,-haloR,haloR*2,haloR*2);
- ctx.strokeStyle='rgba(235,242,255,'+(.92-.35*impact)+')';
- ctx.lineWidth=Math.max(2,ringR*.14);ctx.shadowColor='rgba(120,170,255,.85)';ctx.shadowBlur=18;
- ctx.beginPath();ctx.arc(0,0,ringR,0,TAU);ctx.stroke();
- if(q>.82){
-  const flare=ringR*(1.2+2.3*impact),burst=ctx.createRadialGradient(0,0,0,0,0,flare);
-  burst.addColorStop(0,'rgba(255,255,255,'+(.9*impact)+')');
-  burst.addColorStop(.25,'rgba(255,210,150,'+(.55*impact)+')');
-  burst.addColorStop(.65,'rgba(110,150,255,'+(.18*impact)+')');
-  burst.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.shadowBlur=0;ctx.fillStyle=burst;ctx.fillRect(-flare,-flare,flare*2,flare*2);
+ const impact=ease((q-.78)/.22),fade=ease((q-.94)/.06);
+ const R=Math.min(w,h)*.115,minor=R*.14;
+ // A projected, depth-sorted torus that can be orbited with mouse dragging.
+ // It is symbolic: a Schwarzschild singularity is not a physical ring.
+ const cyaw=Math.cos(tidalYaw),syaw=Math.sin(tidalYaw);
+ const cp=Math.cos(tidalPitch),sp=Math.sin(tidalPitch);
+ const project=(x,y,z)=>{
+  const X=x*cyaw+z*syaw,Z=z*cyaw-x*syaw;
+  const Y=y*cp-Z*sp,D=y*sp+Z*cp;
+  const k=540/(540+D);
+  return {x:cx+X*k,y:cy+Y*k,z:D,k};
+ };
+ ctx.save();ctx.globalCompositeOperation='lighter';
+ const faces=[],N=100,M=12;
+ for(let i=0;i<N;i++)for(let j=0;j<M;j++){
+  const u0=i*TAU/N,u1=(i+1)*TAU/N,v0=j*TAU/M,v1=(j+1)*TAU/M;
+  const at=(u,v)=>{const rad=R+minor*Math.cos(v);return project(rad*Math.cos(u),minor*Math.sin(v),rad*Math.sin(u))};
+  const pts=[at(u0,v0),at(u1,v0),at(u1,v1),at(u0,v1)];
+  const light=.5+.5*Math.cos((v0+v1)*.5-.8);
+  faces.push({pts,z:pts.reduce((sum,p)=>sum+p.z,0)/4,light,u:u0});
+ }
+ faces.sort((a,b)=>b.z-a.z);
+ for(const face of faces){
+  const alpha=(.68+.26*face.light)*(1-.5*impact);
+  ctx.fillStyle='hsla('+(210+42*face.light)+',95%,'+(42+38*face.light)+'%,'+alpha+')';
+  ctx.strokeStyle='rgba(179,211,255,.11)';ctx.lineWidth=.35;
+  ctx.beginPath();face.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();
  }
  ctx.restore();
- if(fade>0){ctx.fillStyle='rgba(0,0,6,'+fade+')';ctx.fillRect(0,0,w,h)}
- ctx.textAlign='center';
- if(q<.97){ctx.fillStyle='rgba(228,238,255,'+(1-fade)+')';ctx.font='600 14px system-ui';
-  ctx.fillText(q<.65?'APPROACHING THE SINGULARITY · SYMBOLIC RING':'FINAL APPROACH · MODEL ENDPOINT',cx,h*.86);
- }else{ctx.fillStyle='#e7edf8';ctx.font='600 13px system-ui';
-  ctx.fillText('MODEL ENDPOINT REACHED',cx,h*.48);ctx.font='12px system-ui';ctx.fillStyle='#a5bcd1';
-  ctx.fillText('Schwarzschild singularities are point-like; the ring is symbolic.',cx,h*.53)}
+ if(q>.82){
+  const flare=R*(.4+3*impact),g=ctx.createRadialGradient(cx,cy,0,cx,cy,flare);
+  g.addColorStop(0,'rgba(255,255,255,'+(.75*impact)+')');g.addColorStop(.35,'rgba(111,149,255,'+(.26*impact)+')');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(cx-flare,cy-flare,flare*2,flare*2);
+ }
+ if(fade){ctx.fillStyle='rgba(0,0,6,'+fade+')';ctx.fillRect(0,0,w,h)}
+ ctx.textAlign='center';ctx.fillStyle='#e5edff';ctx.font='600 13px system-ui';
+ if(q<.97){
+  ctx.fillText('SCHWARZSCHILD SINGULARITY · SYMBOLIC 3D RING',cx,h*.83);
+  ctx.font='11px system-ui';ctx.fillStyle='#9cb5d1';
+  ctx.fillText('Drag to orbit · the classical Schwarzschild singularity is point-like',cx,h*.83+20);
+ }else{
+  ctx.fillText('CLASSICAL MODEL ENDPOINT',cx,h*.48);
+  ctx.font='12px system-ui';ctx.fillText('What occurs at the singularity remains unknown.',cx,h*.53);
+ }
 }
 function interiorScene(){
  const cx=w*.5,cy=h*.52,depth=Math.max(0,Math.min(1,interiorElapsed/85)),t=now;
