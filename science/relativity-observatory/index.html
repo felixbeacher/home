@@ -178,8 +178,52 @@ function craft(){
  ctx.restore();
  ctx.save();ctx.globalAlpha=fade;ctx.fillStyle='#b0dce7';ctx.textAlign='center';ctx.font='10px ui-monospace,monospace';ctx.fillText('ODYSSEY · 01',center.x,center.y-size*2.4);ctx.restore();
 }
+// Inside-horizon conceptual scene: tidal light cones narrow, outgoing paths bend inward.
+// An illustrative comoving view, not a literal photograph or ray-traced GR solution.
+function interiorScene(){
+ const p=pr([0,0,0]),cx=w*.5,cy=h*.52;
+ const depth=Math.max(0,Math.min(1,(1-r)/.85)),t=now;
+ ctx.save();
+ ctx.fillStyle='#02020b';ctx.fillRect(0,0,w,h);
+ const halo=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.72);
+ halo.addColorStop(0,'#190b27');halo.addColorStop(.35,'#10091d');halo.addColorStop(1,'#01020b');
+ ctx.fillStyle=halo;ctx.fillRect(0,0,w,h);
+ // Apparent exterior universe compressed into a warped luminous window.
+ const radius=Math.min(w,h)*(.37-.22*depth);
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(t*.028);
+ for(let k=0;k<45;k++){
+  const a=k/45*TAU+t*.014,warp=Math.sin(a*3+t*.18)*.055;
+  const inner=radius*(.85+warp),outer=radius*(1.03+warp);
+  ctx.strokeStyle='hsla('+(205+75*depth+30*Math.sin(a*2))+',95%,72%,'+(.08+.20*(1-depth))+')';
+  ctx.lineWidth=Math.max(.6,2.5*(1-depth));
+  ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
+  ctx.lineTo(Math.cos(a+.13)*outer,Math.sin(a+.13)*outer);ctx.stroke();
+ }
+ for(let i=0;i<8;i++){
+  const rad=radius*(.37+i*.10);
+  ctx.beginPath();ctx.ellipse(0,0,rad,rad*(.78+.14*Math.sin(t*.16+i)),t*.016+i*.28,0,TAU);
+  ctx.strokeStyle='hsla('+(190+i*13)+',85%,65%,'+(.08+.12*(1-depth))+')';
+  ctx.lineWidth=1.1;ctx.stroke();
+ }
+ ctx.restore();
+ // The tidal direction becomes increasingly dominant on the way inward.
+ for(let i=0;i<95;i++){
+  const a=i*2.39996,rad=((i*41)%97)/97;
+  const z=(t*.16*(1+depth*2)+rad)%1;
+  const x=cx+Math.cos(a)*w*.55*(1-z),y=cy+Math.sin(a)*h*.65*(1-z);
+  const length=(6+70*depth)*(1-z);
+  ctx.strokeStyle='rgba(137,186,255,'+(.04+.4*z)+')';
+  ctx.lineWidth=.5+1.8*z;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(cx-x)/(Math.hypot(cx-x,cy-y)||1)*length,y+(cy-y)/(Math.hypot(cx-x,cy-y)||1)*length);ctx.stroke();
+ }
+ ctx.fillStyle='#c9daee';ctx.font='600 12px system-ui';ctx.textAlign='center';
+ ctx.fillText('INSIDE THE EVENT HORIZON · CONCEPTUAL VIEW',cx,Math.max(34,h*.12));
+ ctx.font='11px system-ui';ctx.fillStyle='#92a7bd';
+ ctx.fillText('All future-directed paths lead towards smaller radius',cx,Math.max(52,h*.12+20));
+ ctx.restore();
+}
 function drawScene(){
- camera();bg();orbitLines();diskDraw('far');lensedDisk();sphere(body==='bh'?1:2.35);diskDraw('near');craft();
+ camera();if(body==='bh'&&mode==='fall'&&r<=1){interiorScene();return;}bg();orbitLines();diskDraw('far');lensedDisk();sphere(body==='bh'?1:2.35);diskDraw('near');craft();
  if(observer==='onboard'){
   ctx.save();ctx.strokeStyle='#8ad9e588';ctx.lineWidth=1;
   const cx=w*.5,cy=h*.55;ctx.beginPath();ctx.moveTo(cx-24,cy);ctx.lineTo(cx-8,cy);ctx.moveTo(cx+8,cy);ctx.lineTo(cx+24,cy);ctx.moveTo(cx,cy-24);ctx.lineTo(cx,cy-8);ctx.moveTo(cx,cy+8);ctx.lineTo(cx,cy+24);ctx.stroke();
@@ -229,15 +273,15 @@ function readouts(){
  drawDial('farDial',far,'#ffc995');
  $('regime').textContent=isBH?'Black hole':'Neutron star';
  $('eventStatus').textContent=
- isBH&&r<=.15?'Interior visualisation ended near the classical singularity. Reset to repeat.':
- cross?'Inside the event horizon: escape is impossible. The craft clock continues; far-away Schwarzschild time is no longer a valid onboard comparison.':
+ isBH&&r<=.15?'Approaching the classical singularity: this model ends here. Real physics becomes uncertain. Reset to repeat.':
+ cross?'INTERIOR PHASE · Conceptual comoving perspective. Escape is impossible; future-directed trajectories move inward. The onboard clock continues, but distant Schwarzschild coordinates cannot describe the interior this way.':
  surface?'Neutron-star surface reached. This is an idealised impact.':
  r<3?'Deep gravity well: strong gravitational effects and tidal forces.':
  r<5?'Near 3 rₛ: the Schwarzschild innermost stable circular orbit.':
  'The spacecraft is approaching a powerful gravitational field.';
  const progress=Math.max(0,Math.min(1,(init-r)/Math.max(.01,init-(isBH?1:2.35))));
  $('descentProgress').style.width=(progress*100).toFixed(1)+'%';
- $('stage').textContent=isBH&&r<=1?'EVENT HORIZON CROSSED':surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
+ $('stage').textContent=isBH&&r<=1?'PHASE II · BLACK HOLE INTERIOR':surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
  if((isBH&&r<=.15)||surface){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 }
 function drawDial(id,seconds,color){
@@ -321,9 +365,9 @@ function setupAudio(){
   }
   while(nextNote<t+2){
    const tension=Math.min(1,Math.max(0,(8-r)/7));
-   const phrase=phrases[Math.floor(step/6)%phrases.length],pitch=phrase[step%6];
-   if(step%6!==5)note(nextNote,pitch,3.5-tension*.8,.15,Math.sin(step*1.8)*.62);
-   nextNote+=2.65-tension*.65;
+   const interior=body==='bh'&&mode==='fall'&&r<=1;const phrase=phrases[Math.floor(step/6)%phrases.length],pitch=interior?phrase[(step+2)%6]*.5:phrase[step%6];
+   if(step%6!==5) {note(nextNote,pitch,3.5-tension*.8,interior?.19:.17,Math.sin(step*1.8)*.62);if(step%3===0)note(nextNote+.45,pitch*(interior?1.5:2),2.5,.07,-Math.sin(step*1.8)*.65);}
+   nextNote+=interior?1.9:2.45-tension*.55;
    step++;
   }
  }
