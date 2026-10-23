@@ -81,7 +81,7 @@ function lensedDisk(){
   const g=ctx.createLinearGradient(cx-width,y,cx+width,y);
   const blueSide=['rgba(22,70,255,0)','rgba(28,71,255,'+(.58*strength)+')','rgba(51,122,255,'+(.7*strength)+')'];
   const redSide=['rgba(255,22,36,'+(.68*strength)+')','rgba(240,14,27,'+(.58*strength)+')','rgba(180,10,27,0)'];
-  const stops=motionSign>0?[...blueSide,'rgba(255,255,255,'+(.64*strength)+')'',...redSide]:[...redSide.slice().reverse(),'rgba(255,226,190,'+(.30*strength)+')',...blueSide.slice().reverse()];
+  const stops=motionSign>0?[...blueSide,'rgba(255,255,255,'+(.64*strength)+')',...redSide]:[...redSide.slice().reverse(),'rgba(255,255,255,'+(.64*strength)+')',...blueSide.slice().reverse()];
   stops.forEach((color,k)=>g.addColorStop(k/(stops.length-1),color));
   ctx.strokeStyle=g;ctx.lineWidth=Math.max(1,flat*.15);
   ctx.shadowBlur=rr*.1;ctx.beginPath();ctx.moveTo(cx-width,y);ctx.lineTo(cx+width,y);ctx.stroke();
