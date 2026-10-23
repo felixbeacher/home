@@ -150,9 +150,10 @@ function craft(){
 // An illustrative comoving view, not a literal photograph or ray-traced GR solution.
 // Final 15%: illustrative tidal stretching and disruption (not a resolved singularity).
 function tidalFinale(cx,cy,depth){
- const q=Math.max(0,Math.min(1,(depth-.84)/.16));if(!q)return;
+ // Only reveal the symbolic Kerr ring during the final ~5 seconds.
+ const q=Math.max(0,Math.min(1,(depth-.94)/.06));if(!q)return;
  const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
- const impact=ease((q-.78)/.22),fade=ease((q-.94)/.06);
+ const impact=ease((q-.70)/.30),fade=ease((q-.95)/.05),reveal=ease(q/.22);
  const R=Math.min(w,h)*.145,minor=Math.max(.55,R*.012);
  // An extremely thin, rotatable rendering of the idealised Kerr ring singularity.
  // Kerr is a rotating solution; the exterior flight model remains Schwarzschild-based.
@@ -175,7 +176,7 @@ function tidalFinale(cx,cy,depth){
  }
  faces.sort((a,b)=>b.z-a.z);
  for(const face of faces){
-  const alpha=(.68+.26*face.light)*(1-.5*impact);
+  const alpha=(.68+.26*face.light)*(1-.5*impact)*reveal;
   ctx.fillStyle='hsla('+(210+42*face.light)+',95%,'+(42+38*face.light)+'%,'+alpha+')';
   ctx.strokeStyle='rgba(179,211,255,.07)';ctx.lineWidth=.2;
   ctx.beginPath();face.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();
@@ -219,14 +220,37 @@ function interiorScene(){
  }
  tidalFinale(cx,cy,depth);
  ctx.textAlign='center';ctx.fillStyle='#d5e7fc';ctx.font='600 12px system-ui';
- ctx.fillText(depth>.85?'PHASE III · TIDAL DISRUPTION':'PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
+ ctx.fillText(depth>.94?'PHASE III · KERR-INSPIRED ENDPOINT':'PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
  ctx.fillStyle='#a3b7d0';ctx.font='11px system-ui';
  ctx.fillText('DRAG TO CHANGE VIEW · INWARD FALL VISUALISATION',cx,Math.max(47,h*.12+21));
  ctx.fillText('Conceptual interior · '+Math.ceil(Math.max(0,85-interiorElapsed))+' seconds to model endpoint',cx,Math.max(65,h*.12+40));
  ctx.restore();
 }
+// A short transition after horizon crossing: the exterior sky contracts and
+// blue-shifted radial arcs sweep past the viewer (cinematic, not GR ray tracing).
+function horizonTransition(){
+ const t=Math.max(0,Math.min(1,interiorElapsed/4)),cx=w*.5,cy=h*.52;
+ if(t>=1)return;
+ const pulse=Math.sin(Math.PI*t),r0=Math.max(w,h)*(.8-.72*t);
+ ctx.save();
+ ctx.fillStyle='rgba(1,2,12,'+(.47*pulse)+')';ctx.fillRect(0,0,w,h);
+ ctx.globalCompositeOperation='lighter';
+ for(let i=0;i<32;i++){
+  const a=i*TAU/32+now*.06,rr=r0*(.82+.18*Math.sin(i*14.3));
+  ctx.strokeStyle='rgba(131,188,255,'+(pulse*.26)+')';ctx.lineWidth=1.2+2*pulse;
+  ctx.beginPath();ctx.arc(cx,cy,rr,a,a+.16+.15*pulse);ctx.stroke();
+ }
+ const glow=ctx.createRadialGradient(cx,cy,r0*.5,cx,cy,r0*1.2);
+ glow.addColorStop(0,'rgba(86,146,255,0)');
+ glow.addColorStop(.62,'rgba(118,185,255,'+(.35*pulse)+')');
+ glow.addColorStop(1,'rgba(86,146,255,0)');
+ ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+ ctx.restore();
+ ctx.textAlign='center';ctx.font='600 14px system-ui';ctx.fillStyle='rgba(227,242,255,'+Math.sin(Math.PI*Math.min(1,t*1.4))+')';
+ ctx.fillText('EVENT HORIZON CROSSED',cx,h*.80);
+}
 function drawScene(){
- camera();if(body==='bh'&&mode==='fall'&&r<=1){interiorScene();return;}bg();orbitLines();diskDraw('far');lensedDisk();sphere(body==='bh'?1:2.35);diskDraw('near');craft();
+ camera();if(body==='bh'&&mode==='fall'&&r<=1){interiorScene();horizonTransition();return;}bg();orbitLines();diskDraw('far');lensedDisk();sphere(body==='bh'?1:2.35);diskDraw('near');craft();
  if(observer==='onboard'){
   ctx.save();ctx.strokeStyle='#8ad9e588';ctx.lineWidth=1;
   const cx=w*.5,cy=h*.55;ctx.beginPath();ctx.moveTo(cx-24,cy);ctx.lineTo(cx-8,cy);ctx.moveTo(cx+8,cy);ctx.lineTo(cx+24,cy);ctx.moveTo(cx,cy-24);ctx.lineTo(cx,cy-8);ctx.moveTo(cx,cy+8);ctx.lineTo(cx,cy+24);ctx.stroke();
@@ -434,6 +458,6 @@ for(const event of ['pointerdown','keydown','touchstart']){
 }
 setAudioButton();
 void startAudio();
-C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(body==='bh'&&mode==='fall'&&r<=1){if(interiorElapsed>=71.4){tidalYaw+=dx*.009;tidalPitch=Math.max(-1.2,Math.min(1.2,tidalPitch+dy*.008))}else{interiorLook=Math.max(-.65,Math.min(1.2,interiorLook-dy*.008))}}else if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();if(body==='bh'&&mode==='fall'&&r<=1)return;zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
+C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(body==='bh'&&mode==='fall'&&r<=1){if(interiorElapsed>=79.9){tidalYaw+=dx*.009;tidalPitch=Math.max(-1.2,Math.min(1.2,tidalPitch+dy*.008))}else{interiorLook=Math.max(-.65,Math.min(1.2,interiorLook-dy*.008))}}else if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();if(body==='bh'&&mode==='fall'&&r<=1)return;zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 })();
 </script></body></html>
