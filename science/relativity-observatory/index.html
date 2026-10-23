@@ -46,9 +46,10 @@ function diskDraw(layer){
   const towards=Math.max(0,doppler),away=Math.max(0,-doppler);
   const inner=Math.max(0,Math.min(1,(5-d.r)/3));
   const intensity=Math.min(.94,disk*(.14+.57*d.bright)*(.68+1.05*towards));
-  const red=Math.round(Math.max(0,Math.min(255,210+27*d.bright+35*away+15*inner-88*towards)));
-  const green=Math.round(Math.max(0,Math.min(255,106+42*d.bright+72*towards-17*away)));
-  const blue=Math.round(Math.max(0,Math.min(255,55+28*d.bright+205*towards-22*away)));
+  const blueBoost=Math.pow(towards,1.05),redBoost=Math.pow(away,1.05);
+  const red=Math.round(Math.max(0,Math.min(255,190+65*redBoost+20*d.bright+12*inner-105*blueBoost)));
+  const green=Math.round(Math.max(0,Math.min(255,66+46*d.bright+23*redBoost+128*blueBoost)));
+  const blue=Math.round(Math.max(0,Math.min(255,27+242*blueBoost-25*redBoost+15*d.bright)));
   ctx.fillStyle='rgba('+red+','+green+','+blue+','+intensity+')';
   ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.4,Math.min(3.5,d.size*p.k*.7)),0,TAU);ctx.fill();
  }
@@ -63,13 +64,16 @@ function lensedDisk(){
  const edge=Math.pow(Math.max(0,1-incl),1.25),strength=disk*lensing*edge;
  if(strength<.012)return;
  const cx=p.x,cy=p.y,extent=rr*2.9,depth=rr*(1.43+.16*lensing);
+ // Reverse the apparent blue/red sides when the camera passes around the disc.
+ const motionSign=Math.sign(dot([-eye[2],0,eye[0]],right))||1;
+ const colorGradient=(left,rightColor,fade=1)=>{const g=ctx.createLinearGradient(cx-extent,cy,cx+extent,cy);const a=motionSign>0?left:rightColor,b=motionSign>0?rightColor:left;g.addColorStop(0,a);g.addColorStop(.48,'rgba(255,221,185,'+(fade*.38)+')');g.addColorStop(1,b);return g;};
  ctx.save();ctx.globalCompositeOperation='lighter';
  // Lensed far-side disc lifts into arches above and below the shadow.
  for(const side of [-1,1]){
   for(let band=0;band<22;band++){
    const t=band/21,wide=extent*(.85+.28*t),high=depth*(.76+.58*t);
    const intensity=(1-t*.70)*strength;
-   const hue=12+27*t,alpha=.05+.17*intensity;
+   const alpha=.08+.28*intensity;
    ctx.beginPath();
    for(let i=0;i<=110;i++){
     const a=Math.PI*i/110;
@@ -78,9 +82,9 @@ function lensedDisk(){
     const y=cy+side*(rr*.18+high*shape);
     if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
    }
-   ctx.strokeStyle='hsla('+hue+',100%,'+(58+22*(1-t))+'%,'+alpha+')';
+   ctx.strokeStyle=colorGradient('rgba(85,185,255,'+alpha+')','rgba(255,53,29,'+alpha+')');
    ctx.lineWidth=Math.max(.65,rr*(.013+.024*(1-t)));
-   ctx.shadowColor='#ff751b';ctx.shadowBlur=rr*.12;
+   ctx.shadowColor='#e7a2c0';ctx.shadowBlur=rr*.12;
    ctx.stroke();
   }
  }
@@ -98,7 +102,7 @@ function lensedDisk(){
    const y=cy+side*(rr*.18+rise*Math.pow(Math.sin(a),.78));
    if(!j)ctx.moveTo(x,y);else ctx.lineTo(x,y);
   }
-  ctx.strokeStyle=n%5===0?'rgba(255,233,146,.85)':'rgba(255,110,27,.65)';
+  ctx.strokeStyle=colorGradient(n%5===0?'rgba(145,221,255,.9)':'rgba(75,153,255,.78)',n%5===0?'rgba(255,161,113,.9)':'rgba(255,55,35,.78)');
   ctx.lineWidth=Math.max(.7,rr*(n%5===0?.014:.007))*strength;
   ctx.shadowBlur=rr*.13;ctx.stroke();
  }
@@ -109,18 +113,16 @@ function lensedDisk(){
   const y=cy+(t-.5)*flat*2.5;
   const width=extent*(1-.14*Math.abs(t-.5));
   const g=ctx.createLinearGradient(cx-width,y,cx+width,y);
-  g.addColorStop(0,'rgba(160,31,9,0)');
-  g.addColorStop(.12,'rgba(255,85,13,'+(.22*strength)+')');
-  g.addColorStop(.34,'rgba(255,173,43,'+(.35*strength)+')');
-  g.addColorStop(.6,'rgba(255,196,69,'+(.38*strength)+')');
-  g.addColorStop(.89,'rgba(238,62,7,'+(.19*strength)+')');
-  g.addColorStop(1,'rgba(160,31,9,0)');
+  const blueSide=['rgba(25,105,255,0)','rgba(48,144,255,'+(.38*strength)+')','rgba(125,218,255,'+(.53*strength)+')'];
+  const redSide=['rgba(255,45,24,'+(.46*strength)+')','rgba(255,99,45,'+(.38*strength)+')','rgba(180,25,12,0)'];
+  const stops=motionSign>0?[...blueSide,'rgba(255,226,190,'+(.30*strength)+')',...redSide]:[...redSide.slice().reverse(),'rgba(255,226,190,'+(.30*strength)+')',...blueSide.slice().reverse()];
+  stops.forEach((color,k)=>g.addColorStop(k/(stops.length-1),color));
   ctx.strokeStyle=g;ctx.lineWidth=Math.max(1,flat*.15);
   ctx.shadowBlur=rr*.1;ctx.beginPath();ctx.moveTo(cx-width,y);ctx.lineTo(cx+width,y);ctx.stroke();
  }
  ctx.restore();
 }
-function sphere(B){const p=pr([0,0,0]);if(!p)return;const rr=Math.max(3,B*p.k);glow(p.x,p.y,rr*3,body==='bh'?'255,128,65':'72,179,255',body==='bh'?.13:.17);if(body==='bh'){let ring=rr*(1.26+.22*lensing);const g=ctx.createRadialGradient(p.x,p.y,rr*.9,p.x,p.y,ring*1.6);g.addColorStop(0,'#020509');g.addColorStop(.65,'#020509');g.addColorStop(.81,'#b58b5b');g.addColorStop(.86,'#201827');g.addColorStop(1,'#0000');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,ring*1.6,0,TAU);ctx.fill();ctx.fillStyle='#010307';ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill();ctx.strokeStyle='#fbd69b99';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(p.x,p.y,ring,0,TAU);ctx.stroke()}else{let g=ctx.createRadialGradient(p.x-rr*.35,p.y-rr*.35,rr*.05,p.x,p.y,rr*1.2);g.addColorStop(0,'#d3f9ff');g.addColorStop(.25,'#72ceef');g.addColorStop(.66,'#2c74a6');g.addColorStop(1,'#041421');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill();ctx.save();ctx.translate(p.x,p.y);ctx.rotate(now*.37);ctx.strokeStyle='#8deaff';ctx.shadowColor='#a2efff';ctx.shadowBlur=17;for(let i=0;i<6;i++){ctx.beginPath();ctx.ellipse(0,0,rr*(.2+.13*i),rr,0,0,TAU);ctx.globalAlpha=.08;ctx.stroke()}ctx.restore();ctx.globalAlpha=1;glow(p.x-rr*.2,p.y-rr*.3,rr*.8,'130,221,255',.22)}}
+function sphere(B){const p=pr([0,0,0]);if(!p)return;const rr=Math.max(3,B*p.k);glow(p.x,p.y,rr*3,body==='bh'?'255,128,65':'72,179,255',body==='bh'?.13:.17);if(body==='bh'){let ring=rr*(1.26+.22*lensing);const g=ctx.createRadialGradient(p.x,p.y,rr*1.08,p.x,p.y,ring*1.75);g.addColorStop(0,'#020509');g.addColorStop(.72,'#020509');g.addColorStop(.84,'rgba(255,132,62,.25)');g.addColorStop(.90,'rgba(55,18,24,.1)');g.addColorStop(1,'#0000');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,ring*1.75,0,TAU);ctx.fill();ctx.fillStyle='#010307';ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill()}else{let g=ctx.createRadialGradient(p.x-rr*.35,p.y-rr*.35,rr*.05,p.x,p.y,rr*1.2);g.addColorStop(0,'#d3f9ff');g.addColorStop(.25,'#72ceef');g.addColorStop(.66,'#2c74a6');g.addColorStop(1,'#041421');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill();ctx.save();ctx.translate(p.x,p.y);ctx.rotate(now*.37);ctx.strokeStyle='#8deaff';ctx.shadowColor='#a2efff';ctx.shadowBlur=17;for(let i=0;i<6;i++){ctx.beginPath();ctx.ellipse(0,0,rr*(.2+.13*i),rr,0,0,TAU);ctx.globalAlpha=.08;ctx.stroke()}ctx.restore();ctx.globalAlpha=1;glow(p.x-rr*.2,p.y-rr*.3,rr*.8,'130,221,255',.22)}}
 function orbitLines(){let path=[];for(let i=0;i<=150;i++){let a=i/150*TAU;path.push([r*Math.cos(a),0,r*Math.sin(a)])}line3(path,'#79dcf1',.14,1);for(let rad of [2,3,5,8,12]){path=[];for(let i=0;i<=130;i++){let a=i/130*TAU;path.push([rad*Math.cos(a),0,rad*Math.sin(a)])}line3(path,'#528ab2',rad===r?.15:.065,.7)}}
 function craftOccluded(P){
  const radius=body==='bh'?1:2.35;
