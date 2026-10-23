@@ -146,6 +146,39 @@ function craft(){
 }
 // Inside-horizon conceptual scene: tidal light cones narrow, outgoing paths bend inward.
 // An illustrative comoving view, not a literal photograph or ray-traced GR solution.
+// Final 15%: illustrative tidal stretching and disruption (not a resolved singularity).
+function tidalFinale(cx,cy,depth){
+ const q=Math.max(0,Math.min(1,(depth-.85)/.15));
+ if(q<=0)return;
+ const smooth=q*q*(3-2*q),fracture=Math.max(0,Math.min(1,(q-.4)/.48));
+ const scale=Math.min(w,h)/460;
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(-.17);
+ // Cutaway spacecraft is shown externally so its deformation can be understood.
+ ctx.globalAlpha=Math.max(0,1-Math.max(0,(q-.82)/.18));
+ ctx.scale(scale,scale);
+ if(fracture<.95){
+  ctx.save();
+  ctx.scale(Math.max(.09,1-.88*smooth),1+3.2*smooth);
+  ctx.fillStyle='#8aaabf';ctx.strokeStyle='#c4e6f5';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,-42);ctx.bezierCurveTo(13,-32,14,19,0,43);ctx.bezierCurveTo(-14,19,-13,-32,0,-42);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#224d68';ctx.beginPath();ctx.ellipse(0,-17,7,14,0,0,TAU);ctx.fill();
+  ctx.strokeStyle='#68cbff';ctx.beginPath();ctx.moveTo(-22,12);ctx.lineTo(22,12);ctx.stroke();
+  ctx.restore();
+ }
+ for(let i=0;i<46;i++){
+  const a=i*2.399963,scatter=(i%11)/11,flow=fracture*fracture;
+  const x=Math.cos(a)*scatter*52*flow,y=Math.sin(a)*scatter*200*flow;
+  ctx.strokeStyle=i%3?'rgba(130,200,255,.8)':'rgba(255,169,105,.8)';
+  ctx.lineWidth=1.1+(i%4)*.3;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x*.65,y+Math.sign(y||1)*(12+90*flow));ctx.stroke();
+ }
+ ctx.restore();
+ // Fade down rather than picturing a knowable singularity.
+ if(q>.73){ctx.fillStyle='rgba(0,0,5,'+Math.min(1,Math.pow((q-.73)/.27,1.5))+')';ctx.fillRect(0,0,w,h)}
+ ctx.textAlign='center';ctx.fillStyle='rgba(225,238,255,'+(1-Math.max(0,(q-.88)/.12))+')';
+ ctx.font='600 13px system-ui';ctx.fillText(q<.45?'TIDAL STRETCHING':q<.84?'STRUCTURAL BREAKUP':'APPROACHING THE CLASSICAL SINGULARITY',cx,h*.82);
+ if(q>=.99){ctx.fillStyle='#ced9e8';ctx.font='12px system-ui';ctx.fillText('Classical relativity predicts a singularity. The actual physics remains unknown.',cx,h*.52)}
+}
 function interiorScene(){
  const cx=w*.5,cy=h*.52,depth=Math.max(0,Math.min(1,interiorElapsed/85)),t=now;
  // Drag vertically to turn towards the exterior. Drag down to look forward into the fall.
@@ -161,13 +194,14 @@ function interiorScene(){
   const a=i*2.39996,rad=((i*41)%97)/97;
   const z=(1-((t*.075*(1+depth)+rad)%1));
   const x=cx+Math.cos(a)*w*.6*z,y=cy+Math.sin(a)*h*.66*z;
-  const alpha=(.08+.38*z)*(.55+.45*(1-visibility));
+  const alpha=(.08+.38*z)*(.55+.45*(1-visibility))*(1-Math.max(0,(depth-.87)/.13));
   ctx.strokeStyle='rgba(158,136,236,'+alpha+')';ctx.lineWidth=.5+z*1.5;
   ctx.beginPath();ctx.moveTo(x,y);
   ctx.lineTo(x+(x-cx)*(.07+.15*depth),y+(y-cy)*(.07+.15*depth));ctx.stroke();
  }
+ tidalFinale(cx,cy,depth);
  ctx.textAlign='center';ctx.fillStyle='#d5e7fc';ctx.font='600 12px system-ui';
- ctx.fillText('PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
+ ctx.fillText(depth>.85?'PHASE III · TIDAL DISRUPTION':'PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
  ctx.fillStyle='#a3b7d0';ctx.font='11px system-ui';
  ctx.fillText('DRAG TO CHANGE VIEW · INWARD FALL VISUALISATION',cx,Math.max(47,h*.12+21));
  ctx.fillText('Conceptual interior · elapsed time: '+Math.floor(interiorElapsed)+' / 85 s',cx,Math.max(65,h*.12+40));
@@ -230,15 +264,15 @@ function readouts(){
  drawDial('properDial',proper,'#a8f4e5');
  drawDial('farDial',far,'#ffc995');
  $('eventStatus').textContent=
- isBH&&r<=.15?'End of the extended interior journey. The classical singularity is beyond the scope of this visual model. Reset to repeat.':
- cross?'INTERIOR PHASE · Light streaks now sweep outward across your field of view, conveying forward motion towards the singularity. The scene is conceptual, not a literal prediction of interior optics.':
+ isBH&&r<=.15?'End of the journey: the craft has undergone idealised tidal disruption. What happens at a singularity remains unknown. Reset to repeat.':
+ cross?(interiorElapsed>72?'FINAL PHASE · Extreme tidal stretching and structural breakup. This is a conceptual cutaway, not a resolved prediction of a singularity.':'INTERIOR PHASE · Light streaks sweep outward across your field of view as the craft falls inward. The scene is conceptual.'):
  surface?'Neutron-star surface reached. This is an idealised impact.':
  r<3?'Deep gravity well: strong gravitational effects and tidal forces.':
  r<5?'Near 3 rₛ: the Schwarzschild innermost stable circular orbit.':
  'The spacecraft is approaching a powerful gravitational field.';
  const progress=Math.max(0,Math.min(1,(init-r)/Math.max(.01,init-(isBH?1:2.35))));
  $('descentProgress').style.width=(progress*100).toFixed(1)+'%';
- $('stage').textContent=isBH&&r<=1?'PHASE II · BLACK HOLE INTERIOR':surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
+ $('stage').textContent=isBH&&r<=1?(interiorElapsed>72?'PHASE III · TIDAL BREAKUP':'PHASE II · BLACK HOLE INTERIOR'):surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
  if((isBH&&r<=.15)||surface){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
 }
 function drawDial(id,seconds,color){
