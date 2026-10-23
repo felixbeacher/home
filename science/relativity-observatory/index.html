@@ -226,12 +226,12 @@ function interiorScene(){
  ctx.fillText('Conceptual interior · '+Math.ceil(Math.max(0,85-interiorElapsed))+' seconds to model endpoint',cx,Math.max(65,h*.12+40));
  ctx.restore();
 }
-// A short transition after horizon crossing: the exterior sky contracts and
+// A short transition after horizon crossing: a central flash expands outward and
 // blue-shifted radial arcs sweep past the viewer (cinematic, not GR ray tracing).
 function horizonTransition(){
  const t=Math.max(0,Math.min(1,interiorElapsed/4)),cx=w*.5,cy=h*.52;
  if(t>=1)return;
- const pulse=Math.sin(Math.PI*t),r0=Math.max(w,h)*(.8-.72*t);
+ const pulse=Math.sin(Math.PI*t),r0=Math.max(w,h)*(.025+1.12*t);
  ctx.save();
  ctx.fillStyle='rgba(1,2,12,'+(.47*pulse)+')';ctx.fillRect(0,0,w,h);
  ctx.globalCompositeOperation='lighter';
