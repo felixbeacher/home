@@ -412,5 +412,22 @@ window.addEventListener('resize', render);
 
 render();
 </script>
-</body>
+<div id="cabinet-tools" role="group" aria-label="Exhibit controls"><button type="button" id="cabinet-fullscreen" aria-label="Toggle fullscreen">⛶ Fullscreen</button><button type="button" id="cabinet-info-toggle" aria-expanded="false" aria-controls="cabinet-info">ⓘ About</button></div><aside id="cabinet-info" hidden aria-label="Exhibit information"><strong>Mandelbox Explorer</strong><p>Explore a three-dimensional box-like fractal, formed by repeated geometric transformations.</p><a href="https://en.wikipedia.org/wiki/Mandelbox" target="_blank" rel="noopener noreferrer">Background and references ↗</a><button type="button" id="cabinet-info-close">Close</button></aside><style>
+#cabinet-tools{position:fixed;z-index:9998;right:12px;top:56px;display:flex;gap:6px;font:12px system-ui,sans-serif}
+#cabinet-tools button,#cabinet-info button{cursor:pointer;color:#e5f0ee;background:#0c1920ed;border:1px solid #8299a4aa;border-radius:24px;padding:9px 13px;font:600 12px system-ui}
+#cabinet-tools button:hover,#cabinet-info button:hover{background:#274047}
+#cabinet-tools button:focus-visible,#cabinet-info button:focus-visible{outline:3px solid #d6f3a1;outline-offset:2px}
+#cabinet-info{position:fixed;z-index:9999;top:102px;right:12px;max-width:min(360px,calc(100vw - 24px));background:#101e25f7;border:1px solid #64867d;border-radius:16px;padding:20px;box-shadow:0 20px 60px #000a;color:#e6f0ed;font:14px/1.55 system-ui,sans-serif}
+#cabinet-info[hidden]{display:none!important}#cabinet-info strong{font-size:17px}#cabinet-info p{color:#b8d0ca}#cabinet-info a{color:#d6f3a1;display:block;margin-bottom:16px}#cabinet-info button{margin-top:8px}
+@media(max-width:600px){#cabinet-tools{top:auto;bottom:56px;right:12px}#cabinet-info{top:auto;bottom:106px;max-height:60vh;overflow:auto}}
+</style>
+<script>
+(()=>{const full=document.getElementById('cabinet-fullscreen'),toggle=document.getElementById('cabinet-info-toggle'),panel=document.getElementById('cabinet-info'),close=document.getElementById('cabinet-info-close');
+function updateFull(){full.textContent=document.fullscreenElement?'⛶ Exit fullscreen':'⛶ Fullscreen'}
+full.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(e){full.textContent='Fullscreen unavailable'}});
+document.addEventListener('fullscreenchange',()=>{updateFull();window.dispatchEvent(new Event('resize'))});
+function setInfo(open){panel.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(open)close.focus();else toggle.focus()}
+toggle.addEventListener('click',()=>setInfo(panel.hidden));close.addEventListener('click',()=>setInfo(false));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)setInfo(false)});
+})();
+</script></body>
 </html>
