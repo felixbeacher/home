@@ -77,7 +77,7 @@ body{background:radial-gradient(ellipse 1000px 620px at 75% 1%,#17312c 0%,transp
 .collection-head{border-color:#77998c65;padding-top:36px}
 .group-label{font-size:17px;margin-bottom:24px;letter-spacing:.2px}
 .group-label small{color:#99b6ae}
-.grid,.science .grid{gap:26px}
+.grid,.science .grid{gap:26px;grid-template-columns:repeat(3,minmax(0,1fr))}
 .card{background:linear-gradient(145deg,#18282b,#112025);border:1px solid #415854;border-radius:22px;box-shadow:0 16px 44px #0002;transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
 .card:hover{transform:translateY(-8px);border-color:#b0d7af;box-shadow:0 22px 64px #0007}
 .card .art{height:225px;background:#0c1b21}
@@ -93,15 +93,16 @@ body{background:radial-gradient(ellipse 1000px 620px at 75% 1%,#17312c 0%,transp
 .wide .art{height:100%;min-height:260px}
 .wide .card-body{padding:34px}
 .science .card:nth-child(-n+4){border-color:#6e95826e}
-.science .card:nth-child(-n+4) .art{height:265px}
+.science .card:nth-child(-n+4) .art{height:225px}
 .science .card:nth-child(-n+4) .tag{color:#dcf9a9}
 footer{margin-top:92px}
 @media(max-width:900px){
  .hero{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px;padding:42px 0 50px;min-height:0}
  .hero h1{font-size:clamp(48px,6.6vw,72px);letter-spacing:-3px}
  .hero .intro{font-size:15px}
+ .grid,.science .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .card .art{height:190px}
- .science .card:nth-child(-n+4) .art{height:215px}
+ .science .card:nth-child(-n+4) .art{height:190px}
  .card-body{padding:22px}
 }
 @media(max-width:600px){
