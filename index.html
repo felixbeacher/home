@@ -56,6 +56,72 @@
 .top-category-nav .filters button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @media(min-width:901px){.hero{column-gap:clamp(28px,5vw,80px)}.hero-visual{min-width:0}}
 @media(max-width:600px){.top-category-nav .filters{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.top-category-nav .filters button{padding:10px 2px;font-size:clamp(10px,2.7vw,12px)}.card{border-radius:12px}.hero{gap:8px}.topology-shell{max-height:270px}}
+
+/* Curiosity Cabinet — editorial gallery refresh */
+:root{--bg:#0a1216;--panel:#132025;--line:#304448;--ink:#f5f4ea;--muted:#a5bbb9;--accent:#d6f3a1}
+body{background:radial-gradient(ellipse 1000px 620px at 75% 1%,#17312c 0%,transparent 68%),var(--bg)}
+.wrap{max-width:1440px}
+.top-category-nav{background:#091318ed;border-bottom:1px solid #7f9e9140}
+.top-category-nav .filters{justify-content:center;gap:12px}
+.top-category-nav .filters button{border-radius:12px;background:#16262a;border-color:#47625d;color:#d9e6dd;letter-spacing:.35px;transition:background .2s,transform .2s,box-shadow .2s}
+.top-category-nav .filters button:hover{background:#294037;box-shadow:0 8px 24px #0005}
+.top-category-nav .filters button[aria-pressed=true]{background:#d6f3a1;color:#14221c;box-shadow:0 0 28px #a9da8a2c}
+.hero{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(30px,5vw,85px);padding:64px 0 76px;min-height:570px}
+.hero h1{font-size:clamp(60px,6.8vw,104px);letter-spacing:-4.5px;line-height:1.02;margin:0 0 25px}
+.hero h1 em{color:#d6f3a1}
+.hero .intro{font-size:17px;line-height:1.9;max-width:520px}
+.hero-visual{min-width:0;position:relative}
+.topology-shell{aspect-ratio:1.35;max-height:none;border:1px solid #628e715c;border-radius:26px;background:radial-gradient(ellipse at 45% 45%,#2c5349,#152b2b 60%,#091519 100%);box-shadow:0 38px 90px #0007,inset 0 0 80px #6ddbad10}
+.topology-label{font-size:10px;letter-spacing:2px}
+.animation-control{margin-top:14px;padding:9px 20px;border-color:#719183;border-radius:50px;color:#dceadf}
+.collection-head{border-color:#77998c65;padding-top:36px}
+.group-label{font-size:17px;margin-bottom:24px;letter-spacing:.2px}
+.group-label small{color:#99b6ae}
+.grid,.science .grid{gap:26px}
+.card{background:linear-gradient(145deg,#18282b,#112025);border:1px solid #415854;border-radius:22px;box-shadow:0 16px 44px #0002;transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease}
+.card:hover{transform:translateY(-8px);border-color:#b0d7af;box-shadow:0 22px 64px #0007}
+.card .art{height:225px;background:#0c1b21}
+.card .art svg{transition:transform .6s ease;transform-origin:center}
+.card:hover .art svg{transform:scale(1.055)}
+.card-body{padding:28px 30px 26px}
+.card .tag{font-size:10px;letter-spacing:1.7px;font-weight:700}
+.card h3{font:400 clamp(24px,2.1vw,31px)/1.16 Georgia,serif;letter-spacing:-.5px;margin:12px 0}
+.card p{font-size:14px;line-height:1.8;margin-bottom:28px}
+.card .open{padding-top:20px;color:#e8f5ea}
+.card .open b{font-size:22px}
+.wide{grid-template-columns:1fr 1.5fr}
+.wide .art{height:100%;min-height:260px}
+.wide .card-body{padding:34px}
+.science .card:nth-child(-n+4){border-color:#6e95826e}
+.science .card:nth-child(-n+4) .art{height:265px}
+.science .card:nth-child(-n+4) .tag{color:#dcf9a9}
+footer{margin-top:92px}
+@media(max-width:900px){
+ .hero{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px;padding:42px 0 50px;min-height:0}
+ .hero h1{font-size:clamp(48px,6.6vw,72px);letter-spacing:-3px}
+ .hero .intro{font-size:15px}
+ .card .art{height:190px}
+ .science .card:nth-child(-n+4) .art{height:215px}
+ .card-body{padding:22px}
+}
+@media(max-width:600px){
+ .hero{grid-template-columns:1fr;gap:24px;padding:38px 0 43px}
+ .hero h1{font-size:clamp(52px,12vw,72px);letter-spacing:-3px}
+ .hero .intro{font-size:15px;line-height:1.75}
+ .hero-visual{margin:0}
+ .topology-shell{max-height:none;aspect-ratio:1.35;border-radius:20px}
+ .top-category-nav .filters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+ .top-category-nav .filters button{border-radius:9px;font-size:clamp(10px,2.7vw,12px);padding:10px 2px;min-height:44px}
+ .grid,.science .grid{grid-template-columns:1fr;gap:18px}
+ .card{border-radius:18px}
+ .card .art,.science .card:nth-child(-n+4) .art{height:220px}
+ .card-body{padding:24px}
+ .card h3{font-size:27px}
+ .wide{display:flex}
+ .wide .art{height:220px;min-height:0}
+ footer{margin-top:60px}
+}
+@media(prefers-reduced-motion:reduce){.card,.card .art svg,.top-category-nav .filters button{transition:none}.card:hover{transform:none}.card:hover .art svg{transform:none}}
 </style>
 <noscript><style>.group[hidden]{display:block}</style></noscript>
 </head>
