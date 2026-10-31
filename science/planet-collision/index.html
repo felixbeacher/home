@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Giant Impact: Theia and Proto-Earth (Phase 3 Visual FX)</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:system-ui,Segoe UI,sans-serif;color:#dde}
+  #panel{position:fixed;top:0;right:0;bottom:0;width:330px;box-sizing:border-box;overflow-y:auto;padding:10px 12px;font-size:12.5px;
+      background:rgba(10,12,20,.86);border-left:1px solid #334;backdrop-filter:blur(6px);z-index:5}
+  #panel section,#panel details{border:1px solid #334;border-radius:8px;padding:6px 10px;margin:0 0 8px}
+  #panel h3{margin:0 0 6px;font-size:13px;color:#ffcf8a;display:inline-block}
+  #panel button,#panel select{background:#1c2236;color:#eef;border:1px solid #445;border-radius:6px;padding:5px 9px;cursor:pointer}
+  #panel button:disabled{opacity:.4;cursor:default}
+  #panel label{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:4px 0}
+  #panel fieldset{border:1px solid #334;border-radius:6px;margin:6px 0;padding:4px 8px} #panel legend{color:#9ab}
+  #panel input[type=range]{width:120px} #panel .v{min-width:92px;text-align:right;font-variant-numeric:tabular-nums;color:#cde}
+  #panel .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap} #panel .row label{margin:0}
+  #panel .q button{padding:2px 6px;font-size:11.5px} #panel .note{color:#fb9;font-size:11.5px;margin:4px 0}
+  #panel .start{width:100%;margin-top:6px;padding:10px;font-size:15px;font-weight:700;background:#2b6a3a;border-color:#5a9}
+  #play{background:#2b3a66 !important;font-weight:600;min-width:92px} #musicBtn.on{background:#4a2b66 !important;border-color:#86a !important}
+  #scrub{flex:1} #hud{line-height:1.5;font-variant-numeric:tabular-nums} #hud summary{cursor:pointer} #hud b{color:#ffcf8a} #hud .k{color:#9ab}
+  #prompt{position:fixed;left:calc((100vw - 330px)/2);top:50%;transform:translate(-50%,-50%);font-size:20px;color:#cde;background:rgba(10,12,20,.6);padding:14px 22px;border-radius:12px;pointer-events:none;display:none}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+ "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="panel">
+ <section id="sec_setup"><h3>Set-up</h3>
+  <label>Preset <select id="su_preset"><option value="">(custom)</option><option value="theia">Theia (default)</option><option value="headon">Head-on</option>
+    <option value="hitrun">Hit-and-run</option><option value="merger">Equal-mass merger</option><option value="icy">Icy impactor</option>
+    <option value="gasgiant">Rocky planet into gas giant</option><option value="gasgas">Gas planet collision</option><option value="bhole">Planet meets black hole</option></select></label>
+  <fieldset><legend>Target</legend><label>Type <select id="su_tt"></select></label>
+    <label>Mass <input id="su_mt" type="range" min="0.3" max="2" step="0.01"><span class="v" id="su_mtv"></span></label></fieldset>
+  <fieldset><legend>Impactor</legend><label>Type <select id="su_it"></select></label>
+    <label>Mass <input id="su_mi" type="range" min="0.01" max="1" step="0.005"><span class="v" id="su_miv"></span></label></fieldset>
+  <fieldset><legend>Impact</legend>
+    <label>Speed <input id="su_v" type="range" min="0.8" max="3" step="0.05"><span class="v" id="su_vv"></span></label>
+    <label>Angle <input id="su_a" type="range" min="0" max="75" step="1"><span class="v" id="su_av"></span></label>
+    <div class="q">Quick: <button data-a="0">Direct</button> <button data-a="45">Oblique</button> <button data-a="65">Glancing</button></div></fieldset>
+  
+  <label>Quality <select id="quality" title="Particle count">
+    <option value="low">Low (4k)</option><option value="medium">Medium (16k)</option><option value="high">High (65k)</option>
+  </select></label>
+  <div class="note" id="su_note"></div>
+  <button id="su_apply" class="start">&#9654; Start</button>
+ </section>
+ <section id="sec_play"><h3>Playback</h3>
+  <div class="row"><button id="play" title="Pause / play (Space or P)">&#10074;&#10074; Pause</button>
+  <button id="reset" title="Restart from the initial conditions">&#8634; Restart</button></div>
+  <label>Time <input id="scrub" type="range" min="0" max="0" value="0" step="1" title="Scrub through recorded time (rewind)"></label>
+  <label>Speed <select id="speed">
+    <option value="1">0.5&times;</option><option value="2" selected>1&times;</option>
+    <option value="4">2&times;</option><option value="8">4&times;</option>
+  </select></label>
+ </section>
+ <section><h3>View</h3>
+  <label>Visual detail <select id="vdetail" title="Rendering detail only (mesh/surface resolution, MSAA, stars); physics unchanged"><option value="high">High</option><option value="low">Low</option></select></label>
+  <label>Camera <select id="campreset"><option value="">Free</option><option value="overview">Overview</option>
+    <option value="impact">Impact close-up</option><option value="disc">Disc (top-down)</option></select></label>
+  <button id="cine" title="Slow automatic orbit around the remnant">&#127909; Cinematic</button> <button id="zin" title="Zoom in (+)">&#xFF0B; Zoom in</button> <button id="zout" title="Zoom out (&minus;)">&minus; Zoom out</button>
+ </section>
+ <section><h3>Sound</h3>
+  <div class="row"><button id="musicBtn" title="Spooky ambient soundtrack (M)">&#127925; Music: on</button>
+  <label title="Music volume">Vol <input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.6" style="width:90px"></label></div>
+ </section>
+ <details id="hud" open><summary><h3>Readout</h3></summary><b>Theia &rarr; Proto-Earth giant impact</b><br>
+  <span id="stats">Choose your settings and press Start.</span><div id="budget"></div><div id="adapt" class="k"></div></details>
+</div>
+<div id="prompt">Choose your settings and press <b>&#9654; Start</b></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* =====================================================================================
+   UNITS: G = 1, proto-Earth mass = 1, proto-Earth radius = 1
+   (1 time unit ≈ 806 s ≈ 13.4 min; 1 velocity unit ≈ 7.9 km/s).
+   PHYSICS (phase 2):
+   - SPH: cubic-spline kernel, fixed h, uniform-grid neighbour search on the GPU
+     (cell hash -> bitonic sort -> bucket ranges by binary search).
+   - EOS: Tillotson-like (A·μ + B·μ² compression + a·ρ·u thermal term), iron core / silicate mantle.
+   - Monaghan artificial viscosity with viscous heating -> specific internal energy u per particle.
+   - Gravity: "tree-lite" hierarchical grid (32³→16³→8³→4³ mass + centre-of-mass levels, FMM-style
+     interaction lists, softened monopoles): ~750 cell reads per particle regardless of N.
+   - Integrator: kick-drift-kick leapfrog (symplectic).
+   ===================================================================================== */
+const params = new URLSearchParams(location.search);
+const STARTED = params.has('start');
+const VW = () => Math.max(innerWidth - (document.getElementById('panel').offsetWidth || 330), 200);
+const QUALITY = { low: 64, medium: 128, high: 256 };          // N = TEX² must be a power of two (bitonic sort)
+const QNAME = QUALITY[params.get('q')] ? params.get('q') : 'medium';
+const VHI = params.get('vd') !== 'low';   // 'Visual detail' toggle: rendering only, independent of particle count
+const TEX = +(params.get('tex') || QUALITY[QNAME]);
+const N = TEX * TEX, TABLE = N;
+const BODY = {
+  earth: { R: 1.0,  core:[0.45,0.30,0.15], mantle:[0.28,0.13,0.08], crust:[0.11,0.12,0.13] },
+  theia: { R: 0.48, core:[0.48,0.33,0.16], mantle:[0.32,0.17,0.09], crust:[0.15,0.13,0.11] },
+};
+const CORE_FRAC_R = 0.55, FE_SI = 2.5;
+// ---------------- Set-up (planet types, masses, speed, angle) ----------------
+// Materials (attr.z): 0 iron, 1 silicate, 2 water ice. Reference densities relative to silicate (iron ~7.9/3.2, ice ~0.92/3.2 -> 0.3).
+// Tillotson-like params (A = ρ0·c0², B = kB·A, thermal a): iron/silicate a = 0.5, ice a = 0.3 (Tillotson ice), kB 1 / 1 / 0.8.
+const MATRHO = [FE_SI, 1.0, 0.3, 0.12], MAT_KB = [1.0, 1.0, 0.8, 0.0], MAT_A = [0.5, 0.5, 0.3, 0.0];
+// Material 3 = H/He gas envelope: ideal gas P = (γ-1)ρu (no Tillotson terms). γ = 5/3 for stability (H₂ is nearer 1.4; γ → 4/3 is marginally unstable).
+// Gas envelope particles sit on a coarser lattice (GF × spacing, GF³ × mass) with GF × smoothing length (symmetrised kernels).
+const GAMMA = 5 / 3, GF = 1.7;
+// Black hole: softened Newtonian point mass (no particles). Horizon radius r_h = 2GM/c'² with a deliberately reduced
+// light speed c' = 20 code units (~158 km/s) so the 'mini black hole' is visible at planetary scale; floor 0.15 R⊕.
+const CL = 20, rHorizon = M => Math.max(2 * M / (CL * CL), 0.15);
+const TYPES = {
+  rocky: { label: 'Rocky (Earth-like)', cf: 0.55, core: 0, mant: 1, u0: 0.02, atmo: 1.0, tint: [1, 1, 1] },
+  iron:  { label: 'Iron-rich (Mercury-like)', cf: 0.8, core: 0, mant: 1, u0: 0.02, atmo: 0.0, tint: [1, 1, 1],
+           cols: { core: [0.42, 0.30, 0.18], mantle: [0.25, 0.17, 0.12], crust: [0.13, 0.12, 0.115] } },
+  icy:   { label: 'Icy (water-ice mantle)', cf: 0.5, core: 1, mant: 2, u0: 0.02, atmo: 0.35, tint: [0.7, 0.95, 1.35],
+           cols: { core: [0.28, 0.13, 0.08], mantle: [0.40, 0.50, 0.62], crust: [0.50, 0.58, 0.68] } },
+  lava:  { label: 'Molten / lava world', cf: 0.55, core: 0, mant: 1, u0: 0.075, atmo: 0.6, tint: [1.5, 0.75, 0.45],
+           cols: { core: [0.45, 0.30, 0.15], mantle: [0.40, 0.12, 0.04], crust: [0.07, 0.05, 0.045] } },
+  gasj:  { label: 'Gas giant (Jupiter-like)', gas: true, cf: 0.275, core: 1, mant: 3, u0: 0.02, atmo: 0.8, tint: [1.25, 1.0, 0.75],
+           cols: { core: [0.30, 0.20, 0.12], mantle: [0.72, 0.58, 0.42], crust: [0.80, 0.66, 0.48] }, band: [[0.86, 0.74, 0.58], [0.58, 0.36, 0.22]] },
+  gasn:  { label: 'Gas/ice giant (Neptune-like)', gas: true, cf: 0.275, core: 1, mant: 3, u0: 0.02, atmo: 0.8, tint: [0.6, 0.9, 1.5],
+           cols: { core: [0.28, 0.20, 0.14], mantle: [0.32, 0.50, 0.80], crust: [0.40, 0.60, 0.90] }, band: [[0.48, 0.68, 0.98], [0.20, 0.34, 0.72]] },
+  bh:    { label: 'Black hole (mini, Newtonian)', bh: true, cf: 0, core: 1, mant: 1, u0: 0.02, atmo: 0, tint: [1, 1, 1] },
+};
+const dbar = t => TYPES[t].cf ** 3 * MATRHO[TYPES[t].core] + (1 - TYPES[t].cf ** 3) * MATRHO[TYPES[t].mant];
+const radiusOf = (M, t) => TYPES[t].bh ? rHorizon(M) : Math.cbrt(M * dbar('rocky') / dbar(t));      // uncompressed: R ∝ (M/ρ̄)^(1/3), rocky 1 M⊕ -> 1 R⊕
+const LIMITS = { mt: [0.3, 2.0], mi: [0.01, 1.0], vimp: [0.8, 3.0], angle: [0, 75] };
+const clampP = (k, d) => { const v = params.has(k) ? +params.get(k) : d; return Math.min(LIMITS[k][1], Math.max(LIMITS[k][0], isFinite(v) ? v : d)); };
+const massLim = (k, t) => TYPES[t].bh ? [1, 1000] : TYPES[t].gas ? [1, 15] : LIMITS[k];   // mass range depends on body type
+const SETUP = (() => { let tt = TYPES[params.get('tt')] ? params.get('tt') : 'rocky', it = TYPES[params.get('it')] ? params.get('it') : 'rocky';
+  let mt = params.has('mt') ? +params.get('mt') : null, mi = params.has('mi') ? +params.get('mi') : null; const notes = [];
+  if (TYPES[tt].bh && TYPES[it].bh) { it = 'rocky'; notes.push('Two black holes are not supported: impactor set to Rocky'); }
+  else if (TYPES[it].bh) { [tt, it] = [it, tt]; [mt, mi] = [mi, mt]; notes.push('Black hole simulated in the target slot (same encounter)'); }
+  const cm = (k, t, v, d) => { const L = massLim(k, t); v = v === null || !isFinite(v) ? d : v; return Math.min(L[1], Math.max(L[0], v)); };
+  return { tt, it, mt: cm('mt', tt, mt, 1), mi: mi === null ? null : cm('mi', it, mi, 0.11), notes }; })();
+const GAS = !!(TYPES[SETUP.tt].gas || TYPES[SETUP.it].gas), BH = !!TYPES[SETUP.tt].bh;
+const shapeF = t => TYPES[t].gas ? TYPES[t].cf ** 3 + (1 - TYPES[t].cf ** 3) / GF ** 3 : TYPES[t].bh ? 0 : 1;   // particles per R³ (relative)
+const NMIN_IMP = 100;     // resolution floor: an impactor needs ~100 SPH particles to behave as a fluid body at all
+{ // radii from mass & type (default: exactly the legacy R = 1, 0.48)
+  BODY.earth.R = SETUP.mt === 1 && SETUP.tt === 'rocky' ? 1.0 : radiusOf(SETUP.mt, SETUP.tt);
+  if (SETUP.mi === null) { SETUP.mi = +(0.48 ** 3 * dbar(SETUP.it) / dbar('rocky')).toFixed(4); if (SETUP.it !== 'rocky') BODY.theia.R = radiusOf(SETUP.mi, SETUP.it); }
+  else BODY.theia.R = radiusOf(SETUP.mi, SETUP.it);
+  const n = TEX * TEX, rMin = BODY.earth.R * Math.cbrt(NMIN_IMP / (n - NMIN_IMP) * Math.max(shapeF(SETUP.tt), 1e-9) / shapeF(SETUP.it));
+  if (!BH && (GAS ? BODY.earth.R ** 3 * shapeF(SETUP.tt) < NMIN_IMP / (n - NMIN_IMP) * BODY.theia.R ** 3 * shapeF(SETUP.it) : false)) {   // target is the under-resolved one
+    const r = BODY.theia.R * Math.cbrt(NMIN_IMP / (n - NMIN_IMP) * shapeF(SETUP.it) / shapeF(SETUP.tt)), m = +(r ** 3 * dbar(SETUP.tt) / dbar('rocky')).toFixed(4);
+    SETUP.notes.push(`Target mass raised from ${SETUP.mt} to ${m} M⊕ (needs ≥${NMIN_IMP} particles at this quality)`); SETUP.mt = m; BODY.earth.R = r; }
+  else if (!BH && BODY.theia.R < rMin) { BODY.theia.R = rMin; const m = +(rMin ** 3 * dbar(SETUP.it) / dbar('rocky')).toFixed(4);
+    SETUP.notes.push(`Impactor mass raised from ${SETUP.mi} to ${m} M⊕ (needs ≥${NMIN_IMP} particles at this quality)`); SETUP.mi = m; }
+  for (const [b, t] of [['earth', SETUP.tt], ['theia', SETUP.it]]) { const T = TYPES[t]; BODY[b].type = t; BODY[b].T = T; if (T.cols) Object.assign(BODY[b], T.cols); }
+}
+const RE_ = BODY.earth.R, RT_ = BODY.theia.R;
+{ // ---- Set-up panel (values live in the URL so a scenario is shareable) ----
+  const $ = id => document.getElementById(id), PRESETS = {
+    theia:  { tt: 'rocky', it: 'rocky', mt: 1, mi: 0.1106, vimp: 1.1, angle: 45 },
+    headon: { tt: 'rocky', it: 'rocky', mt: 1, mi: 0.1106, vimp: 1.1, angle: 0 },
+    hitrun: { tt: 'rocky', it: 'rocky', mt: 1, mi: 0.2, vimp: 1.6, angle: 55 },
+    merger: { tt: 'rocky', it: 'rocky', mt: 0.5, mi: 0.5, vimp: 1.0, angle: 30 },
+    icy:    { tt: 'rocky', it: 'icy', mt: 1, mi: 0.1, vimp: 1.3, angle: 45 },
+    gasgiant: { tt: 'gasj', it: 'rocky', mt: 10, mi: 1, vimp: 1.2, angle: 40 },
+    gasgas: { tt: 'gasn', it: 'gasn', mt: 5, mi: 3, vimp: 1.1, angle: 30 },
+    bhole:  { tt: 'bh', it: 'rocky', mt: 100, mi: 1, vimp: 1.0, angle: 30 } };
+  const ranges = () => { for (const [k, sid] of [['mt', 'su_tt'], ['mi', 'su_it']]) { const L = massLim(k, $(sid).value), e = $('su_' + k);
+      e.min = L[0]; e.max = L[1]; e.step = L[1] >= 100 ? 1 : L[1] >= 10 ? 0.1 : k === 'mt' ? 0.01 : 0.005; } };
+  for (const id of ['su_tt', 'su_it']) for (const [k, T] of Object.entries(TYPES)) $(id).add(new Option(T.label, k));
+  const get = () => ({ tt: $('su_tt').value, it: $('su_it').value, mt: +$('su_mt').value, mi: +$('su_mi').value, vimp: +$('su_v').value, angle: +$('su_a').value });
+  const set = c => { $('su_tt').value = c.tt; $('su_it').value = c.it; ranges(); $('su_mt').value = c.mt; $('su_mi').value = c.mi; $('su_v').value = c.vimp; $('su_a').value = c.angle; show(); };
+  const same = (a, b) => ['tt', 'it', 'mt', 'mi', 'vimp', 'angle'].every(k => typeof a[k] === 'string' ? a[k] === b[k] : Math.abs(a[k] - b[k]) < 1e-3);
+  function show() { ranges(); const c = get(), rt = radiusOf(c.mt, c.tt), ri = radiusOf(c.mi, c.it), vesc = Math.sqrt(2 * (c.mt + c.mi) / (rt + ri)) * 7.905;   // code velocity unit √(GM⊕/R⊕) = 7.905 km/s
+    $('su_mtv').textContent = `${c.mt.toFixed(2)} M⊕ · ${rt.toFixed(2)} R⊕`; $('su_miv').textContent = `${c.mi.toFixed(3)} M⊕ · ${ri.toFixed(2)} R⊕`;
+    $('su_vv').textContent = `${c.vimp.toFixed(2)}× v_esc · ${(c.vimp * vesc).toFixed(1)} km/s`;
+    $('su_av').textContent = `${c.angle}° · ${c.angle < 20 ? 'Direct' : c.angle <= 55 ? 'Oblique' : 'Glancing'}`;
+    $('su_preset').value = Object.keys(PRESETS).find(k => same(PRESETS[k], c)) || ''; }
+  set({ tt: SETUP.tt, it: SETUP.it, mt: SETUP.mt, mi: SETUP.mi, vimp: clampP('vimp', 1.1), angle: clampP('angle', 45) });
+  $('su_note').innerHTML = SETUP.notes.join('<br>') + (BH ? `${SETUP.notes.length ? '<br>' : ''}Black hole: Newtonian point mass, horizon r_h = ${RE_.toFixed(2)} R⊕ (reduced light speed); lensing is a visual effect.` : '');
+  $('sec_setup').querySelectorAll('input,select').forEach(e => { if (e.id !== 'su_preset') e.oninput = show; });
+  $('su_preset').onchange = () => { const p = PRESETS[$('su_preset').value]; if (p) set(p); };   // choosing a preset fills in all selections; Start launches it
+  $('sec_setup').querySelectorAll('.q button').forEach(b => b.onclick = () => { $('su_a').value = b.dataset.a; show(); });
+  $('su_apply').onclick = () => { const c = get(), u = new URL(location.href);
+    for (const k of ['tt', 'it', 'mt', 'mi', 'vimp', 'angle']) u.searchParams.delete(k);
+    if (!same(c, PRESETS.theia)) for (const [k, v] of Object.entries(c)) u.searchParams.set(k, v);   // default preset -> clean URL (legacy-exact)
+    u.searchParams.set('q', $('quality').value); if ($('quality').value !== QNAME) u.searchParams.delete('tex');
+    u.searchParams.delete('paused'); u.searchParams.set('start', '1'); location.href = u.toString(); };   // Start always (re)loads with start=1 -> settle + run
+  const imp = TYPES[SETUP.it].label.split(' (')[0], tgt = TYPES[SETUP.tt].label.split(' (')[0];
+  if (['tt', 'it', 'mt', 'mi', 'vimp', 'angle'].some(k => params.has(k))) document.querySelector('#hud b').textContent = `${SETUP.mi} M⊕ ${imp} → ${SETUP.mt} M⊕ ${tgt} · ${clampP("angle", 45)}° · ${clampP("vimp", 1.1)}× v_esc`;
+}
+const VIMP = clampP('vimp', 1.1);                  // impact speed / mutual escape speed
+const ANGLE = clampP('angle', 45);                 // impact angle (deg, 0 = head-on)
+const RTID = BH ? Math.max(RT_ * Math.cbrt(SETUP.mt / SETUP.mi), 1.5 * RE_ + RT_) : 0;   // tidal radius: the 'contact' distance for a black hole
+const RENC = BH ? RTID : RE_ + RT_;
+const SEP0 = Math.max(5.0, 1.25 * RENC), U0 = 0.02;
+const SNAP_EVERY = 20, MAX_SNAPS = 300;
+const RP = 1.05 * RE_, ROCHE = 2.9 * RE_;                      // planet radius & fluid Roche limit (R⊕) for disc diagnostics
+
+// ---------------- Initial conditions: lattice-filled spheres ----------------
+function latticeSphere(R, s) {
+  const pts = [], n = Math.ceil(R / s) + 1;
+  for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) for (let k = -n; k <= n; k++) {
+    const x = (i + 0.25) * s, y = (j + 0.25) * s, z = (k + 0.25) * s;
+    if (x * x + y * y + z * z <= R * R) pts.push([x, y, z]);
+  }
+  return pts;
+}
+function bodyLattice(B, s) {   // gas giants: fine lattice for the core, GF-coarser lattice for the envelope
+  if (B.T.bh) return [];
+  if (!B.T.gas) return latticeSphere(B.R, s);
+  const rc = B.T.cf * B.R, core = latticeSphere(rc, s), env = latticeSphere(B.R, s * GF).filter(p => Math.hypot(...p) >= rc);
+  env.forEach(p => p.hf = GF); return core.concat(env); }
+let sp = GAS || BH ? Math.cbrt((4.18879 * (BODY.earth.R ** 3 * shapeF(SETUP.tt) + BODY.theia.R ** 3 * shapeF(SETUP.it))) / N) : Math.cbrt((4.18879 * (BODY.earth.R ** 3 + BODY.theia.R ** 3)) / N), PE_, PT_;
+for (;;) { PE_ = bodyLattice(BODY.earth, sp); PT_ = bodyLattice(BODY.theia, sp); if (PE_.length + PT_.length <= N) break; sp *= 1.005; }
+const SPACING = sp, NE = PE_.length, NT = PT_.length, NACT = NE + NT;
+const H = +(params.get('hf') || 1.2) * SPACING;    // smoothing length (~58 neighbours within 2h)
+const CELL = 2 * H * (GAS ? GF : 1);
+// EOS stiffness scales with the deepest potential well (M/R) so hydrostatic compression stays as in the default (=1 there);
+// the timestep shrinks with the faster sound speed and with impact speed (CFL), unchanged for the default set-up.
+const KSTIFF = Math.max(1, BH ? 0 : SETUP.mt / RE_, SETUP.mi / RT_);
+const DT = +(params.get('dt') || Math.min(0.085 * H / Math.sqrt(KSTIFF) * Math.min(1, 1.6 / (0.5 + VIMP)),
+  BH ? 0.25 * H / Math.sqrt(2 * SETUP.mt / RE_) : Infinity));   // black hole: Courant limit on the free-fall speed at the horizon
+const coreCountE = PE_.filter(p => Math.hypot(...p) / RE_ < BODY.earth.T.cf).length;
+const pmRel = (B, p) => MATRHO[Math.hypot(...p) / B.R < B.T.cf ? B.T.core : B.T.mant] * (p.hf || 1) ** 3;   // particle mass / M_SI
+const M_SI = BH ? SETUP.mi / PT_.reduce((a, p) => a + pmRel(BODY.theia, p), 0) : BODY.earth.T.gas ? SETUP.mt / PE_.reduce((a, p) => a + pmRel(BODY.earth, p), 0)
+  : SETUP.mt / ((NE - coreCountE) * MATRHO[BODY.earth.T.mant] + MATRHO[BODY.earth.T.core] * coreCountE);   // so target mass = mt (default 1)
+const RHO0_SI = M_SI / SPACING ** 3, RHO0_FE = RHO0_SI * FE_SI;
+
+function twoBody(Mtot) {   // relative orbit reaching contact at VIMP·v_esc and ANGLE
+  const rc = RENC;
+  const vesc = Math.sqrt(2 * Mtot / rc), vcon = VIMP * vesc;
+  const L = rc * vcon * Math.sin(ANGLE * Math.PI / 180), E = 0.5 * vcon * vcon - Mtot / rc;
+  let sep = SEP0;   // bound orbits (VIMP<1) may not reach SEP0: start just inside apoapsis
+  if (E < 0) { const disc = Math.max(Mtot * Mtot + 2 * E * L * L, 0), rapo = (-Mtot - Math.sqrt(disc)) / (2 * E); sep = Math.min(SEP0, 0.95 * rapo); }
+  const v0 = Math.sqrt(Math.max(2 * (E + Mtot / sep), 0)), vt = L / sep, vr = Math.sqrt(Math.max(v0 * v0 - vt * vt, 0));
+  return { r: new THREE.Vector3(-sep, 0, 0), v: new THREE.Vector3(vr, 0, -vt), vesc, vcon };   // orbit plane = XZ
+}
+// Hydrostatic u(r) for a uniform-density ideal-gas envelope on a core: (γ-1) du/dr = -G M(r)/r², u(R) ≈ 0.02
+function gasU(B, Mb, r) { const R = B.R, rc = B.T.cf * R, fc = rc ** 3 * MATRHO[B.T.core] / (rc ** 3 * MATRHO[B.T.core] + (R ** 3 - rc ** 3) * MATRHO[3]);
+  const Mr = x => Mb * (x <= rc ? fc * (x / rc) ** 3 : fc + (1 - fc) * (x ** 3 - rc ** 3) / (R ** 3 - rc ** 3));
+  let u = 0.02; const n = 200, dx = (R - r) / n; for (let k = 0; k < n; k++) { const x = r + (k + 0.5) * dx; u += Mr(x) / (x * x) * dx / (GAMMA - 1); } return u; }
+function makeInit() {
+  const pos = new Float32Array(N * 4), vel = new Float32Array(N * 4), attr = new Float32Array(N * 4);
+  const list = [];
+  for (const p of PE_) list.push([p, 0]);
+  for (const p of PT_) list.push([p, 1]);
+  let MT = 0;
+  for (const p of PT_) MT += pmRel(BODY.theia, p) * M_SI;
+  const Mtot = SETUP.mt + MT, tb = twoBody(Mtot);
+  const cT = tb.r.clone().multiplyScalar(SETUP.mt / Mtot), cE = tb.r.clone().multiplyScalar(-MT / Mtot);
+  const vT = tb.v.clone().multiplyScalar(SETUP.mt / Mtot), vE = tb.v.clone().multiplyScalar(-MT / Mtot);
+  list.forEach((e, i) => e.push(Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1));   // shuffle
+  list.sort((a, b) => a[2] - b[2]);
+  for (let i = 0; i < N; i++) {
+    if (i >= NACT) { pos.set([1e4 + i, 1e4, 1e4, 0], i * 4); attr.set([-1, 0, 0, 0], i * 4); continue; }
+    const [p, b] = list[i], B = b ? BODY.theia : BODY.earth;
+    const rr = Math.hypot(...p) / B.R, layer = rr < B.T.cf ? 0 : rr < 0.9 ? 1 : 2, mat = layer === 0 ? B.T.core : B.T.mant;
+    const m = (p.hf ? pmRel(B, p) : MATRHO[mat]) * M_SI, c = b ? cT : cE, v = b ? vT : vE;
+    const u = mat === 3 ? gasU(B, b ? MT : SETUP.mt, Math.hypot(...p)) : B.T.u0;
+    pos.set([c.x + p[0], c.y + p[1], c.z + p[2], m], i * 4);
+    vel.set([v.x, v.y, v.z, u], i * 4);
+    attr.set([b, layer, mat, mat === 3 ? u : 0], i * 4);   // gas: attr.w keeps the hydrostatic u (glow shows only shock heat above it)
+  }
+  return { pos, vel, attr, cE, cT, vE, vT, tb, Mtot, MT };
+}
+const init = makeInit();
+// gravity grid half-width: 6 (legacy) unless the bodies start further out; black hole: grid follows the planet's centre of mass
+const GRID_H = BH ? 4.0 * RT_ : Math.max(6.0, init.cT.length() + 1.4 * RT_, init.cE.length() + 1.4 * RE_);
+const SC = Math.max(1, SEP0 / 5);   // camera framing scale (1 for every pre-gas set-up)
+
+// ---------------- Renderer / scene ----------------
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(VW(), innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.8;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const gl = renderer.getContext();
+if (!gl.getExtension('EXT_color_buffer_float')) console.error('EXT_color_buffer_float unavailable');
+if (!gl.getExtension('EXT_float_blend')) console.error('EXT_float_blend unavailable (gravity deposit needs it)');
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, VW() / innerHeight, 0.01, 2000);
+camera.position.set(1.5 * SC, 7.5 * SC, 10.0 * SC);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.minDistance = 2; controls.maxDistance = 80; controls.zoomSpeed = 2.2; controls.zoomToCursor = true; controls.minDistance = 1.4;   // snappier zoom, towards the pointer
+const sun = new THREE.DirectionalLight(0xfff1dc, 3.0);
+sun.position.set(-8, 4, 6);
+scene.add(sun, new THREE.AmbientLight(0x223344, 0.15));
+const sunDir = sun.position.clone().normalize();
+{ // starfield: round soft point sprites with size/colour variety + faint Milky Way band (kept under the bloom threshold)
+  const nS = VHI ? 9000 : 4000, nB = VHI ? 30000 : 0, n = nS + nB, p = new Float32Array(n * 3), c = new Float32Array(n * 3), sz = new Float32Array(n);
+  const bandN = new THREE.Vector3(0.3, 0.9, -0.3).normalize(), tmp = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    const v = new THREE.Vector3().randomDirection(); let b, t = Math.random();
+    if (i >= nS) { v.addScaledVector(bandN, -v.dot(bandN) + (Math.random() + Math.random() + Math.random() - 1.5) * 0.12).normalize();
+      b = 0.008 + Math.random() * 0.014; sz[i] = 0.5 + Math.random(); }
+    else { const m = Math.pow(Math.random(), 6); b = 0.15 + m * 0.5; sz[i] = 1.0 + m * 2.8; }
+    v.multiplyScalar(600 + Math.random() * 300); p.set([v.x, v.y, v.z], i * 3);
+    c.set([b * (0.8 + 0.25 * t), b * 0.88, b * (1.05 - 0.3 * t)], i * 3);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('color', new THREE.BufferAttribute(c, 3)); g.setAttribute('sz', new THREE.BufferAttribute(sz, 1));
+  const starMat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { pr: { value: 1 } },
+    vertexShader: `in vec3 color; in float sz; uniform float pr; out vec3 vC; void main(){ vC = color; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_PointSize = (sz + 1.5) * pr; }`,
+    fragmentShader: `precision highp float; in vec3 vC; out vec4 o; void main(){ vec2 d = gl_PointCoord * 2.0 - 1.0; float r = length(d); o = vec4(vC * smoothstep(1.0, 0.2, r) * 1.6, 1.0); }` });
+  window.__starMat = starMat; const st = new THREE.Points(g, starMat); st.renderOrder = -10; st.frustumCulled = false; scene.add(st);
+}
+
+// ---------------- GPU compute helpers ----------------
+const RTopts = { type: THREE.FloatType, format: THREE.RGBAFormat, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false };
+const mkRT = (w, h, o = {}) => new THREE.WebGLRenderTarget(w, h, { ...RTopts, ...o });
+const fsq = new FullScreenQuad(null);
+function run(mat, rt) { fsq.material = mat; renderer.setRenderTarget(rt); fsq.render(renderer); }
+const BLACK = new THREE.Color(0, 0, 0);
+function clearRT(rt) { renderer.setRenderTarget(rt); renderer.setClearColor(BLACK, 0); renderer.clear(true, false, false); }
+const LIB = /* glsl */`
+precision highp float; precision highp int; precision highp sampler2D;
+#define W ${TEX}
+#define NP ${N}
+#define TABLE ${TABLE}
+#define HSM ${H.toFixed(6)}
+#define CELL ${CELL.toFixed(6)}
+#define GH ${GRID_H.toFixed(3)}
+const float PI = 3.141592653589793;
+ivec2 I2(int i){ return ivec2(i % W, i / W); }
+ivec3 cellOf(vec3 p){ return ivec3(floor(p / CELL)); }
+int hashCell(ivec3 c){ uint h = (uint(c.x) * 73856093u) ^ (uint(c.y) * 19349663u) ^ (uint(c.z) * 83492791u); return int(h % uint(TABLE)); }
+float Wk(float r){ float q = r / HSM, s = 1.0 / (PI * HSM * HSM * HSM);
+  if (q < 1.0) return s * (1.0 - 1.5*q*q + 0.75*q*q*q); if (q < 2.0) { float t = 2.0 - q; return s * 0.25 * t*t*t; } return 0.0; }
+float dWk(float r){ float q = r / HSM, s = 1.0 / (PI * HSM * HSM * HSM * HSM);
+  if (q < 1.0) return s * (-3.0*q + 2.25*q*q); if (q < 2.0) { float t = 2.0 - q; return -s * 0.75 * t*t; } return 0.0; }
+` + (GAS ? `float hOf(float mat){ return mat > 2.5 ? HSM * ${GF.toFixed(4)} : HSM; }
+float WkH(float r, float h){ float q = r / h, s = 1.0 / (PI * h * h * h);
+  if (q < 1.0) return s * (1.0 - 1.5*q*q + 0.75*q*q*q); if (q < 2.0) { float t = 2.0 - q; return s * 0.25 * t*t*t; } return 0.0; }
+float dWkH(float r, float h){ float q = r / h, s = 1.0 / (PI * h * h * h * h);
+  if (q < 1.0) return s * (-3.0*q + 2.25*q*q); if (q < 2.0) { float t = 2.0 - q; return -s * 0.75 * t*t; } return 0.0; }
+` : '');
+const HEAD = LIB + `int selfIdx(){ ivec2 p = ivec2(gl_FragCoord.xy); return p.y * W + p.x; }\nout vec4 fragOut;\n`;
+const VSQ = `void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }`;
+const cmat = (frag, uniforms) => new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, vertexShader: VSQ, fragmentShader: HEAD + frag, uniforms, depthTest: false, depthWrite: false, toneMapped: false });
+const pointMat = (vs, fs, uniforms, eq) => new THREE.ShaderMaterial({
+  glslVersion: THREE.GLSL3, depthTest: false, depthWrite: false, toneMapped: false, blending: THREE.CustomBlending,
+  blendEquation: eq, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendEquationAlpha: eq, blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneFactor,
+  uniforms, vertexShader: LIB + vs, fragmentShader: 'precision highp float; in vec4 vD; out vec4 o; void main(){ o = vD; }' });
+
+const posRT = [mkRT(TEX, TEX), mkRT(TEX, TEX)], velRT = [mkRT(TEX, TEX), mkRT(TEX, TEX)];
+let pc = 0, vc = 0;
+const accRT = mkRT(TEX, TEX), densRT = mkRT(TEX, TEX), keyRT = [mkRT(TEX, TEX), mkRT(TEX, TEX)], bucketRT = mkRT(TEX, TEX), diagRT = mkRT(TEX, TEX);
+const attrTex = new THREE.DataTexture(init.attr, TEX, TEX, THREE.RGBAFormat, THREE.FloatType); attrTex.needsUpdate = true;
+const copyMat = cmat(`uniform sampler2D src; void main(){ fragOut = texelFetch(src, ivec2(gl_FragCoord.xy), 0); }`, { src: { value: null } });
+function upload(arr, rt) { const t = new THREE.DataTexture(arr, TEX, TEX, THREE.RGBAFormat, THREE.FloatType); t.needsUpdate = true; copyMat.uniforms.src.value = t; run(copyMat, rt); t.dispose(); }
+
+// 1. cell keys
+const keyMat = cmat(`uniform sampler2D pos;
+void main(){ int i = selfIdx(); vec4 p = texelFetch(pos, I2(i), 0);
+  float key = p.w > 0.0 ? float(hashCell(cellOf(p.xyz))) : float(TABLE);
+  fragOut = vec4(key, float(i), 0.0, 0.0); }`, { pos: { value: null } });
+// 2. bitonic sort pass
+const sortMat = cmat(`uniform sampler2D src; uniform int k; uniform int j;
+void main(){ int i = selfIdx(); int p = i ^ j;
+  vec4 a = texelFetch(src, I2(i), 0), b = texelFetch(src, I2(p), 0);
+  bool aLess = a.x < b.x || (a.x == b.x && a.y < b.y);
+  bool keepMin = ((i & k) == 0) == (i < p);
+  fragOut = keepMin ? (aLess ? a : b) : (aLess ? b : a); }`, { src: { value: null }, k: { value: 2 }, j: { value: 1 } });
+// 3. bucket ranges
+const bucketMat = cmat(`uniform sampler2D sorted;
+int lb(float key){ int lo = 0, hi = NP; while (lo < hi) { int mid = (lo + hi) >> 1; if (texelFetch(sorted, I2(mid), 0).x < key) lo = mid + 1; else hi = mid; } return lo; }
+void main(){ int b = selfIdx(); fragOut = vec4(float(lb(float(b))), float(lb(float(b + 1))), 0.0, 0.0); }`, { sorted: { value: null } });
+
+const NEIGH = /* glsl */`
+#define FOR_NEIGHBOURS(P) ivec3 c0_ = cellOf(P); for (int dz = -1; dz <= 1; dz++) for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) { ivec3 cc_ = c0_ + ivec3(dx, dy, dz); vec2 rg_ = texelFetch(buckets, I2(hashCell(cc_)), 0).xy; int e_ = min(int(rg_.y), int(rg_.x) + ${GAS ? 512 : 128}); for (int kk = int(rg_.x); kk < e_; kk++) { int j = int(texelFetch(sorted, I2(kk), 0).y); vec4 pj = texelFetch(pos, I2(j), 0); if (cellOf(pj.xyz) != cc_) continue;
+#define END_NEIGHBOURS }}
+uniform vec4 eosFe; uniform vec4 eosSi; uniform vec4 eosIce;   // (rho0, A, B, a)
+vec2 eos(float rho, float u, float mat){   // Tillotson-like EOS -> (P, sound speed)
+  ${GAS ? `if (mat > 2.5) { float Pg = ${(GAMMA - 1).toFixed(6)} * rho * u; return vec2(Pg, sqrt(max(${(GAMMA * (GAMMA - 1)).toFixed(6)} * u, 1e-4))); }   // ideal gas` : ''}
+  vec4 e = mat < 0.5 ? eosFe : mat < 1.5 ? eosSi : eosIce;
+  float mu = rho / e.x - 1.0;
+  float P = e.w * rho * u + e.y * mu + (mu > 0.0 ? e.z * mu * mu : 0.0);
+  P = max(P, 0.0);                          // no tension: fluid planets, avoids SPH tensile instability
+  float cs = sqrt(max(e.y / e.x * (1.0 + 2.0 * max(mu, 0.0)) + e.w * (1.0 + e.w) * u, 1e-4));
+  return vec2(P, cs);
+}`;
+const C0 = +(params.get('c0') || 1.6) * Math.sqrt(KSTIFF);
+const eosSi = new THREE.Vector4(RHO0_SI, RHO0_SI * C0 * C0, RHO0_SI * C0 * C0, 0.5);
+const eosFe = new THREE.Vector4(RHO0_FE, RHO0_FE * C0 * C0, RHO0_FE * C0 * C0, 0.5);
+const RHO0_ICE = RHO0_SI * MATRHO[2], eosIce = new THREE.Vector4(RHO0_ICE, RHO0_ICE * C0 * C0, MAT_KB[2] * RHO0_ICE * C0 * C0, MAT_A[2]);
+const eosU = () => ({ eosFe: { value: eosFe }, eosSi: { value: eosSi }, eosIce: { value: eosIce } });
+
+// 4. density + EOS
+const densMat = cmat(NEIGH + `uniform sampler2D pos, vel, sorted, buckets, attr;
+void main(){ int i = selfIdx(); vec4 pi = texelFetch(pos, I2(i), 0);
+  if (pi.w <= 0.0) { fragOut = vec4(1.0, 0.0, 1.0, 0.0); return; }
+  float rho = 0.0;
+  ${GAS ? `float hi = hOf(texelFetch(attr, I2(i), 0).z);
+  FOR_NEIGHBOURS(pi.xyz) float r = length(pi.xyz - pj.xyz), hj = hOf(texelFetch(attr, I2(j), 0).z); rho += pj.w * 0.5 * (WkH(r, hi) + WkH(r, hj)); END_NEIGHBOURS`
+  : 'FOR_NEIGHBOURS(pi.xyz) rho += pj.w * Wk(length(pi.xyz - pj.xyz)); END_NEIGHBOURS'}
+  vec2 pc = eos(rho, texelFetch(vel, I2(i), 0).w, texelFetch(attr, I2(i), 0).z);
+  fragOut = vec4(rho, pc.x, pc.y, 0.0); }`, { pos: { value: null }, vel: { value: null }, sorted: { value: null }, buckets: { value: null }, attr: { value: attrTex }, ...eosU() });
+
+// 5. gravity tree-lite
+const GS = [32, 16, 8, 4], GT = [8, 8, 8, 4];
+const gravRT = GS.map((s, l) => mkRT(s * GT[l], s * (s / GT[l])));
+const GLSL_FLAT = `ivec2 flat3(ivec3 c, int s, int t){ return ivec2(c.x + s * (c.z % t), c.y + s * (c.z / t)); }
+` + (BH ? `uniform sampler2D comT;
+ivec3 gcell(vec3 p, int s){ vec3 c0 = texelFetch(comT, ivec2(0, 0), 0).xyz; return clamp(ivec3(floor((p - c0 + GH) / (2.0 * GH) * float(s))), ivec3(0), ivec3(s - 1)); }\n`
+  : `ivec3 gcell(vec3 p, int s){ return clamp(ivec3(floor((p + GH) / (2.0 * GH) * float(s))), ivec3(0), ivec3(s - 1)); }\n`);
+const idxGeo = new THREE.BufferGeometry();
+idxGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3));
+idxGeo.setAttribute('idx', new THREE.BufferAttribute(new Float32Array([...Array(N).keys()]), 1));
+const depositMat = pointMat(GLSL_FLAT + `uniform sampler2D pos; in float idx; out vec4 vD;
+  void main(){ vec4 p = texelFetch(pos, I2(int(idx)), 0); ivec2 f = flat3(gcell(p.xyz, 32), 32, 8);
+    vD = vec4(p.xyz * p.w, p.w); gl_PointSize = 1.0;
+    gl_Position = p.w > 0.0 ? vec4((vec2(f) + 0.5) / vec2(256.0, 128.0) * 2.0 - 1.0, 0.0, 1.0) : vec4(9.0, 9.0, 9.0, 1.0); }`,
+  null, { pos: { value: null }, comT: { value: null } }, THREE.AddEquation);
+const pointScene = (mat) => { const s = new THREE.Scene(), p = new THREE.Points(idxGeo, mat); p.frustumCulled = false; s.add(p); return s; };
+const depositScene = pointScene(depositMat);
+const reduceMat = cmat(GLSL_FLAT + `uniform sampler2D src; uniform int s; uniform int ts; uniform int tt;
+void main(){ ivec2 f = ivec2(gl_FragCoord.xy); ivec3 c = ivec3(f.x % s, f.y % s, (f.x / s) + (f.y / s) * tt);
+  vec4 sum = vec4(0.0);
+  for (int z = 0; z < 2; z++) for (int y = 0; y < 2; y++) for (int x = 0; x < 2; x++) sum += texelFetch(src, flat3(2 * c + ivec3(x, y, z), 2 * s, ts), 0);
+  fragOut = sum; }`, { src: { value: null }, s: { value: 16 }, ts: { value: 8 }, tt: { value: 8 } });
+renderer.autoClear = false;
+function buildGravity(posTex) {
+  depositMat.uniforms.pos.value = posTex; if (BH) depositMat.uniforms.comT.value = bh.com.texture;
+  clearRT(gravRT[0]); renderer.render(depositScene, camera);
+  for (let l = 1; l < 4; l++) {
+    const u = reduceMat.uniforms; u.src.value = gravRT[l - 1].texture; u.s.value = GS[l]; u.ts.value = GT[l - 1]; u.tt.value = GT[l];
+    run(reduceMat, gravRT[l]);
+  }
+}
+const GRAV = GLSL_FLAT + `
+uniform sampler2D g0, g1, g2, g3; uniform float eps2;
+void acc1(vec4 cm, vec3 p, inout vec3 a, inout float phi){ if (cm.w <= 0.0) return; vec3 d = cm.xyz / cm.w - p;
+  float ir = inversesqrt(dot(d, d) + eps2); a += cm.w * ir * ir * ir * d; phi -= cm.w * ir; }
+#define ILIST(TEXL, S, T) { ivec3 c = gcell(p, S); ivec3 pc = c >> 1; for (int z = 2*pc.z - 2; z <= 2*pc.z + 3; z++) for (int y = 2*pc.y - 2; y <= 2*pc.y + 3; y++) for (int x = 2*pc.x - 2; x <= 2*pc.x + 3; x++) { ivec3 q = ivec3(x, y, z); if (any(lessThan(q, ivec3(0))) || any(greaterThanEqual(q, ivec3(S)))) continue; ivec3 dq = abs(q - c); if (max(dq.x, max(dq.y, dq.z)) <= 1) continue; acc1(texelFetch(TEXL, flat3(q, S, T), 0), p, a, phi); } }
+void gravity(vec3 p, out vec3 a, out float phi){ a = vec3(0.0); phi = 0.0;
+  { ivec3 c = gcell(p, 32); for (int z = -1; z <= 1; z++) for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+      ivec3 q = c + ivec3(x, y, z); if (any(lessThan(q, ivec3(0))) || any(greaterThanEqual(q, ivec3(32)))) continue;
+      acc1(texelFetch(g0, flat3(q, 32, 8), 0), p, a, phi); } }
+  ILIST(g0, 32, 8) ILIST(g1, 16, 8) ILIST(g2, 8, 8)
+  { ivec3 c = gcell(p, 4); for (int z = 0; z < 4; z++) for (int y = 0; y < 4; y++) for (int x = 0; x < 4; x++) {
+      ivec3 dq = abs(ivec3(x, y, z) - c); if (max(dq.x, max(dq.y, dq.z)) <= 1) continue; acc1(texelFetch(g3, flat3(ivec3(x, y, z), 4, 4), 0), p, a, phi); } }
+}`;
+// 6. forces: SPH pressure + artificial viscosity + gravity -> (a, du/dt), or (a, φ) in diagnostic mode
+const forceMat = cmat(NEIGH + GRAV + `uniform sampler2D pos, vel, dens, sorted, buckets; uniform bool diag;${GAS ? ' uniform sampler2D attr;' : ''}${BH ? ' uniform sampler2D bhT; uniform float bhOn;' : ''}
+void main(){ int i = selfIdx(); vec4 pi = texelFetch(pos, I2(i), 0);
+  if (pi.w <= 0.0) { fragOut = vec4(0.0); return; }
+  vec4 vi = texelFetch(vel, I2(i), 0), di = texelFetch(dens, I2(i), 0);
+  float Pi = di.y / (di.x * di.x);
+  vec3 a = vec3(0.0); float du = 0.0;${GAS ? ' float hi = hOf(texelFetch(attr, I2(i), 0).z);' : ''}
+  FOR_NEIGHBOURS(pi.xyz)
+    vec3 rij = pi.xyz - pj.xyz; float r = length(rij);${GAS ? ' float hj = hOf(texelFetch(attr, I2(j), 0).z), HH = 0.5 * (hi + hj);' : ' const float HH = HSM;'}
+    if (r > 0.0 && r < ${GAS ? '2.0 * max(hi, hj)' : '2.0 * HSM'}) {
+      vec4 vj = texelFetch(vel, I2(j), 0), dj = texelFetch(dens, I2(j), 0);
+      vec3 vij = vi.xyz - vj.xyz; float vr = dot(vij, rij);
+      float Pij = 0.0;
+      if (vr < 0.0) { float mu = HH * vr / (r * r + 0.01 * HH * HH);
+        Pij = (-0.5 * (di.z + dj.z) * mu + 2.0 * mu * mu) / (0.5 * (di.x + dj.x)); }
+      vec3 gW = ${GAS ? '0.5 * (dWkH(r, hi) + dWkH(r, hj))' : 'dWk(r)'} * rij / r;
+      a -= pj.w * (Pi + dj.y / (dj.x * dj.x) + Pij) * gW;
+      du += pj.w * (Pi + 0.5 * Pij) * dot(vij, gW);
+    }
+  END_NEIGHBOURS
+  vec3 ag; float phi; gravity(pi.xyz, ag, phi);
+  ${BH ? `{ vec4 b0 = texelFetch(bhT, ivec2(0, 0), 0); vec3 d = b0.xyz - pi.xyz; float ir = inversesqrt(dot(d, d) + ${(0.09 * RE_ * RE_).toFixed(6)});   // softened point mass (ε = 0.3 r_h)
+    ag += bhOn * b0.w * ir * ir * ir * d; phi -= bhOn * 2.0 * b0.w * ir; }   // ×2: the pair energy is halved in the diagnostic sum` : ''}
+  fragOut = vec4(a + ag, diag ? phi : du); }`,
+  { pos: { value: null }, vel: { value: null }, dens: { value: densRT.texture }, sorted: { value: null }, buckets: { value: bucketRT.texture },
+    comT: { value: null }, g0: { value: gravRT[0].texture }, g1: { value: gravRT[1].texture }, g2: { value: gravRT[2].texture }, g3: { value: gravRT[3].texture },
+    eps2: { value: (+(params.get('eps') || 0.2)) ** 2 }, diag: { value: false }, ...eosU(), ...(GAS ? { attr: { value: attrTex } } : {}), ...(BH ? { bhT: { value: null }, bhOn: { value: 0 } } : {}) });
+// 7. kick / drift
+const kickMat = cmat(`uniform sampler2D vel, acc, dens; uniform float hdt, damp, relaxU, cool, rho0; uniform vec3 vCorr;${GAS ? ' uniform sampler2D attr;' : ''}
+void main(){ ivec2 f = ivec2(gl_FragCoord.xy); vec4 v = texelFetch(vel, f, 0), a = texelFetch(acc, f, 0);
+  vec3 nv = (v.xyz + vCorr + a.xyz * hdt) * (1.0 - damp);
+  ${GAS ? 'bool isGas = texelFetch(attr, f, 0).z > 2.5;' : ''}
+  float u = relaxU > 0.0 ? ${GAS ? '(isGas ? v.w : relaxU)' : 'relaxU'} : max(v.w + a.w * hdt, 1e-5);
+  if (relaxU <= 0.0 && texelFetch(dens, f, 0).x < 0.5 * rho0${GAS ? ' && !isGas' : ''}) u = max(u - cool * hdt * max(u - 0.02, 0.0), 1e-5);   // radiative cooling of expanded ejecta
+  fragOut = vec4(nv, u); }`, { vel: { value: null }, acc: { value: accRT.texture }, hdt: { value: DT / 2 }, dens: { value: densRT.texture }, cool: { value: +(params.get('cool') || 0.08) }, rho0: { value: RHO0_SI }, damp: { value: 0 }, relaxU: { value: 0 }, vCorr: { value: new THREE.Vector3() }, ...(GAS ? { attr: { value: attrTex } } : {}) });
+const driftMat = cmat(`uniform sampler2D pos, vel; uniform float dt;
+void main(){ ivec2 f = ivec2(gl_FragCoord.xy); vec4 p = texelFetch(pos, f, 0);
+  fragOut = p.w > 0.0 ? vec4(p.xyz + texelFetch(vel, f, 0).xyz * dt, p.w) : p; }`, { pos: { value: null }, vel: { value: null }, dt: { value: DT } });
+
+const posTex = () => posRT[pc].texture, velTex = () => velRT[vc].texture;
+let sortedTex = null;
+function sortKeys() {
+  keyMat.uniforms.pos.value = posTex(); run(keyMat, keyRT[0]);
+  let s = 0;
+  for (let k = 2; k <= N; k <<= 1) for (let j = k >> 1; j > 0; j >>= 1) {
+    const u = sortMat.uniforms; u.src.value = keyRT[s].texture; u.k.value = k; u.j.value = j;
+    run(sortMat, keyRT[1 - s]); s = 1 - s;
+  }
+  sortedTex = keyRT[s].texture;
+  bucketMat.uniforms.sorted.value = sortedTex; run(bucketMat, bucketRT);
+}
+function computeForces(diag = false) {
+  sortKeys();
+  const d = densMat.uniforms; d.pos.value = posTex(); d.vel.value = velTex(); d.sorted.value = sortedTex; d.buckets.value = bucketRT.texture; run(densMat, densRT);
+  buildGravity(posTex());
+  const u = forceMat.uniforms; u.pos.value = posTex(); u.vel.value = velTex(); u.sorted.value = sortedTex; u.diag.value = diag;
+  if (BH) { u.bhT.value = bh.tex(); u.bhOn.value = bh.on ? 1 : 0; depositMat.uniforms.comT.value = bh.com.texture; }
+  run(forceMat, diag ? diagRT : accRT); u.diag.value = false;
+  if (BH) { if (bh.on && !diag) bh.force(); bh.updateCom(); }
+}
+// ---- Black hole (GPU-resident state, exact pairwise forces, mass + momentum conserving absorption) ----
+const bh = BH ? (() => {
+  const st = [mkRT(2, 1), mkRT(2, 1)], acc = mkRT(1, 1), ab = mkRT(2, 1), com = mkRT(1, 1); let c = 0;
+  const up = (arr, rt, w) => { const t = new THREE.DataTexture(arr, w, 1, THREE.RGBAFormat, THREE.FloatType); t.needsUpdate = true; copyMat.uniforms.src.value = t; run(copyMat, rt); t.dispose(); };
+  const E2 = (0.09 * RE_ * RE_).toFixed(6), RH2 = (RE_ * RE_).toFixed(6);
+  const accMat = pointMat(`uniform sampler2D pos, bhT; in float idx; out vec4 vD;
+    void main(){ vec4 p = texelFetch(pos, I2(int(idx)), 0); vec3 d = p.xyz - texelFetch(bhT, ivec2(0, 0), 0).xyz; float ir = inversesqrt(dot(d, d) + ${E2});
+      vD = vec4(p.w * ir * ir * ir * d, 0.0); gl_PointSize = 1.0; gl_Position = p.w > 0.0 ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(9.0, 9.0, 9.0, 1.0); }`, null, { pos: { value: null }, bhT: { value: null } }, THREE.AddEquation);
+  const abMat = pointMat(`uniform sampler2D pos, vel, bhT; uniform float slot; in float idx; out vec4 vD;
+    void main(){ int i = int(idx); vec4 p = texelFetch(pos, I2(i), 0); vec3 d = p.xyz - texelFetch(bhT, ivec2(0, 0), 0).xyz; bool inside = p.w > 0.0 && dot(d, d) < ${RH2};
+      vD = slot < 0.5 ? vec4(p.w * texelFetch(vel, I2(i), 0).xyz, p.w) : vec4(p.w * p.xyz, 1.0); gl_PointSize = 1.0;
+      gl_Position = inside ? vec4(slot < 0.5 ? -0.5 : 0.5, 0.0, 0.0, 1.0) : vec4(9.0, 9.0, 9.0, 1.0); }`, null, { pos: { value: null }, vel: { value: null }, bhT: { value: null }, slot: { value: 0 } }, THREE.AddEquation);
+  const killMat = cmat(`uniform sampler2D pos, bhT; void main(){ int i = selfIdx(); vec4 p = texelFetch(pos, I2(i), 0); vec3 d = p.xyz - texelFetch(bhT, ivec2(0, 0), 0).xyz;
+      fragOut = (p.w > 0.0 && dot(d, d) < ${RH2}) ? vec4(1e4 + float(i), 1e4, 1e4, 0.0) : p; }`, { pos: { value: null }, bhT: { value: null } });
+  const stepMat = cmat(`uniform sampler2D bhT, acc, ab; uniform int mode; uniform float hdt, dt;
+    void main(){ ivec2 f = ivec2(gl_FragCoord.xy); vec4 s0 = texelFetch(bhT, ivec2(0, 0), 0), s1 = texelFetch(bhT, ivec2(1, 0), 0);
+      vec3 x = s0.xyz, v = s1.xyz; float M = s0.w, sw = s1.w;
+      if (mode == 0) v += texelFetch(acc, ivec2(0, 0), 0).xyz * hdt;
+      else if (mode == 1) x += v * dt;
+      else { vec4 a0 = texelFetch(ab, ivec2(0, 0), 0), a1 = texelFetch(ab, ivec2(1, 0), 0);
+        if (a0.w > 0.0) { float Mn = M + a0.w; v = (M * v + a0.xyz) / Mn; x = (M * x + a1.xyz) / Mn; M = Mn; sw += a0.w; } }
+      fragOut = f.x == 0 ? vec4(x, M) : vec4(v, sw); }`, { bhT: { value: null }, acc: { value: acc.texture }, ab: { value: ab.texture }, mode: { value: 0 }, hdt: { value: DT / 2 }, dt: { value: DT } });
+  const comMat = cmat(`uniform sampler2D g3; void main(){ vec4 s = vec4(0.0); for (int i = 0; i < 64; i++) s += texelFetch(g3, ivec2(i % 16, i / 16), 0);
+      fragOut = vec4(s.xyz / max(s.w, 1e-12), 1.0); }`, { g3: { value: gravRT[3].texture } });
+  const accSc = pointScene(accMat), abSc = pointScene(abMat);
+  const self = { on: false, tex: () => st[c].texture, com,
+    set(x, v, M, sw = 0) { up(new Float32Array([x.x, x.y, x.z, M, v.x, v.y, v.z, sw]), st[c], 2); },
+    setCom(x) { up(new Float32Array([x.x, x.y, x.z, 1]), com, 1); },
+    read() { const b = new Float32Array(8); renderer.readRenderTargetPixels(st[c], 0, 0, 2, 1, b); return b; },
+    run(mode) { stepMat.uniforms.bhT.value = st[c].texture; stepMat.uniforms.mode.value = mode; run(stepMat, st[1 - c]); c = 1 - c; },
+    force() { clearRT(acc); accMat.uniforms.pos.value = posTex(); accMat.uniforms.bhT.value = st[c].texture; renderer.render(accSc, camera); },
+    absorb() { clearRT(ab); const u = abMat.uniforms; u.pos.value = posTex(); u.vel.value = velTex(); u.bhT.value = st[c].texture;
+      for (const k of [0, 1]) { u.slot.value = k; renderer.render(abSc, camera); }
+      killMat.uniforms.pos.value = posTex(); killMat.uniforms.bhT.value = st[c].texture; run(killMat, posRT[1 - pc]); pc = 1 - pc; this.run(2); },
+    updateCom() { run(comMat, com); } };
+  return self; })() : null;
+function kick() { kickMat.uniforms.vel.value = velTex(); run(kickMat, velRT[1 - vc]); vc = 1 - vc; }
+function drift() { driftMat.uniforms.pos.value = posTex(); driftMat.uniforms.vel.value = velTex(); run(driftMat, posRT[1 - pc]); pc = 1 - pc; }
+var physicsStep = function () { kick(); kickMat.uniforms.vCorr.value.set(0, 0, 0); drift(); computeForces(); kick(); }   // KDK leapfrog
+if (BH) physicsStep = function () {   // KDK for particles + black hole, absorption after the drift
+  const on = bh.on; kick(); if (on) bh.run(0); kickMat.uniforms.vCorr.value.set(0, 0, 0); drift(); if (on) { bh.run(1); bh.absorb(); } computeForces(); kick(); if (on) bh.run(0); };
+
+// ---------------- Particle rendering (heat glow from specific internal energy) ----------------
+const col = k => new THREE.Vector3(...k);
+const HEATGLSL = /* glsl */`
+// Blackbody colour ramp: specific internal energy u -> temperature (latent heats folded into an effective cv)
+// -> Planck colour (Tanner Helland fit) with Stefan-Boltzmann-like brightness ∝ T^3 (tempered for display).
+float tempOf(float u){ return 250.0 + u * 15000.0; }
+vec3 blackbody(float u){
+  float T = tempOf(u), t = T / 100.0; vec3 c;
+  c.r = t <= 66.0 ? 1.0 : clamp(1.292936 * pow(t - 60.0, -0.1332), 0.0, 1.0);
+  c.g = t <= 66.0 ? clamp(0.390082 * log(t) - 0.631841, 0.0, 1.0) : clamp(1.129891 * pow(t - 60.0, -0.0755), 0.0, 1.0);
+  c.b = t >= 66.0 ? 1.0 : (t <= 19.0 ? 0.0 : clamp(0.543207 * log(t - 10.0) - 1.196254, 0.0, 1.0));
+  float I = smoothstep(1000.0, 1900.0, T) * min(pow(T / 1500.0, 2.0), 2.5) * 0.3;
+  return c * I;
+}
+vec3 heatColour(float u){ return blackbody(u); }`;
+const PART_VS = LIB + HEATGLSL + `
+    in float idx; uniform sampler2D pos, vel, attr, dens; uniform vec3 cE[3], cT[3], sunDir, centreE, centreT;
+    uniform float pxScale, size, rho0, mode, streak;${BH ? ' uniform vec3 bhV;' : ''}
+    in float endv; out vec3 vCol; out float vA;
+    bool isEjecta(vec3 p, float rel){ return rel < 0.45 || (length(p - centreE) > ${(1.5 * RE_).toFixed(4)} && length(p - centreT) > ${(0.7 * RT_ / 0.48).toFixed(4)}); }
+    void main(){ int i = int(idx); vec4 p = texelFetch(pos, I2(i), 0); vec4 at = texelFetch(attr, I2(i), 0); vec4 vv = texelFetch(vel, I2(i), 0);
+      vec4 dd = texelFetch(dens, I2(i), 0); float u = vv.w;${GAS ? `
+      if (at.z > 2.5) u = max(u - 1.5 * at.w, 0.0) * 0.5;   // gas glows only from shock heating above its hydrostatic u` : ''}
+      float rel = dd.x / (rho0 * (at.z < 0.5 ? ${FE_SI.toFixed(2)} : at.z < 1.5 ? 1.0 : ${GAS ? `at.z < 2.5 ? ${MATRHO[2].toFixed(2)} : ${MATRHO[3].toFixed(2)}` : MATRHO[2].toFixed(2)}));
+      bool ej = isEjecta(p.xyz, rel), hot = tempOf(u) > 1500.0;
+      bool show = p.w > 0.0 && (mode < 0.5 ? !ej : mode < 1.5 ? ej : mode < 2.5 ? (!ej && hot) : (ej && length(vv.xyz) > 0.15));
+      if (!show) { gl_Position = vec4(9.0, 9.0, 9.0, 1.0); gl_PointSize = 0.0; return; }
+      int layer = int(at.y + 0.5); bool isT = at.x > 0.5;
+      vec3 base = isT ? (layer==0 ? cT[0] : layer==1 ? cT[1] : cT[2]) : (layer==0 ? cE[0] : layer==1 ? cE[1] : cE[2]);
+      vec3 n = normalize(p.xyz - (isT ? centreT : centreE) + 1e-5);
+      vec3 lit = base * (0.02 + 1.6 * max(dot(n, sunDir), 0.0)), glow = min(blackbody(u), vec3(1.2));${BH ? `
+      { float beta = clamp(dot(vv.xyz - bhV, normalize(cameraPosition - p.xyz)) / ${CL.toFixed(1)}, -0.6, 0.6); glow *= pow((1.0 + beta) / (1.0 - beta), 1.5); }   // Doppler-ish beaming of the hot disc` : ''}
+      vec3 wp = p.xyz;
+      if (mode > 2.5) { wp -= vv.xyz * streak * endv; vCol = (glow * 1.2 + lit * 0.2); vA = 0.12 * (1.0 - endv); }
+      else if (mode > 1.5) { vCol = glow * 0.012; vA = 1.0; }              // hot condensed matter glowing through the crust mesh
+      else if (mode > 0.5) { bool far = length(p.xyz - centreE) > ${(1.4 * RE_).toFixed(4)}; vCol = lit * 0.8 + glow; vA = far ? 0.07 : 0.14; }   // soft ejecta sprite
+      else { vCol = lit + glow; vA = 1.0; }
+      vec4 mv = modelViewMatrix * vec4(wp, 1.0); gl_Position = projectionMatrix * mv;
+      float rad = clamp(1.25 * pow(p.w / max(dd.x, 1e-6), 1.0 / 3.0), 0.6 * size, 3.5 * size);   // splat radius from SPH density
+      float k = mode < 0.5 ? 1.0 : mode < 1.5 ? (length(p.xyz - centreE) > ${(1.4 * RE_).toFixed(4)} ? 5.5 : 2.2) : 1.3;   // orbiting debris: large soft splats accumulate into a disc
+      gl_PointSize = clamp(k * rad * pxScale / -mv.z, 1.0, 96.0); }`;
+const pUniforms = { pos: { value: null }, vel: { value: null }, attr: { value: attrTex }, dens: { value: densRT.texture }, rho0: { value: RHO0_SI },
+    pxScale: { value: innerHeight * renderer.getPixelRatio() }, sunDir: { value: sunDir }, centreE: { value: new THREE.Vector3() }, centreT: { value: new THREE.Vector3() },
+    cE: { value: [col(BODY.earth.core), col(BODY.earth.mantle), col(BODY.earth.crust)] },
+    cT: { value: [col(BODY.theia.core), col(BODY.theia.mantle), col(BODY.theia.crust)] }, size: { value: SPACING }, streak: { value: 0.35 }, ...(BH ? { bhV: { value: new THREE.Vector3() } } : {}) };
+function partMat(mode) {
+  const soft = mode > 0;
+  const m = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms: { ...pUniforms, mode: { value: mode } }, vertexShader: PART_VS,
+    fragmentShader: mode === 3 ? `precision highp float; in vec3 vCol; in float vA; out vec4 o; void main(){ o = vec4(vCol * vA, 1.0); }`
+      : `precision highp float; in vec3 vCol; in float vA; out vec4 o; uniform float mode;
+    void main(){ vec2 c = gl_PointCoord * 2.0 - 1.0; float r2 = dot(c, c); if (r2 > 1.0) discard;
+      if (mode < 0.5) { float a = clamp((1.0 - r2) / max(fwidth(r2), 1e-4), 0.0, 1.0); o = vec4(vCol * (0.8 + 0.2 * sqrt(1.0 - r2)), a); } else o = vec4(vCol * vA * exp(-3.5 * r2) * (1.0 - r2), 1.0); }`,
+    transparent: soft, alphaToCoverage: !soft && VHI, depthWrite: !soft, depthTest: mode !== 2, blending: soft ? THREE.AdditiveBlending : THREE.NormalBlending });
+  return m;
+}
+const pMat = { uniforms: pUniforms };
+const idxGeoE = idxGeo.clone(); idxGeoE.setAttribute('endv', new THREE.BufferAttribute(new Float32Array(N), 1));
+const points = new THREE.Points(idxGeoE, partMat(0)), ejecta = new THREE.Points(idxGeoE, partMat(1)), hotGlow = new THREE.Points(idxGeoE, partMat(2));
+const streakGeo = new THREE.BufferGeometry();
+{ const ix = new Float32Array(2 * N), ev = new Float32Array(2 * N); for (let i = 0; i < N; i++) { ix[2*i] = ix[2*i+1] = i; ev[2*i+1] = 1; }
+  streakGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6 * N), 3));
+  streakGeo.setAttribute('idx', new THREE.BufferAttribute(ix, 1)); streakGeo.setAttribute('endv', new THREE.BufferAttribute(ev, 1)); }
+const streaks = new THREE.LineSegments(streakGeo, partMat(3));
+for (const o of [points, ejecta, hotGlow, streaks]) { o.frustumCulled = false; scene.add(o); }
+points.renderOrder = 0; streaks.renderOrder = 5; ejecta.renderOrder = 6; hotGlow.renderOrder = 7;
+
+
+// ================= DUAL-MESH CRUST DEFORMATION =================
+// Per body: an outer crust mesh and an inner molten-mantle mesh, both displaced every frame from an equirectangular
+// surface map built on the GPU (nearby pressurised particles splat (radius, u) with MAX blending, then a smoothing
+// dilation fills gaps). Crust is depressed (cratered) where impact heating from dissipated kinetic energy is high and
+// tears open (discard) to reveal the glowing molten mesh beneath. Disc/ejecta material remains as particles.
+const MAPW = 256, MAPH = 128;   // particle-resolution surface map (bilinear); fine detail is procedural in the crust shader
+const shock = { t0: -1, n: { value: new THREE.Vector3(1, 0, 0) }, t: { value: -1 }, tNone: { value: -1 }, p: new THREE.Vector3() };
+const NOISE = `float hash(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float noise(vec3 x){ vec3 i = floor(x), f = fract(x); f = f*f*(3.0-2.0*f);
+  return mix(mix(mix(hash(i), hash(i+vec3(1,0,0)), f.x), mix(hash(i+vec3(0,1,0)), hash(i+vec3(1,1,0)), f.x), f.y),
+             mix(mix(hash(i+vec3(0,0,1)), hash(i+vec3(1,0,1)), f.x), mix(hash(i+vec3(0,1,1)), hash(i+vec3(1,1,1)), f.x), f.y), f.z); }`;
+const FBM = `float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 5; i++) { s += a * noise(p); p = p * 2.03 + 1.7; a *= 0.5; } return s; }`;
+function makeCrust(bodyId, centreRef, Rbody, cols, tShock) {
+  const gasB = !!(cols.T && cols.T.gas), SPX = SPACING * (gasB ? GF : 1);
+  const raw = mkRT(MAPW, MAPH), map = mkRT(MAPW, MAPH, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, wrapS: THREE.RepeatWrapping });
+  const splat = pointMat(`uniform sampler2D pos, vel, attr, dens; uniform vec3 centre; uniform float rmax; uniform int body; in float idx; out vec4 vD;
+      void main(){ int i = int(idx); vec4 p = texelFetch(pos, I2(i), 0); vec3 d = p.xyz - centre; float r = length(d);
+        bool ok = p.w > 0.0 && r < rmax && r > 1e-4 && (body < 0 || int(texelFetch(attr, I2(i), 0).x + 0.5) == body) && texelFetch(dens, I2(i), 0).y > 0.0;
+        if (!ok) { gl_Position = vec4(9.0, 9.0, 9.0, 1.0); gl_PointSize = 0.0; return; }
+        vec3 n = d / r; float lon = atan(-n.z, n.x), lat = asin(clamp(n.y, -1.0, 1.0));
+        vec2 uv = vec2(lon / (2.0 * PI) + 0.5, lat / PI + 0.5);
+        vD = vec4(r, ${gasB ? '(texelFetch(attr, I2(i), 0).z > 2.5 ? max(texelFetch(vel, I2(i), 0).w - 1.5 * texelFetch(attr, I2(i), 0).w, 0.0) * 0.5 : texelFetch(vel, I2(i), 0).w)' : 'texelFetch(vel, I2(i), 0).w'}, 1.0, 1.0); gl_PointSize = min(${(SPX * 1.4 * MAPH / Math.PI).toFixed(3)} / r / max(cos(lat), 0.2), 64.0);
+        gl_Position = vec4(uv * 2.0 - 1.0, 0.0, 1.0); }`, null,
+    { pos: { value: null }, vel: { value: null }, attr: { value: attrTex }, dens: { value: densRT.texture }, centre: { value: centreRef }, rmax: { value: Rbody * 1.45 }, body: { value: bodyId } },
+    THREE.MaxEquation);
+  const sc = pointScene(splat);
+  const dilate = cmat(`uniform sampler2D src;
+    void main(){ ivec2 f = ivec2(gl_FragCoord.xy); float wsum = 0.0; vec4 acc = vec4(0.0);
+      for (int y = -3; y <= 3; y++) for (int x = -3; x <= 3; x++) { ivec2 g = ivec2((f.x + x + ${MAPW}) % ${MAPW}, clamp(f.y + y, 0, ${MAPH - 1}));
+        vec4 s = texelFetch(src, g, 0); if (s.z > 0.0) { float w = exp(-0.25 * float(x*x + y*y)); acc += s * w; wsum += w; } }
+      fragOut = wsum > 0.0 ? acc / wsum : vec4(0.0); }`, { src: { value: raw.texture } });
+  const geo = VHI ? new THREE.SphereGeometry(1, 512, 256) : new THREE.SphereGeometry(1, 192, 96);
+  const VS = 'precision highp float;\nconst float PI = 3.141592653589793;\n' + `uniform sampler2D map; uniform vec3 centre, contactN; uniform float inset, pad, tShock; out vec3 vN; out vec3 vW; out float vHeat; out float vOk; out float vRip;
+    float ripple(vec3 n){ if (tShock < 0.0) return 0.0;      // shock front running over the surface from the contact point (and refocusing at the antipode)
+      float ang = acos(clamp(dot(n, contactN), -1.0, 1.0)), x = ang - min(0.55 * tShock, 3.1416);
+      return 0.05 * exp(-0.3 * tShock) * exp(-x * x / 0.05) * cos(x * 22.0); }
+    vec3 P(vec2 t){ vec4 m = texture(map, t); float lon = (t.x - 0.5) * 2.0 * PI, lat = (t.y - 0.5) * PI;
+      vec3 n = vec3(cos(lat) * cos(lon), sin(lat), -cos(lat) * sin(lon));
+      float crater = 0.05 * smoothstep(0.08, 0.6, m.y);              // heat (dissipated KE) -> crater depression
+      return centre + n * max(m.x + pad - crater - inset + ripple(n), 0.0); }
+    void main(){ vec4 m = texture(map, uv); vOk = m.z; vHeat = m.y; { float lon = (uv.x - 0.5) * 2.0 * PI, lat = (uv.y - 0.5) * PI; vRip = ripple(vec3(cos(lat) * cos(lon), sin(lat), -cos(lat) * sin(lon))); }
+      vec3 p = P(uv), pu = P(uv + vec2(1.0 / ${MAPW}.0, 0.0)), pv = P(uv + vec2(0.0, 1.0 / ${MAPH}.0));
+      vN = cross(pu - p, pv - p); if (dot(vN, vN) < 1e-14) vN = p - centre; vN = normalize(vN); if (dot(vN, p - centre) < 0.0) vN = -vN;
+      vW = p; gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0); }`;
+  const FS = 'precision highp float;\n' + NOISE + FBM + HEATGLSL + `in vec3 vN; in vec3 vW; in float vHeat; in float vOk; in float vRip; uniform vec3 sunDir, col; uniform float molten; out vec4 o;
+    void main(){ if (vOk < 0.5) discard;
+      if (molten > 0.5) { o = vec4(vec3(0.35, 0.07, 0.01) + min(heatColour(max(vHeat, 0.12)) * 0.4, vec3(0.8)), 1.0); return; }
+      float n = noise(vW * 9.0) * 0.6 + noise(vW * 23.0) * 0.4;
+      float melt = smoothstep(0.045, 0.3, vHeat);
+      if (n < melt) discard;                                          // crust torn open -> molten mesh shows through
+      vec3 N = normalize(vN);
+      ${VHI ? `vec3 q = vW * 14.0; float f0 = fbm(q); const float e = 0.02;      // procedural terrain: bump-mapped fbm + albedo variation + dark maria
+      vec3 gr = vec3(fbm(q + vec3(e, 0, 0)), fbm(q + vec3(0, e, 0)), fbm(q + vec3(0, 0, e))) - f0;
+      N = normalize(N - 0.9 * (gr / e - N * dot(gr / e, N)) * 0.22);
+      float maria = smoothstep(0.45, 0.62, noise(vW * 2.3 + 7.0));
+      vec3 alb = col * (0.45 + 1.1 * f0) * mix(1.0, 0.55, maria) * (0.85 + 0.3 * n);` : `vec3 alb = col * (0.75 + 0.5 * n);`}
+      float lam = 0.02 + 1.6 * max(dot(N, sunDir), 0.0);
+      vec3 c = alb * lam;
+      c += vec3(1.0, 0.35, 0.05) * smoothstep(0.0, 0.08, melt - n + 0.08) * 1.0 * melt;   // glowing crack rims
+      c += vec3(1.0, 0.45, 0.15) * smoothstep(0.0, 0.03, vRip) * 0.8 + vec3(0.25, 0.08, 0.02) * smoothstep(0.0, 0.02, -vRip);                       // shocked, heated ripple crest
+      o = vec4(c, 1.0); }`;
+  // Gas giant: soft cloud deck at the top of the envelope (no crust) with procedural zonal bands; shocked gas tears it open
+  const FSG = 'precision highp float;\n' + NOISE + FBM + HEATGLSL + `in vec3 vN; in vec3 vW; in float vHeat; in float vOk; in float vRip; uniform vec3 sunDir, col, centre, b0, b1; uniform float molten; out vec4 o;
+    void main(){ if (vOk < 0.5 || molten > 0.5) discard;
+      vec3 n = normalize(vW - centre); float w = fbm(n * 3.0 + 4.0), t = noise(n * 22.0);
+      if (t < smoothstep(0.05, 0.4, vHeat)) discard;                    // envelope blown open
+      float band = sin(n.y * 19.0 + 3.2 * (w - 0.5) + 1.3 * sin(n.y * 7.0));
+      vec3 alb = mix(b0, b1, smoothstep(-0.55, 0.55, band)) * (0.88 + 0.24 * fbm(vec3(n.y * 40.0, n.x * 4.0 + w * 3.0, n.z * 4.0)));
+      vec3 N = normalize(vN); float lam = 0.03 + 1.0 * smoothstep(-0.15, 1.0, dot(N, sunDir));   // soft terminator (no hard surface)
+      o = vec4(alb * lam + min(heatColour(vHeat) * 0.5, vec3(0.8)), 1.0); }`;
+  const mk = (molten) => new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, vertexShader: VS, fragmentShader: gasB ? FSG : FS,
+    uniforms: { map: { value: map.texture }, centre: { value: centreRef }, inset: { value: molten ? SPX * 0.6 : 0 }, pad: { value: SPX * 0.55 },
+      sunDir: { value: sunDir }, col: { value: col(cols.crust) }, molten: { value: molten ? 1 : 0 }, contactN: shock.n, tShock,
+      ...(gasB ? { b0: { value: col(cols.T.band[0]) }, b1: { value: col(cols.T.band[1]) } } : {}) } });
+  const crust = new THREE.Mesh(geo, mk(false)), molten = new THREE.Mesh(geo, mk(true));
+  crust.frustumCulled = molten.frustumCulled = false;
+  scene.add(molten, crust);
+  return {
+    crust, molten, visible: true,
+    update() {
+      crust.visible = molten.visible = this.visible && crustDeformation.enabled && !(cols.T && cols.T.bh); if (gasB) molten.visible = false;
+      if (!crust.visible) return;
+      splat.uniforms.pos.value = posTex(); splat.uniforms.vel.value = velTex();
+      clearRT(raw); renderer.render(sc, camera); run(dilate, map);
+    },
+  };
+}
+const crustDeformation = {
+  enabled: !params.has('nomesh'), earth: null, theia: null,
+  init() {
+    this.earth = makeCrust(BODY.earth.T.gas ? 0 : -1, pMat.uniforms.centreE.value, RE_, BODY.earth, shock.t);         // remnant: all pressurised material nearby
+    this.theia = makeCrust(1, pMat.uniforms.centreT.value, BODY.theia.R, BODY.theia, shock.tNone);  // Theia: its own particles until disrupted
+  },
+  every: 1, frame: 0,
+  update() { if (this.frame++ % this.every) return; this.earth.update(); this.theia.update(); },
+};
+crustDeformation.init();
+
+// HOOK(phase 3) ATMOSPHERIC SCATTERING: ray-marched Rayleigh/Mie shell around proto-Earth (+ silicate vapour plume).
+const atmosphere = (() => {
+  const RA = 1.22;
+  const u = { rs: { value: RE_ }, tint: { value: new THREE.Vector3(...BODY.earth.T.tint).multiplyScalar(BODY.earth.T.atmo) }, centre: { value: pMat.uniforms.centreE.value }, sunDir: { value: sunDir }, impactDir: shock.n, strip: { value: 0 }, heat: { value: 0 }, steps: { value: 16 } };
+  const mat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms: u, side: THREE.BackSide, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `out vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+    fragmentShader: `precision highp float; in vec3 vW; uniform vec3 centre, sunDir, impactDir, tint; uniform float strip, heat, rs; uniform int steps; out vec4 o;
+      const float RP = 1.0, RA = ${RA.toFixed(2)};
+      const vec3 BR = vec3(5.8, 13.5, 33.1) * 1.4; const float BM = 6.0;
+      vec2 isect(vec3 ro, vec3 rd, float R){ float b = dot(ro, rd), c = dot(ro, ro) - R * R, d = b * b - c; if (d < 0.0) return vec2(1e9, -1e9); d = sqrt(d); return vec2(-b - d, -b + d); }
+      float densF(vec3 p, float hs){ float h = length(p) - RP; float s = smoothstep(0.1, 0.9, dot(normalize(p), impactDir));
+        return exp(-max(h, 0.0) / hs) * (1.0 - strip * (0.35 + 0.65 * s)); }          // impact hemisphere stripped first
+      void main(){ vec3 ro = (cameraPosition - centre) / rs, rd = normalize(vW - cameraPosition);
+        vec2 a = isect(ro, rd, RA); if (a.y < 0.0) discard;
+        float t0 = max(a.x, 0.0), t1 = a.y; vec2 pl = isect(ro, rd, RP); if (pl.x > 0.0) t1 = min(t1, pl.x);
+        float dt = (t1 - t0) / float(steps); vec3 sR = vec3(0.0), sM = vec3(0.0), em = vec3(0.0); float odR = 0.0, odM = 0.0;
+        for (int i = 0; i < 32; i++) { if (i >= steps) break;
+          vec3 p = ro + rd * (t0 + (float(i) + 0.5) * dt);
+          float dR = densF(p, 0.05) * dt, dM = densF(p, 0.022) * dt; odR += dR; odM += dM;
+          if (isect(p, sunDir, RP).x > 0.0) { em += exp(-BR * odR) * dR; continue; }
+          float ls = isect(p, sunDir, RA).y / 4.0, lR = 0.0, lM = 0.0;
+          for (int j = 0; j < 4; j++) { vec3 q = p + sunDir * (float(j) + 0.5) * ls; lR += densF(q, 0.05) * ls; lM += densF(q, 0.022) * ls; }
+          vec3 att = exp(-(BR * (odR + lR) + BM * 1.1 * (odM + lM)));
+          sR += att * dR; sM += att * dM; em += exp(-BR * odR) * dR; }
+        float mu = dot(rd, sunDir), g = 0.76;
+        float phR = 0.0597 * (1.0 + mu * mu), phM = 0.1194 * ((1.0 - g * g) * (1.0 + mu * mu)) / ((2.0 + g * g) * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
+        vec3 c = 0.7 * (sR * BR * phR + sM * BM * phM) + heat * vec3(1.0, 0.32, 0.07) * em * 1.8;   // + glow of shock-heated air
+        o = vec4(c * tint, 1.0); }` });
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(RA, 64, 32), mat); mesh.frustumCulled = false; mesh.renderOrder = 8; scene.add(mesh);
+  return { enabled: !params.has('noatmo'), uniforms: u, init() {},
+    update(tS) { mesh.visible = this.enabled && BODY.earth.T.atmo > 0; mesh.position.copy(u.centre.value); mesh.scale.setScalar(RE_);
+      u.strip.value = tS < 0 ? 0 : 0.85 * Math.min(1, tS / 4);
+      u.heat.value = tS < 0 ? 0 : Math.exp(-tS / 6) * Math.min(1, tS / 0.3); } };
+})();
+// Contact flash (sprite) + expanding hot shock shell
+const flash = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, '#fff'); gr.addColorStop(0.2, 'rgba(255,230,180,0.9)'); gr.addColorStop(0.5, 'rgba(255,140,40,0.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: Object.assign(new THREE.CanvasTexture(cv), { anisotropy: renderer.capabilities.getMaxAnisotropy() }), blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, transparent: true, color: new THREE.Color(1.1, 0.8, 0.55) }));
+  const shellMat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { op: { value: 0 } },
+    vertexShader: `out vec3 vN; out vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `precision highp float; in vec3 vN; in vec3 vV; uniform float op; out vec4 o; void main(){ float f = pow(1.0 - abs(dot(vN, vV)), 3.0); o = vec4(vec3(1.0, 0.55, 0.2) * f * op * 1.2, 1.0); }` });
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 24), shellMat);
+  sprite.renderOrder = shell.renderOrder = 9; scene.add(sprite, shell);
+  return { update(tS) { const on = tS >= 0 && tS < 5; sprite.visible = shell.visible = on; if (!on) return;
+    sprite.position.copy(shock.p); shell.position.copy(shock.p);
+    sprite.scale.setScalar(0.4 + 1.3 * Math.sqrt(tS)); sprite.material.opacity = 0.7 * Math.exp(-tS / 0.35) * Math.min(1, tS / 0.08);
+    shell.scale.setScalar(0.15 + 0.9 * tS); shellMat.uniforms.op.value = Math.exp(-tS / 1.0) * Math.min(1, tS / 0.1); } };
+})();
+
+// ---------------- Post-processing ----------------
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(VW() * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: VHI ? 4 : 0 })); let bloom;
+composer.addPass(new RenderPass(scene, camera));
+// Black hole visuals: horizon sphere, screen-space point-lens distortion (visual effect only; dynamics are Newtonian),
+// photon-ring glow, optional jets (?jets) along the debris angular momentum.
+const bhVis = (() => {
+  if (!BH) return null;
+  const hole = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 24), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+  hole.scale.setScalar(RE_); hole.renderOrder = 1; scene.add(hole);
+  const lens = new ShaderPass({ uniforms: { tDiffuse: { value: null }, c: { value: new THREE.Vector2(0.5, 0.5) }, asp: { value: 1 }, tE: { value: 0 }, tS: { value: 0 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 c; uniform float asp, tE, tS; varying vec2 vUv;
+      void main(){ vec2 d = (vUv - c) * vec2(asp, 1.0); float th = length(d);
+        if (tE <= 0.0 || th < 1e-5) { gl_FragColor = texture2D(tDiffuse, vUv); return; }
+        float be = th - tE * tE / th;                                  // point-lens map: source angle β = θ - θE²/θ
+        vec2 src = c + d / th * be / vec2(asp, 1.0);
+        vec3 col = texture2D(tDiffuse, src).rgb * smoothstep(tS * 0.98, tS * 1.04, th);      // shadow ≈ 2.6 r_h
+        float ring = exp(-pow((th - tS * 1.03) / (0.035 * tS + 1e-4), 2.0));                  // photon ring
+        gl_FragColor = vec4(col + vec3(1.0, 0.82, 0.6) * ring * 0.9, 1.0); }` });
+  composer.addPass(lens);
+  const jetMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'varying vec2 vUv; void main(){ float a = (1.0 - vUv.y) * 0.9 + 0.1; gl_FragColor = vec4(vec3(0.55, 0.7, 1.0) * a * 0.35, 1.0); }' });
+  const jets = new THREE.Group(); for (const sgn of [1, -1]) { const m = new THREE.Mesh(new THREE.CylinderGeometry(RE_ * 1.2, RE_ * 0.25, RE_ * 30, 24, 1, true), jetMat);
+    m.position.y = sgn * RE_ * 15; m.rotation.x = sgn > 0 ? Math.PI : 0; jets.add(m); }
+  jets.visible = false; scene.add(jets);
+  const pos = new THREE.Vector3(), axis = new THREE.Vector3(0, 1, 0), wantJets = params.has('jets');
+  return { update(d) { pos.copy(d.rem.c); hole.position.copy(pos); jets.position.copy(pos);
+      if (wantJets && d.L > 0) { jets.visible = d.disc > 0.05 * SETUP.mi; } },
+    frame() { const v = pos.clone().project(camera), D = camera.position.distanceTo(pos), f = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+      const tE = Math.sqrt(2 * RE_ / D), ok = v.z < 1 && D > 2 * RE_;
+      lens.uniforms.c.value.set(v.x * 0.5 + 0.5, v.y * 0.5 + 0.5); lens.uniforms.asp.value = camera.aspect;
+      lens.uniforms.tE.value = ok ? 0.5 * tE / f : 0; lens.uniforms.tS.value = ok ? 0.5 * 2.6 * RE_ / D / f : 0; },
+    setAxis(a) { axis.copy(a).normalize(); jets.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis); } };
+})();
+composer.addPass(bloom = new UnrealBloomPass(new THREE.Vector2(VW(), innerHeight), 0.45, 0.45, 0.92));   // cinematic: high threshold, wide soft halo
+composer.addPass(new OutputPass());
+composer.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'uniform sampler2D tDiffuse; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }\n void main(){ vec4 c = texture2D(tDiffuse, vUv); float d = (h(gl_FragCoord.xy) + h(gl_FragCoord.xy + 17.3) - 1.0) / 255.0; gl_FragColor = vec4(c.rgb + d, c.a); }' }));   // triangular dither: kills 8-bit bloom banding
+
+// ---------------- Diagnostics: budgets and disc ----------------
+function readRT(rt) { const b = new Float32Array(rt.width * rt.height * 4); renderer.readRenderTargetPixels(rt, 0, 0, rt.width, rt.height, b); return b; }
+const attr = init.attr;
+function remnantCentre(pos, vel, guess, R) {
+  const c = guess.clone(), v = new THREE.Vector3(); let m = 0;
+  for (let it = 0; it < 4; it++) {
+    const s = new THREE.Vector3(); v.set(0, 0, 0); m = 0;
+    for (let i = 0; i < NACT; i++) { const w = pos[i*4+3], dx = pos[i*4]-c.x, dy = pos[i*4+1]-c.y, dz = pos[i*4+2]-c.z;
+      if (dx*dx + dy*dy + dz*dz < R*R) { s.x += w*pos[i*4]; s.y += w*pos[i*4+1]; s.z += w*pos[i*4+2]; v.x += w*vel[i*4]; v.y += w*vel[i*4+1]; v.z += w*vel[i*4+2]; m += w; } }
+    if (m > 0) { c.copy(s.divideScalar(m)); v.divideScalar(m); }
+  }
+  return { c, v, m };
+}
+function theiaCentre(pos) { const c = new THREE.Vector3(); let m = 0;
+  for (let i = 0; i < NACT; i++) if (attr[i*4] > 0.5) { const w = pos[i*4+3]; c.x += w*pos[i*4]; c.y += w*pos[i*4+1]; c.z += w*pos[i*4+2]; m += w; }
+  return c.divideScalar(m); }
+let E0 = null, cEst = init.cE.clone();
+function diagnostics(pos, vel, phi) {
+  let Px = 0, Py = 0, Pz = 0, KE = 0, U = 0, PE = 0, M = 0, Lx = 0, Ly = 0, Lz = 0;
+  for (let i = 0; i < NACT; i++) { const m = pos[i*4+3], vx = vel[i*4], vy = vel[i*4+1], vz = vel[i*4+2], x = pos[i*4], y = pos[i*4+1], z = pos[i*4+2];
+    Px += m*vx; Py += m*vy; Pz += m*vz; KE += 0.5*m*(vx*vx+vy*vy+vz*vz); U += m*vel[i*4+3]; M += m; PE += 0.5 * m * phi[i*4+3];
+    Lx += m*(y*vz - z*vy); Ly += m*(z*vx - x*vz); Lz += m*(x*vy - y*vx); }
+  let rem;
+  if (BH) { const b = bh.read(), m = b[3];   // black hole: a body of the system (momentum, KE); the remnant is the hole
+    Px += m*b[4]; Py += m*b[5]; Pz += m*b[6]; KE += 0.5*m*(b[4]**2 + b[5]**2 + b[6]**2); M += m;
+    Lx += m*(b[1]*b[6] - b[2]*b[5]); Ly += m*(b[2]*b[4] - b[0]*b[6]); Lz += m*(b[0]*b[5] - b[1]*b[4]);
+    rem = { c: new THREE.Vector3(b[0], b[1], b[2]), v: new THREE.Vector3(b[4], b[5], b[6]), m, swallowed: b[7] };
+    const h = new THREE.Vector3(); for (let i = 0; i < NACT; i++) { const w = pos[i*4+3]; if (!w) continue; const dx = pos[i*4]-b[0], dy = pos[i*4+1]-b[1], dz = pos[i*4+2]-b[2], vx = vel[i*4]-b[4], vy = vel[i*4+1]-b[5], vz = vel[i*4+2]-b[6];
+      h.x += w*(dy*vz - dz*vy); h.y += w*(dz*vx - dx*vz); h.z += w*(dx*vy - dy*vx); } if (h.lengthSq() > 0 && bhVis) bhVis.setAxis(h); }
+  // disc analysis about the largest remnant (Canup-style equivalent circular orbit a_eq = h²/(G·M_p))
+  else rem = remnantCentre(pos, vel, cEst, 1.3 * RE_); cEst.copy(rem.c);
+  let disc = 0, roche = 0, esc = 0, orbiting = 0;
+  for (let i = 0; i < NACT; i++) { const m = pos[i*4+3];
+    const dx = pos[i*4]-rem.c.x, dy = pos[i*4+1]-rem.c.y, dz = pos[i*4+2]-rem.c.z, r = Math.hypot(dx, dy, dz);
+    if (r < 1.3 * RE_) continue;
+    const vx = vel[i*4]-rem.v.x, vy = vel[i*4+1]-rem.v.y, vz = vel[i*4+2]-rem.v.z;
+    const E = 0.5*(vx*vx+vy*vy+vz*vz) - rem.m / r;
+    if (E >= 0) { esc += m; continue; }
+    const hx = dy*vz - dz*vy, hy = dz*vx - dx*vz, hz = dx*vy - dy*vx, h2 = hx*hx + hy*hy + hz*hz;
+    const aeq = h2 / rem.m, e = Math.sqrt(Math.max(0, 1 + 2*E*h2/(rem.m*rem.m))), q = aeq / (1 + e);
+    if (aeq > RP) disc += m;
+    if (q > RP) orbiting += m;
+    if (aeq > ROCHE) roche += m;
+  }
+  const E = KE + U + PE;
+  if (E0 === null) E0 = E;
+  return { P: [Px, Py, Pz], Pmag: Math.hypot(Px, Py, Pz), L: Math.hypot(Lx, Ly, Lz), KE, U, PE, E, dE: (E - E0) / Math.abs(E0), M, rem, disc, orbiting, roche, esc, t: simStep * DT };
+}
+
+// ---------------- Snapshots & time controls ----------------
+const snaps = []; let simStep = 0;
+const scrub = document.getElementById('scrub'), budgetEl = document.getElementById('budget');
+const fmt = (x, d = 4) => (Math.abs(x) < 1e-3 && x !== 0 ? x.toExponential(2) : x.toFixed(d));
+function takeSnap(record = true) {
+  computeForces(true);                               // diagnostic pass: φ per particle
+  const pos = readRT(posRT[pc]), vel = readRT(velRT[vc]), phi = readRT(diagRT);
+  const d = diagnostics(pos, vel, phi);
+  // Momentum guard: grid gravity is not exactly pairwise-symmetric, so net momentum (target 0) is removed on the next
+  // kick. SPH forces are pairwise antisymmetric. The HUD shows the drift accumulated since the previous snapshot.
+  const Mp = BH ? d.M - d.rem.m : d.M;   // black hole: correct particles only, so that total (particles + hole) P stays 0
+  kickMat.uniforms.vCorr.value.set(-d.P[0] / Mp, -d.P[1] / Mp, -d.P[2] / Mp); if (BH) pMat.uniforms.bhV.value.copy(d.rem.v), bhVis.update(d);
+  pMat.uniforms.centreE.value.copy(d.rem.c);
+  const tc = theiaCentre(pos); pMat.uniforms.centreT.value.copy(tc);
+  let near = 0, tot = 0;
+  for (let i = 0; i < NACT; i++) if (attr[i*4] > 0.5) { tot++; if (Math.hypot(pos[i*4]-tc.x, pos[i*4+1]-tc.y, pos[i*4+2]-tc.z) < 1.25 * BODY.theia.R) near++; }
+  crustDeformation.theia.visible = near / tot > 0.85 && tc.distanceTo(d.rem.c) > 1.2 * RE_;
+  const tnow = simStep * DT;
+  if (shock.t0 >= 0 && tnow < shock.t0) shock.t0 = -1;                     // scrubbed back before contact
+  if (!BH && shock.t0 < 0 && tc.distanceTo(d.rem.c) < RE_ + BODY.theia.R + 0.1) {
+    shock.t0 = tnow; shock.n.value.copy(tc).sub(d.rem.c).normalize(); shock.p.copy(d.rem.c).addScaledVector(shock.n.value, RE_); }
+  if (record) {
+    snaps.push({ step: simStep, pos, vel, ...(BH ? { bh: bh.read() } : {}) });
+    if (snaps.length > MAX_SNAPS) snaps.splice(1, 1);
+    scrub.max = snaps.length - 1; scrub.value = snaps.length - 1;
+  }
+  const Mt = d.M;
+  budgetEl.innerHTML =
+    `<span class="k">Momentum</span> |P| drift ${fmt(d.Pmag)} (guarded) &middot; <span class="k">|L|</span> ${fmt(d.L)}<br>` +
+    `<span class="k">Energy</span> KE ${fmt(d.KE)} &middot; U ${fmt(d.U)} &middot; PE ${fmt(d.PE)} &middot; E ${fmt(d.E)} (&Delta;E/|E₀| ${(d.dE * 100).toFixed(2)}%)<br>` +
+    (BH ? `<span class="k">Swallowed</span> ${fmt(d.rem.swallowed)} M⊕ (${(d.rem.swallowed / SETUP.mi * 100).toFixed(1)}% of planet; its energy leaves the budget) &middot; ` : '') +
+    `<span class="k">${BH ? 'Black hole' : 'Remnant'}</span> ${(d.rem.m / Mt * 100).toFixed(1)}% &middot; <span class="k">disc</span> (a<sub>eq</sub>&gt;R<sub>p</sub>) ${(d.disc / Mt * 100).toFixed(2)}% &middot; ` +
+    `<span class="k">orbiting</span> (q&gt;R<sub>p</sub>) ${(d.orbiting / Mt * 100).toFixed(2)}%<br><span class="k">beyond Roche</span> (a<sub>eq</sub>&gt;2.9 R⊕) ${(d.roche / Mt * 100).toFixed(2)}% &middot; <span class="k">escaped</span> ${(d.esc / Mt * 100).toFixed(2)}%`;
+  return d;
+}
+function loadSnap(s) { if (BH) { const b = s.bh || init.bh; bh.set(new THREE.Vector3(b[0], b[1], b[2]), new THREE.Vector3(b[4], b[5], b[6]), b[3], b[7]); } upload(s.pos, posRT[pc]); upload(s.vel, velRT[vc]); simStep = s.step; computeForces(); takeSnap(false); }
+
+let playing = STARTED && !params.has('paused'), stepsPerFrame = 2;
+const playBtn = document.getElementById('play');
+const setPlay = p => { playing = p; playBtn.innerHTML = p ? '&#10074;&#10074; Pause' : '&#9654; Play'; };
+setPlay(playing);
+if (!STARTED) { for (const id of ['play', 'reset', 'scrub', 'speed']) document.getElementById(id).disabled = true; document.getElementById('prompt').style.display = 'block'; }
+else document.getElementById('su_apply').innerHTML = '&#9654; Start with these settings';
+addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input,select,textarea')) return; if (e.code === 'Space' || e.key === 'p' || e.key === 'P') { e.preventDefault(); playBtn.click(); } });
+playBtn.onclick = () => { if (!playing && +scrub.value < snaps.length - 1) snaps.length = +scrub.value + 1; setPlay(!playing); };
+scrub.oninput = () => { setPlay(false); loadSnap(snaps[+scrub.value]); };
+document.getElementById('speed').onchange = e => stepsPerFrame = +e.target.value;
+document.getElementById('reset').onclick = () => { snaps.length = 0; cEst.copy(init.cE); loadSnap({ step: 0, pos: init.pos, vel: init.vel }); takeSnap(); setPlay(true); };
+function step(n) { for (let i = 0; i < n; i++) { physicsStep(); simStep++; if (simStep % SNAP_EVERY === 0) takeSnap(); } }
+
+// ---------------- Hydrostatic relaxation of both bodies, then launch ----------------
+function relax() {
+  const n = +(params.get('relax') || 400);
+  upload(init.pos, posRT[pc]); upload(init.vel.map((x, i) => (i % 4 === 3 ? x : 0)), velRT[vc]);
+  if (BH) { bh.on = false; bh.set(init.cE, new THREE.Vector3(), SETUP.mt); bh.setCom(init.cT); }
+  computeForces();
+  kickMat.uniforms.damp.value = 0.03; kickMat.uniforms.relaxU.value = U0;
+  for (let i = 0; i < n; i++) physicsStep();
+  kickMat.uniforms.damp.value = 0; kickMat.uniforms.relaxU.value = 0;
+  const pos = readRT(posRT[pc]);
+  const cm = [new THREE.Vector3(), new THREE.Vector3()], mm = [0, 0];
+  for (let i = 0; i < NACT; i++) { const b = attr[i*4] > 0.5 ? 1 : 0, w = pos[i*4+3]; cm[b].x += w*pos[i*4]; cm[b].y += w*pos[i*4+1]; cm[b].z += w*pos[i*4+2]; mm[b] += w; }
+  cm[0].divideScalar(mm[0]); cm[1].divideScalar(mm[1]);
+  const vel = new Float32Array(N * 4);
+  for (let i = 0; i < NACT; i++) { const b = attr[i*4] > 0.5 ? 1 : 0, to = b ? init.cT : init.cE, v = b ? init.vT : init.vE;
+    pos[i*4] += to.x - cm[b].x; pos[i*4+1] += to.y - cm[b].y; pos[i*4+2] += to.z - cm[b].z; vel.set([v.x, v.y, v.z, attr[i*4+2] > 2.5 ? attr[i*4+3] : (b ? BODY.theia : BODY.earth).T.u0], i*4); }
+  init.pos = pos; init.vel = vel;
+  upload(pos, posRT[pc]); upload(vel, velRT[vc]);
+  if (BH) { bh.on = true; bh.set(init.cE, init.vE, SETUP.mt); init.bh = bh.read(); }
+  computeForces();
+}
+const statsEl = document.getElementById('stats');
+if (STARTED) { statsEl.textContent = 'Settling planets into equilibrium…';
+  await new Promise(res => requestAnimationFrame(() => setTimeout(res, 30))); relax(); }
+const d0 = takeSnap();
+
+// ---------------- Loop ----------------
+let frames = 0, last = performance.now(), fps = 0;
+function render() {
+  pMat.uniforms.pos.value = posTex(); pMat.uniforms.vel.value = velTex();
+  const tS = shock.t0 >= 0 ? simStep * DT - shock.t0 : -1; shock.t.value = tS;
+  crustDeformation.update(); atmosphere.update(tS); flash.update(tS); if (BH) bhVis.frame();
+  if (controls.autoRotate) controls.target.lerp(pMat.uniforms.centreE.value, 0.05);
+  controls.update(); renderer.setRenderTarget(null); renderer.setClearColor(BLACK, 1); renderer.clear(); composer.render();
+}
+function loop() {
+  requestAnimationFrame(loop);
+  if (playing) step(stepsPerFrame);
+  render();
+  frames++; const now = performance.now();
+  if (now - last > 500) { fps = frames * 1000 / (now - last); frames = 0; last = now;
+    if (STARTED) statsEl.textContent = `t = ${(simStep * DT).toFixed(2)} (≈${(simStep * DT * 806 / 3600).toFixed(1)} h) · ${NACT.toLocaleString('en-GB')} SPH particles (${QNAME}) · ${fps.toFixed(0)} FPS`;
+    adapt(); }
+}
+// ---------------- Adaptive quality: degrade rendering cost when FPS < 50, recover when > 58 ----------------
+const adaptEl = document.getElementById('adapt');
+let adaptive = !params.has('noadapt'), adaptLevel = 0, lowCnt = 0, highCnt = 0;
+const basePR = Math.min(devicePixelRatio, 2);
+function applyAdapt() {
+  const pr = [basePR, basePR, Math.max(basePR * 0.75, 1), 1, 0.75][adaptLevel];   // drop other costs first, render scale last
+  renderer.setPixelRatio(pr); composer.setPixelRatio(pr); composer.setSize(VW(), innerHeight);
+  pMat.uniforms.pxScale.value = innerHeight * pr; if (window.__starMat) __starMat.uniforms.pr.value = pr;
+  crustDeformation.every = adaptLevel >= 3 ? 3 : 1; streaks.visible = adaptLevel < 3;
+  atmosphere.uniforms.steps.value = adaptLevel >= 2 ? 8 : 16; bloom.enabled = adaptLevel < 4;
+  adaptEl.textContent = `Render scale ${pr.toFixed(2)}× · visual detail ${VHI ? 'High' : 'Low'}` + (adaptLevel ? ` · adaptive level ${adaptLevel}/4` : '') + (adaptLevel >= 4 && QNAME !== 'low' ? ' · try a lower particle quality' : '');
+}
+applyAdapt();
+function adapt() {
+  if (!adaptive || !playing || !STARTED) return;
+  if (fps < 50) { lowCnt++; highCnt = 0; } else if (fps > 58) { highCnt++; lowCnt = 0; } else { lowCnt = highCnt = 0; }
+  if (lowCnt >= 8 && adaptLevel < 4)   // only after sustained low FPS
+  { adaptLevel++; lowCnt = 0; applyAdapt(); }
+  if (highCnt >= 10 && adaptLevel > 0) { adaptLevel--; highCnt = 0; applyAdapt(); }
+}
+// ---------------- Quality selector, camera presets, cinematic auto-orbit ----------------
+const qSel = document.getElementById('quality'); qSel.value = QNAME;
+const vSel = document.getElementById('vdetail'); vSel.value = VHI ? 'high' : 'low';
+vSel.onchange = () => { const u = new URL(location.href); u.searchParams.set('vd', vSel.value); location.href = u.toString(); };
+function preset(name) {
+  const c = pMat.uniforms.centreE.value;
+  const off = name === 'disc' ? new THREE.Vector3(0, 13, 0.01) : name === 'impact'
+    ? (shock.t0 >= 0 ? shock.n.value.clone().multiplyScalar(2.6).add(new THREE.Vector3(0, 1.6, 0)).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.9) : new THREE.Vector3(-3.2, 1.5, 2.6))
+    : new THREE.Vector3(1.5 * SC, 7.5 * SC, 10 * SC);
+  controls.target.copy(c); camera.position.copy(c).add(off); controls.update();
+}
+document.getElementById('campreset').onchange = e => { if (e.target.value) preset(e.target.value); };
+const cineBtn = document.getElementById('cine');
+const zoomBy = f => { const t = controls.target, d = camera.position.clone().sub(t); const L = THREE.MathUtils.clamp(d.length() * f, controls.minDistance, controls.maxDistance); camera.position.copy(t).add(d.setLength(L)); controls.update(); };
+document.getElementById('zin').onclick = () => zoomBy(0.7); document.getElementById('zout').onclick = () => zoomBy(1 / 0.7);
+addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input,select,textarea')) return; if (e.key === '+' || e.key === '=') zoomBy(0.8); else if (e.key === '-' || e.key === '_') zoomBy(1.25); });
+cineBtn.onclick = () => { controls.autoRotate = !controls.autoRotate; controls.autoRotateSpeed = 0.6; cineBtn.style.borderColor = controls.autoRotate ? '#ffcf8a' : ''; };
+if (params.has('cinematic')) cineBtn.onclick();
+loop();
+addEventListener('resize', () => {
+  camera.aspect = VW() / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(VW(), innerHeight); composer.setSize(VW(), innerHeight);
+  pMat.uniforms.pxScale.value = innerHeight * renderer.getPixelRatio();
+  bloom.resolution.set(VW(), innerHeight);
+});
+window.__sim = {
+  N: NACT, NE, NT, H, DT, BH, GAS, RH: BH ? RE_ : 0, RTID, bhState: () => BH ? Array.from(bh.read()) : null, setup: SETUP, SPACING, MT: init.MT, tb: init.tb, setPlay, render,
+  step: n => { step(n); render(); },
+  simStepN: n => step(n),
+  get simStep() { return simStep; }, get fps() { return fps; }, diag: () => takeSnap(false),
+  timeSteps: n => { readRT(accRT); const t0 = performance.now(); for (let i = 0; i < n; i++) physicsStep(); readRT(accRT); return (performance.now() - t0) / n; },
+  cam: (x, y, z) => { camera.position.set(x, y, z); controls.target.set(0, 0, 0); controls.update(); },
+  getState: () => { const b64 = a => { const u8 = new Uint8Array(a.buffer); let s = ''; for (let i = 0; i < u8.length; i += 32768) s += String.fromCharCode.apply(null, u8.subarray(i, i + 32768)); return btoa(s); };
+    return { step: simStep, pos: b64(readRT(posRT[pc])), vel: b64(readRT(velRT[vc])), ...(BH ? { bh: Array.from(bh.read()) } : {}), t0: shock.t0, n: shock.n.value.toArray(), p: shock.p.toArray(), cEst: cEst.toArray() }; },
+  setState: st => { const f32 = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new Float32Array(u.buffer); };
+    shock.t0 = st.t0; shock.n.value.fromArray(st.n); shock.p.fromArray(st.p); cEst.fromArray(st.cEst);
+    if (BH && st.bh) { const b = st.bh; bh.set(new THREE.Vector3(b[0], b[1], b[2]), new THREE.Vector3(b[4], b[5], b[6]), b[3], b[7]); }
+    upload(f32(st.pos), posRT[pc]); upload(f32(st.vel), velRT[vc]); simStep = st.step; computeForces(); takeSnap(false); render(); },
+  preset, get contactT() { return shock.t0; }, get adaptLevel() { return adaptLevel; }, setAdaptive: a => { adaptive = a; },
+  ready: true, started: STARTED,
+};
+</script>
+<script>
+// ---- Procedural ambient soundtrack (Web Audio only; independent of the simulation loop) ----
+(function () {
+  const ROOT = 38;                                   // D2 (MIDI)
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  // D minor chords (offsets from D): i, bVI, iv, v, plus colour chords bII (Phrygian) and a tritone-tinged i(add#4)
+  const CHORDS = [[0,3,7,10],[-4,0,3,7],[5,8,12,15],[7,10,14,17],[1,5,8,12],[0,3,6,10]];
+  const PENTA = [0,3,5,7,10];                         // D minor pentatonic
+  function makeIR(ctx, secs) {
+    const n = Math.floor(ctx.sampleRate * secs), b = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.2) * (i < 400 ? i / 400 : 1); }
+    return b;
+  }
+  function build(ctx, out, rnd) {
+    rnd = rnd || Math.random;
+    const master = ctx.createGain(); master.gain.value = 0.7; master.connect(out);
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4; comp.connect(master);
+    const verb = ctx.createConvolver(); verb.buffer = makeIR(ctx, 7); const wet = ctx.createGain(); wet.gain.value = 0.75;
+    verb.connect(wet); wet.connect(comp);
+    const dry = ctx.createGain(); dry.gain.value = 0.45; dry.connect(comp);
+    // stereo ping-pong feedback delay
+    const dl = ctx.createDelay(3), dr = ctx.createDelay(3), fb = ctx.createGain(), pl = ctx.createStereoPanner(), pr = ctx.createStereoPanner();
+    dl.delayTime.value = 0.75; dr.delayTime.value = 1.125; fb.gain.value = 0.45; pl.pan.value = -0.8; pr.pan.value = 0.8;
+    const dIn = ctx.createGain(); dIn.gain.value = 0.5; const dlp = ctx.createBiquadFilter(); dlp.frequency.value = 2500;
+    dIn.connect(dl); dl.connect(dlp); dlp.connect(dr); dr.connect(fb); fb.connect(dl); dl.connect(pl); dr.connect(pr);
+    pl.connect(verb); pr.connect(verb); pl.connect(dry); pr.connect(dry);
+    const lfo = (f, a, target, off) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f; g.gain.value = a; o.connect(g); g.connect(target); if (off !== undefined) target.value = off; o.start(); return o; };
+    // drone: sine + saw on D, through a slowly sweeping lowpass
+    const dlpF = ctx.createBiquadFilter(); dlpF.type = 'lowpass'; dlpF.Q.value = 6; lfo(0.021, 220, dlpF.frequency, 320);
+    const dG = ctx.createGain(); dG.gain.value = 0.22; dlpF.connect(dG); dG.connect(dry); dG.connect(verb);
+    [[hz(ROOT), 'sine', 0.9], [hz(ROOT) * 1.003, 'sawtooth', 0.35], [hz(ROOT - 12), 'sine', 0.7], [hz(ROOT + 7) * 0.998, 'sawtooth', 0.18]]
+      .forEach(([f, t, a]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = t; o.frequency.value = f; g.gain.value = a; o.connect(g); g.connect(dlpF); o.start(); });
+    // pad bus: lowpass sweep, tremolo, phaser-ish allpass chain, autopan
+    const padF = ctx.createBiquadFilter(); padF.type = 'lowpass'; padF.Q.value = 3; lfo(0.033, 600, padF.frequency, 1100);
+    let node = padF; const aps = [];
+    for (let i = 0; i < 4; i++) { const ap = ctx.createBiquadFilter(); ap.type = 'allpass'; ap.Q.value = 4; lfo(0.07, 500, ap.frequency, 700 + i * 300); node.connect(ap); node = ap; aps.push(ap); }
+    const phMix = ctx.createGain(); padF.connect(phMix); node.connect(phMix);
+    const trem = ctx.createGain(); lfo(0.19, 0.18, trem.gain, 0.8); phMix.connect(trem);
+    const pan = ctx.createStereoPanner(); lfo(0.043, 0.6, pan.pan, 0); trem.connect(pan);
+    const padG = ctx.createGain(); padG.gain.value = 0.09; pan.connect(padG); padG.connect(dry); padG.connect(verb); padG.connect(dIn);
+    // bells
+    const bellBus = ctx.createGain(); bellBus.gain.value = 0.11; bellBus.connect(dIn); bellBus.connect(verb);
+    // rumble
+    const rumF = ctx.createBiquadFilter(); rumF.type = 'lowpass'; rumF.frequency.value = 140; const rumG = ctx.createGain(); rumG.gain.value = 0;
+    { const nb = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate), d = nb.getChannelData(0); let l = 0;
+      for (let i = 0; i < d.length; i++) { l = l * 0.98 + (Math.random() * 2 - 1) * 0.2; d[i] = l; }
+      const s = ctx.createBufferSource(); s.buffer = nb; s.loop = true; s.connect(rumF); rumF.connect(rumG); rumG.connect(comp); rumG.connect(verb); s.start(); }
+    const sub = ctx.createOscillator(), subG = ctx.createGain(); sub.frequency.value = hz(ROOT - 12); subG.gain.value = 0; sub.connect(subG); subG.connect(comp); sub.start();
+
+    let nextChord = ctx.currentTime + 0.1, nextBell = ctx.currentTime + 3, ci = 0;
+    function chord(t) {
+      const r = rnd(); ci = r < 0.12 ? 4 + (rnd() < 0.5 ? 0 : 1) : [0, 1, 2, 3][(ci < 4 ? ci + (rnd() < 0.7 ? 1 : 2) : 0) % 4];
+      const dur = 14 + rnd() * 10, att = 5, rel = 7;
+      CHORDS[ci].forEach(n => [-7, 7].forEach(cents => {   // 4 notes x 2 detuned = 8 voices, overlap -> <=16
+        const o = ctx.createOscillator(), g = ctx.createGain(); o.type = n % 2 ? 'triangle' : 'sawtooth';
+        o.frequency.value = hz(ROOT + 12 + n); o.detune.value = cents + (rnd() - 0.5) * 6;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.12, t + att); g.gain.setValueAtTime(0.12, t + dur - rel); g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(g); g.connect(padF); o.start(t); o.stop(t + dur + 0.1); }));
+      return dur - rel + 1;
+    }
+    function bell(t) {
+      const n = PENTA[Math.floor(rnd() * 5)] + 12 * (2 + Math.floor(rnd() * 2)), f = hz(ROOT + n);
+      const p = ctx.createStereoPanner(); p.pan.value = rnd() * 1.6 - 0.8; p.connect(bellBus);
+      [[1, 1], [2.76, 0.35], [5.4, 0.12]].forEach(([m, a]) => {      // inharmonic partials -> glassy bell
+        const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = f * m; o.detune.value = (rnd() - 0.5) * 20;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 4 / m + 1);
+        o.connect(g); g.connect(p); o.start(t); o.stop(t + 6); });
+    }
+    return {
+      master,
+      scheduleUntil(T) {
+        while (nextChord < T) nextChord += chord(nextChord);
+        while (nextBell < T) { if (rnd() < 0.85) bell(nextBell); nextBell += 2 + rnd() * 9 + (rnd() < 0.3 ? rnd() * 6 : 0); }
+      },
+      impact(t, s) { s = s || 1; t = t || ctx.currentTime;
+        [[rumG.gain, 0.9 * s], [subG.gain, 0.35 * s]].forEach(([p, a]) => { p.cancelScheduledValues(t); p.setValueAtTime(p.value, t); p.linearRampToValueAtTime(a, t + 2.5); p.exponentialRampToValueAtTime(0.001, t + 14); p.linearRampToValueAtTime(0, t + 14.1); });
+        rumF.frequency.setValueAtTime(80, t); rumF.frequency.linearRampToValueAtTime(260, t + 2.5); rumF.frequency.linearRampToValueAtTime(90, t + 12); },
+    };
+  }
+  // ---- live player ----
+  let ctx = null, eng = null, out = null, on = false, vol = 0.6, timer = null, lastC = -1;
+  const btn = document.getElementById('musicBtn'), sl = document.getElementById('musicVol');
+  function tick() {
+    if (!eng) return; eng.scheduleUntil(ctx.currentTime + 4);
+    try { const s = window.__sim, c = s ? s.contactT : -1;
+      if (typeof c === 'number') { if (c >= 0 && lastC < 0 && on) eng.impact(); lastC = c; } } catch (e) {}
+  }
+  function setOn(v) {
+    on = v;
+    if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; ctx = new AC();
+      out = ctx.createGain(); out.gain.value = 0; out.connect(ctx.destination); eng = build(ctx, out); timer = setInterval(tick, 500); tick(); }
+    if (ctx.state === 'suspended') ctx.resume();
+    const t = ctx.currentTime, g = out.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(on ? vol : 0, t + 2);
+    btn.innerHTML = on ? '&#127925; Music: on' : '&#127925; Music: off'; btn.classList.toggle('on', on);
+  }
+  const save = () => { try { localStorage.setItem('pcMusic', on ? 'on' : 'off'); } catch (e) {} };
+  const blocked = () => ctx && ctx.state === 'suspended' && on;   // browser autoplay block: on, but waiting for a click/key
+  const unlock = () => { if (!blocked()) return; ctx.resume().then(() => { const t = ctx.currentTime, g = out.gain; g.cancelScheduledValues(t); g.setValueAtTime(0, t); g.linearRampToValueAtTime(vol, t + 2); }); };
+  btn.onclick = () => { if (blocked()) { unlock(); return; } setOn(!on); save(); };
+  for (const ev of ['pointerdown', 'keydown', 'touchstart']) addEventListener(ev, unlock, true);
+  let pref = 'on'; try { pref = localStorage.getItem('pcMusic') || 'on'; } catch (e) {}
+  if (pref !== 'off' && !new URLSearchParams(location.search).has('nomusic')) setOn(true);   // music on by default; starts at the first click or key press if the browser blocks autoplay
+  sl.oninput = () => { vol = +sl.value; if (ctx && on) { const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setTargetAtTime(vol, t, 0.1); } };
+  addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input,select,textarea')) return; if (e.key === 'm' || e.key === 'M') { e.preventDefault(); if (blocked()) return; setOn(!on); save(); } });
+  // test hooks
+  window.__music = {
+    get ctx() { return ctx; }, get on() { return on; },
+    async renderOffline(secs, impactAt) {
+      const oc = new OfflineAudioContext(2, Math.floor(44100 * secs), 44100), g = oc.createGain(); g.gain.value = 0.6;
+      g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.6, 2); g.connect(oc.destination);
+      const e = build(oc, g); e.scheduleUntil(secs); if (impactAt) e.impact(impactAt);
+      const b = await oc.startRendering(); return [Array.from(b.getChannelData(0)), Array.from(b.getChannelData(1))];
+    },
+  };
+})();
+</script>
+</body>
+</html>
