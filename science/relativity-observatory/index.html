@@ -1,488 +1,936 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#050b15"><title>FALLING THROUGH SPACETIME — Relativity Observatory</title><style>
-:root{color-scheme:dark;--bg:#050b15;--panel:#101d2adf;--line:#37526780;--ink:#e8f3f8;--muted:#90acbb;--a:#78dfdf;--gold:#fbc88b}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}#viewport{position:fixed;inset:0}#viewport:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,#0009 100%)}.top{position:fixed;top:22px;left:28px;z-index:4;pointer-events:none}.kicker{font:10px ui-monospace,monospace;letter-spacing:3px;color:var(--a)}h1{font:400 clamp(23px,3vw,38px) Georgia,serif;letter-spacing:-.9px;margin:6px 0 3px}.sub{font-size:12px;color:var(--muted)}.panel{position:fixed;z-index:5;right:20px;top:20px;width:316px;max-height:calc(100vh - 40px);overflow:auto;padding:20px;background:var(--panel);backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 55px #0009}.panel h2{font:600 11px ui-monospace,monospace;letter-spacing:2px;color:#a6ccd8;text-transform:uppercase;margin:0 0 12px}.panel h2:not(:first-child){margin-top:21px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.buttons button,.transport button,select{border:1px solid #466272;background:#142737;color:#e2f5f9;border-radius:8px;padding:10px 9px;font:600 12px system-ui;cursor:pointer}.buttons button.selected,.transport button.selected{background:#80dedf;color:#07131d;border-color:#80dedf}.buttons button:hover,.transport button:hover{border-color:#80dedf}label{font-size:12px;color:#bad0d8;display:flex;justify-content:space-between;margin:13px 0 6px;gap:10px}output{font:12px ui-monospace,monospace;color:var(--gold)}input[type=range]{width:100%;accent-color:var(--a);cursor:pointer}.transport{display:flex;gap:7px}.transport button{flex:1}.stats{position:fixed;left:28px;bottom:26px;width:350px;max-width:calc(100vw - 390px);z-index:4;pointer-events:none;background:#0d1c2abf;border:1px solid var(--line);border-radius:14px;padding:17px 19px;backdrop-filter:blur(13px)}.stats .small{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#8db6c4}.big{font:300 40px ui-monospace,monospace;letter-spacing:-2px;color:#b4f6e9;margin:5px 0}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:13px}.numbers b{display:block;color:white;font:600 16px ui-monospace,monospace;margin-top:5px}.numbers span{font-size:10px;color:var(--muted)}.warning{color:#f3b687;font-size:11px;line-height:1.5;margin-top:11px}.hint{position:fixed;left:28px;top:116px;font:11px ui-monospace,monospace;color:#91abba;z-index:4;pointer-events:none;line-height:1.8}.badge{font:600 12px/1.4 system-ui,sans-serif;letter-spacing:.2px;border:1px solid #4a7280;border-radius:20px;color:#d3eff1;background:#102a37;padding:6px 13px;display:inline-block;margin-top:12px;white-space:normal}.note{font-size:11px;line-height:1.5;color:#93acb8;border-top:1px solid #355064;margin-top:18px;padding-top:12px}.note a{color:#9fe8ea}#togglePanel{display:block;position:fixed;right:20px;top:20px;z-index:9;background:#173344;color:#e5f7fa;border:1px solid #6c919a;padding:11px 14px;border-radius:9px;cursor:pointer;font:600 12px system-ui;box-shadow:0 5px 24px #0008}#togglePanel:hover{background:#285064}.panel.collapsed{display:none}.panel:not(.collapsed){top:72px}.panel{transition:opacity .18s}#togglePanel:focus-visible{outline:2px solid var(--gold);outline-offset:3px}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}@media(max-width:780px){.top{top:14px;left:15px}h1{font-size:25px}.sub{font-size:10px}.hint{left:15px;top:92px;font-size:9px}.panel{right:8px;top:66px;width:min(295px,calc(100vw - 16px));max-height:calc(100vh - 165px);padding:15px}#togglePanel{right:12px;top:12px;background:#163042;color:white;border:1px solid #6c919a;padding:9px 11px;border-radius:8px}.stats{left:12px;bottom:12px;max-width:calc(100vw - 24px);width:350px;padding:11px 13px}.big{font-size:28px}.numbers{gap:5px;margin-top:7px}.numbers b{font-size:13px}.stats .small{font-size:8px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
- .observerTag{position:absolute;top:12px;left:14px;font:700 10px ui-monospace,monospace;letter-spacing:1px;color:#b9eced;background:#071624dd;border:1px solid #5d91a3;padding:8px;border-radius:7px}.observerTag.right{left:calc(50% + 14px);color:#fbd39f;border-color:#9b795c}.observerDivider{position:absolute;top:0;bottom:0;left:50%;width:1px;background:#64889888}.splitLabels{position:fixed;inset:0;z-index:2;pointer-events:none}.splitLabels[hidden]{display:none}@media(max-width:780px){.observerTag{top:168px;left:5px;font-size:8px;padding:4px}.observerTag.right{left:calc(50% + 5px)}} .descentHud{margin-top:12px}.descentTrack{background:#273d50;border:1px solid #5f8491;border-radius:9px;height:9px;margin:8px 0 5px;overflow:hidden}.descentTrack div{height:100%;width:0;background:linear-gradient(90deg,#6ae9e8,#e6ad71);transition:width .2s}.descentEnds{display:flex;justify-content:space-between;color:#819fac;font:9px ui-monospace,monospace;letter-spacing:1px}.clockpair{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;margin:10px 0}.clockpair span{color:#9ebbc8;font:9px ui-monospace,monospace;letter-spacing:1px}.clockdial{display:block;width:110px;height:110px;margin:6px auto;max-width:100%}.clockExplain{font:11px/1.45 system-ui,sans-serif;color:#abc7d2;letter-spacing:0;margin:5px auto 0;max-width:190px}.clockNote{font:11px/1.5 system-ui,sans-serif;color:#abc7d2;border-top:1px solid #ffffff20;padding-top:10px;margin-top:9px} </style></head><body><a class="cabinet-return" href="https://felixbeacher.github.io/home/" aria-label="Return to the Curiosity Cabinet homepage">← Curiosity Cabinet</a><style>.cabinet-return{position:fixed;top:12px;right:12px;z-index:9999;display:inline-flex;align-items:center;padding:9px 14px;border:1px solid #8299a4aa;border-radius:24px;background:#0c1920e8;color:#e8f2ee;font:600 12px/1.2 system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);box-shadow:0 2px 14px #0005}.cabinet-return:hover{background:#243b44}.cabinet-return:focus-visible{outline:3px solid #ceeaa6;outline-offset:3px}@media(max-width:600px){.cabinet-return{top:auto;bottom:12px;right:12px;padding:8px 12px;font-size:11px}}</style><div id="viewport"><canvas id="universe" aria-label="Interactive three-dimensional perspective showing a spaceship falling towards a compact object"></canvas></div><div class="splitLabels" id="splitLabels" hidden><div class="observerDivider"></div><div class="observerTag">ONBOARD · PROPER TIME</div><div class="observerTag right">FAR AWAY · REDSHIFT</div></div><header class="top"><h1>Falling through spacetime</h1></header><div class="hint">DRAG · ORBIT CAMERA<br>SCROLL · ZOOM &nbsp; | &nbsp; SHIFT + DRAG · PAN<br>KEYS: SPACE · PAUSE &nbsp; R · RESET</div><button id="togglePanel" aria-controls="controls" aria-expanded="true">Hide controls ×</button><aside id="controls" class="panel"><h2>Destination</h2><div class="buttons"><button id="bh" class="selected">Black hole</button><button id="ns">Neutron star</button></div><h2>Flight control</h2><div class="transport"><button id="play" class="selected">Ⅱ Pause</button><button id="reset">↺ Reset</button><button id="orbit">Orbit view</button></div><div class="buttons" style="margin-top:10px"><button id="singleView" class="selected">Cinematic view</button><button id="splitView">Split observers</button></div><label for="mode">Trajectory <output id="modeOut">Radial freefall</output></label><select id="mode" style="width:100%"><option value="fall">Radial freefall</option><option value="orbit">Circular orbit (visual)</option><option value="hover">Stationary hover</option></select><label for="speed">Simulation speed <output id="speedOut">1.0×</output></label><input id="speed" type="range" min="0.1" max="4" step="0.1" value="1"><label for="distance">Initial distance <output id="distanceOut">12.0 rₛ</output></label><input id="distance" type="range" min="5" max="24" step="0.5" value="12"><label for="mass">Object mass <output id="massOut">10 M☉</output></label><input id="mass" type="range" min="2" max="30" step="1" value="10"><h2>Visual environment</h2><label for="disk">Accretion-disk brightness <output id="diskOut">75%</output></label><input id="disk" type="range" min="0" max="100" step="1" value="75"><label for="lens">Illustrative lensing <output id="lensOut">75%</output></label><input id="lens" type="range" min="0" max="100" step="1" value="75"><label for="starfield">Star brightness <output id="starOut">85%</output></label><input id="starfield" type="range" min="0" max="100" step="1" value="85"><div class="buttons" style="margin-top:13px"><button id="follow" class="selected">Follow craft</button><button id="audio">♫ Enable ambience</button></div><p class="note"><strong>Physics interpretation</strong><br>Live readouts use the Schwarzschild gravitational redshift for <em>stationary</em> clocks, √(1 − rₛ/r). The craft has its own freefall proper-time clock; the two are not interchangeable. Black-hole horizon crossing happens in finite craft proper time, although distant Schwarzschild coordinates behave differently. Orbital motion, lensing and disc light are deliberately illustrative rather than full general-relativistic ray tracing. There is no event horizon around a neutron star.<br><br><a href="https://science.nasa.gov/apod/frequently-asked-questions-faqs-on-black-holes/" target="_blank" rel="noopener">NASA: horizon &amp; time</a> · <a href="https://svs.gsfc.nasa.gov/14619/" target="_blank" rel="noopener">NASA: gravitational lensing</a></p></aside><section class="stats" aria-live="off"><div class="clockpair"><div><span>SPACECRAFT PROPER TIME</span><canvas id="properDial" class="clockdial" aria-label="Spacecraft proper-time clock"></canvas><div class="clockExplain">Time experienced aboard the spacecraft (proper time).</div></div><div><span>DISTANT REFERENCE TIME</span><canvas id="farDial" class="clockdial" aria-label="Distant reference-time clock"></canvas><div class="clockExplain">Local time on a clock far from the black hole; its reading is not a live observation of the spacecraft.</div></div></div><div class="clockNote" id="clockNote">The spacecraft experiences its own time normally. The clocks accumulate different amounts of time because of gravity and relative motion.</div><div class="descentHud"><div class="small" id="stage">DESCENT IN PROGRESS</div><div class="descentTrack"><div id="descentProgress"></div></div><div class="descentEnds"><span id="progressStart">START</span><span id="progressEnd">HORIZON / SURFACE</span></div></div><div class="numbers"><div><span>RADIAL DISTANCE</span><b id="radius">12.00 rₛ</b></div><div hidden><span>SPACECRAFT PROPER TIME</span><b id="proper">0.0 s</b></div><div hidden><span>FAR-AWAY TIME (MODEL)</span><b id="far">0.0 s</b></div><div><span>STATIC GRAVITATIONAL REDSHIFT</span><b id="redshift">z = 0.044</b></div></div><div class="warning" id="eventStatus">Approaching the gravity well. Look for the glow of the accretion disc.</div></section><script>
-(()=>{'use strict';const C=document.getElementById('universe'),ctx=C.getContext('2d',{alpha:false}),$=s=>document.getElementById(s),TAU=Math.PI*2;let w=1,h=1,dpr=1,last=0,frames=0,playing=!window.matchMedia('(prefers-reduced-motion: reduce)').matches,follow=true,sound=false,actx=null,nodes=[],now=0,proper=0,far=0,r=12,init=12,theta=.24,phi=.65,zoom=1,pan=[0,0],drag=null,shipPhase=0,mode='fall',body='bh',split=false,observer='external',mass=10,speed=1,disk=.75,lensing=.75,starBrightness=.85,interiorElapsed=0,interiorLook=0.15,tidalYaw=.6,tidalPitch=.24,singularitySoundPlayed=false;let stars=[],dust=[];
-let seed=54824;const rand=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};for(let i=0;i<680;i++){const a=rand()*TAU,z=rand()*2-1,s=Math.sqrt(1-z*z);stars.push({v:[s*Math.cos(a),s*Math.sin(a),z],b:rand(),size:.4+rand()*1.3})}for(let i=0;i<1500;i++){const a=rand()*TAU,R=2.1+Math.pow(rand(),.72)*8.5;dust.push({a,r:R,h:(rand()-.5)*.16,bright:rand(),size:.35+rand()*1.4})}
-function resize(){const b=C.getBoundingClientRect();w=Math.max(1,b.width);h=Math.max(1,b.height);dpr=Math.min(devicePixelRatio||1,2);C.width=Math.floor(w*dpr);C.height=Math.floor(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
-const norm=v=>Math.hypot(...v),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];let eye,right,up,forward,origin,scale;
-function camera(){
- if(observer==='onboard'){
-  const a=mode==='orbit'?shipPhase:.38,p=[r*Math.cos(a),.3,r*Math.sin(a)],lift=Math.max(.14,r*.07);
-  eye=[p[0]+Math.sin(phi)*lift,p[1]+lift,p[2]+Math.cos(phi)*lift];
-  const aim=[-p[0]*.15,-.1,-p[2]*.15],v=aim.map((n,i)=>n-eye[i]),mag=norm(v)||1;forward=v.map(n=>n/mag);
- }else{
-  const a=mode==='orbit'?shipPhase:.38;
-  const ship=[r*Math.cos(a),.3,r*Math.sin(a)];
-  // Frame both the approaching craft and the compact object, instead of always looking at the origin.
-  const target=follow?ship.map((v,i)=>v*.58):[0,0,0];
-  const dist=(follow?Math.max(7,r*.64+4):17)*zoom;
-  eye=[target[0]+dist*Math.cos(theta)*Math.cos(phi),target[1]+dist*Math.sin(theta),target[2]+dist*Math.cos(theta)*Math.sin(phi)];
-  const sight=target.map((v,i)=>v-eye[i]),d=norm(sight)||1;
-  forward=sight.map(v=>v/d);
- }
- right=cross(forward,[0,1,0]);let n=norm(right)||1;right=right.map(v=>v/n);up=cross(right,forward);
- origin=[w*.5+(observer==='onboard'?0:pan[0]),h*.53+(observer==='onboard'?0:pan[1])];scale=Math.min(w,h)*(observer==='onboard'?1.12:1.33);
-}
-function pr(v){const rel=v.map((x,i)=>x-eye[i]);const z=dot(rel,forward);if(z<=.08)return null;const k=scale/z;return {x:origin[0]+dot(rel,right)*k,y:origin[1]-dot(rel,up)*k,z,k}}
-function line3(points,color,alpha=1,width=1){ctx.beginPath();let open=false;for(const p of points){const q=pr(p);if(!q){open=false;continue}if(!open){ctx.moveTo(q.x,q.y);open=true}else ctx.lineTo(q.x,q.y)}ctx.strokeStyle=color;ctx.globalAlpha=alpha;ctx.lineWidth=width;ctx.stroke();ctx.globalAlpha=1}
-function glow(x,y,r,rgb,a){const gr=ctx.createRadialGradient(x,y,0,x,y,Math.max(1,r));gr.addColorStop(0,`rgba(${rgb},${a})`);gr.addColorStop(.3,`rgba(${rgb},${a*.33})`);gr.addColorStop(1,`rgba(${rgb},0)`);ctx.fillStyle=gr;ctx.fillRect(x-r,y-r,2*r,2*r)}
-function bg(){ctx.fillStyle='#040a13';ctx.fillRect(0,0,w,h);let grad=ctx.createRadialGradient(w*.49,h*.53,5,w*.49,h*.53,Math.max(w,h)*.68);grad.addColorStop(0,'#142433');grad.addColorStop(.46,'#091626');grad.addColorStop(1,'#030710');ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);const pos=pr([0,0,0]),cx=pos?.x??w/2,cy=pos?.y??h/2,R=Math.min(w,h)*.11/Math.max(.6,zoom);for(const st of stars){let x=(st.v[0]*.5+.5)*w,y=(st.v[1]*.5+.5)*h;let dx=x-cx,dy=y-cy,rr=Math.hypot(dx,dy),ring=R*1.28;if(rr<ring*.7){continue}if(rr<ring*3){const a=lensing*Math.pow(ring/(rr+.01),1.55)*52;x+=dx/rr*a;y+=dy/rr*a}ctx.fillStyle=`rgba(190,224,255,${(.24+st.b*.72)*starBrightness})`;ctx.beginPath();ctx.arc(x,y,st.size*(w>900?1:.8),0,TAU);ctx.fill()}return {cx,cy,R}}
-function diskDraw(layer){
- if(body==='ns'&&disk<.12)return;
- const arr=[],centerDepth=norm(eye);
- for(const d of dust){
-  const angle=d.a+now*.12/Math.pow(d.r,1.2);
-  const v=[d.r*Math.cos(angle),d.h,d.r*Math.sin(angle)],p=pr(v);
-  if(p&&(layer==='near'?p.z<centerDepth:p.z>=centerDepth)&&p.x>-70&&p.x<w+70&&p.y>-70&&p.y<h+70)arr.push({p,d,v,angle});
- }
- arr.sort((a,b)=>b.p.z-a.p.z);
- ctx.save();ctx.globalCompositeOperation='lighter';
- for(const {p,d,v,angle} of arr){
-  // Orbit tangent projected onto the direction of the camera: positive = approaching.
-  const velocity=[-Math.sin(angle),0,Math.cos(angle)];
-  const toEye=[eye[0]-v[0],eye[1]-v[1],eye[2]-v[2]];
-  const inv=1/(norm(toEye)||1);
-  const doppler=dot(velocity,toEye)*inv;
-  const towards=Math.max(0,doppler),away=Math.max(0,-doppler);
-  const inner=Math.max(0,Math.min(1,(5-d.r)/3));
-  const intensity=Math.min(.94,disk*(.14+.57*d.bright)*(.68+1.05*towards));
-  const blueBoost=Math.min(1,Math.pow(towards*1.65,.8)),redBoost=Math.min(1,Math.pow(away*1.65,.8));
-  // Doppler-inspired visual palette: approaching cobalt blue, transverse white, receding crimson.
-  const whiteWeight=Math.pow(1-Math.max(blueBoost,redBoost),1.5);
-  const red=Math.round(Math.max(0,Math.min(255,255*whiteWeight+45*blueBoost+250*redBoost)));
-  const green=Math.round(Math.max(0,Math.min(255,255*whiteWeight+92*blueBoost+19*redBoost)));
-  const blue=Math.round(Math.max(0,Math.min(255,255*whiteWeight+255*blueBoost+35*redBoost)));
-  ctx.fillStyle='rgba('+red+','+green+','+blue+','+intensity+')';
-  ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.4,Math.min(3.5,d.size*p.k*.7)),0,TAU);ctx.fill();
- }
- ctx.restore();
-}
-// Cinematic, approximate secondary images of the far side of the accretion disc.
-// Screen-space treatment follows the projected black-hole position so camera orbit still works.
-function lensedDisk(){
- if(body!=='bh'||disk<=.015)return;
- const p=pr([0,0,0]);if(!p)return;
- const rr=Math.max(3,p.k),incl=Math.abs(eye[1])/(norm(eye)||1);
- const edge=Math.pow(Math.max(0,1-incl),1.25),strength=disk*lensing*edge;
- if(strength<.012)return;
- const cx=p.x,cy=p.y,extent=rr*2.9,depth=rr*(1.43+.16*lensing);
- // Reverse the apparent blue/red sides when the camera passes around the disc.
- const motionSign=Math.sign(dot([-eye[2],0,eye[0]],right))||1;
- const colorGradient=(left,rightColor,fade=1)=>{const g=ctx.createLinearGradient(cx-extent,cy,cx+extent,cy);const a=motionSign>0?left:rightColor,b=motionSign>0?rightColor:left;g.addColorStop(0,a);g.addColorStop(.5,'rgba(255,255,255,'+(fade*.55)+')');g.addColorStop(1,b);return g;};
- ctx.save();ctx.globalCompositeOperation='lighter';
- // Removed decorative concentric halo bands and repeated filaments.
- // The disc itself remains, without an unexplained striped ring.
- // The primary near-horizontal disc is brightest across the equatorial plane.
- const flat=Math.max(.075,rr*(.075+incl*.58));
- for(let j=0;j<14;j++){
-  const t=j/13;
-  const y=cy+(t-.5)*flat*2.5;
-  const width=extent*(1-.14*Math.abs(t-.5));
-  const g=ctx.createLinearGradient(cx-width,y,cx+width,y);
-  const blueSide=['rgba(22,70,255,0)','rgba(28,71,255,'+(.58*strength)+')','rgba(51,122,255,'+(.7*strength)+')'];
-  const redSide=['rgba(255,22,36,'+(.68*strength)+')','rgba(240,14,27,'+(.58*strength)+')','rgba(180,10,27,0)'];
-  const stops=motionSign>0?[...blueSide,'rgba(255,255,255,'+(.64*strength)+')',...redSide]:[...redSide.slice().reverse(),'rgba(255,255,255,'+(.64*strength)+')',...blueSide.slice().reverse()];
-  stops.forEach((color,k)=>g.addColorStop(k/(stops.length-1),color));
-  ctx.strokeStyle=g;ctx.lineWidth=Math.max(1,flat*.15);
-  ctx.shadowBlur=rr*.1;ctx.beginPath();ctx.moveTo(cx-width,y);ctx.lineTo(cx+width,y);ctx.stroke();
- }
- ctx.restore();
-}
-function sphere(B){const p=pr([0,0,0]);if(!p)return;const rr=Math.max(3,B*p.k);glow(p.x,p.y,rr*3,body==='bh'?'255,128,65':'72,179,255',body==='bh'?.13:.17);if(body==='bh'){let ring=rr*(1.26+.22*lensing);const g=ctx.createRadialGradient(p.x,p.y,rr*1.08,p.x,p.y,ring*1.75);g.addColorStop(0,'#020509');g.addColorStop(.72,'#020509');g.addColorStop(.84,'rgba(255,132,62,.25)');g.addColorStop(.90,'rgba(55,18,24,.1)');g.addColorStop(1,'#0000');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,ring*1.75,0,TAU);ctx.fill();ctx.fillStyle='#010307';ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill()}else{let g=ctx.createRadialGradient(p.x-rr*.35,p.y-rr*.35,rr*.05,p.x,p.y,rr*1.2);g.addColorStop(0,'#d3f9ff');g.addColorStop(.25,'#72ceef');g.addColorStop(.66,'#2c74a6');g.addColorStop(1,'#041421');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,rr,0,TAU);ctx.fill();ctx.save();ctx.translate(p.x,p.y);ctx.rotate(now*.37);ctx.strokeStyle='#8deaff';ctx.shadowColor='#a2efff';ctx.shadowBlur=17;for(let i=0;i<6;i++){ctx.beginPath();ctx.ellipse(0,0,rr*(.2+.13*i),rr,0,0,TAU);ctx.globalAlpha=.08;ctx.stroke()}ctx.restore();ctx.globalAlpha=1;glow(p.x-rr*.2,p.y-rr*.3,rr*.8,'130,221,255',.22)}}
-function orbitLines(){let path=[];for(let i=0;i<=150;i++){let a=i/150*TAU;path.push([r*Math.cos(a),0,r*Math.sin(a)])}line3(path,'#79dcf1',.14,1);for(let rad of [2,3,5,8,12]){path=[];for(let i=0;i<=130;i++){let a=i/130*TAU;path.push([rad*Math.cos(a),0,rad*Math.sin(a)])}line3(path,'#528ab2',rad===r?.15:.065,.7)}}
-function craftOccluded(P){
- const radius=body==='bh'?1:2.35;
- const D=P.map((v,i)=>v-eye[i]),den=dot(D,D);
- if(den<1e-10)return false;
- const t=-dot(eye,D)/den;
- if(t<=0||t>=1)return false;
- const C=eye.map((v,i)=>v+t*D[i]);
- return dot(C,C)<radius*radius;
-}
-function craft(){
- if(observer==='onboard')return;
- const a=mode==='orbit'?shipPhase:.38;
- const P=[r*Math.cos(a),.3,r*Math.sin(a)];
- if(craftOccluded(P))return;
- const center=pr(P);if(!center)return;
- const size=Math.max(10,Math.min(33,center.k*.66));
- const behind=body==='bh'&&r<1;
- const fade=behind?Math.max(0,Math.min(1,(r-.16)/.84)):1;
- if(fade<=0)return;
- ctx.save();
- // Engine flare and motion streak establish visible movement towards the gravity well.
- const centerHole=pr([0,0,0]);
- if(centerHole&&mode==='fall'&&r>1){
-  const dx=centerHole.x-center.x,dy=centerHole.y-center.y,mag=Math.hypot(dx,dy)||1;
-  const trail=Math.min(90,20+95*Math.max(0,1-r/init));
-  const grad=ctx.createLinearGradient(center.x,center.y,center.x-dx/mag*trail,center.y-dy/mag*trail);
-  grad.addColorStop(0,'rgba(117,234,255,.72)');grad.addColorStop(1,'rgba(117,234,255,0)');
-  ctx.strokeStyle=grad;ctx.lineWidth=Math.max(2,size*.15);ctx.beginPath();ctx.moveTo(center.x,center.y);ctx.lineTo(center.x-dx/mag*trail,center.y-dy/mag*trail);ctx.stroke();
- }
- ctx.globalAlpha=fade;ctx.translate(center.x,center.y);
- const aft=pr([P[0]+.35,P[1]+.07,P[2]-.7]);
- ctx.rotate(Math.atan2((aft?.y??center.y+1)-center.y,(aft?.x??center.x+1)-center.x)+Math.PI/2);
- ctx.scale(size,size);
- // Long exploration vehicle with segmented pressure hull, dorsal antenna and thermal panels.
- ctx.lineJoin='round';ctx.lineCap='round';
- const hull=new Path2D();hull.moveTo(0,-1.8);hull.bezierCurveTo(.2,-1.59,.29,-.8,.27,-.1);hull.lineTo(.36,.55);hull.lineTo(.23,1.0);hull.lineTo(-.23,1);hull.lineTo(-.36,.55);hull.lineTo(-.27,-.1);hull.bezierCurveTo(-.29,-.8,-.2,-1.59,0,-1.8);hull.closePath();
- const plating=ctx.createLinearGradient(-.38,0,.4,0);plating.addColorStop(0,'#536d83');plating.addColorStop(.25,'#dae6e7');plating.addColorStop(.55,'#e4f2f0');plating.addColorStop(1,'#5b7b96');
- ctx.fillStyle=plating;ctx.strokeStyle='#c7e9ef';ctx.lineWidth=.025;ctx.fill(hull);ctx.stroke(hull);
- ctx.fillStyle='#233d50';ctx.fillRect(-1.5,.12,1.19,.22);ctx.fillRect(.31,.12,1.19,.22);
- for(let side of [-1,1]){
-  const x=side*.9;
-  ctx.strokeStyle='#91c5d5';ctx.lineWidth=.023;ctx.strokeRect(x-.53,.10,1.06,.28);
-  ctx.strokeStyle='#4d89a1';ctx.lineWidth=.019;
-  for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(x+i*.17,.12);ctx.lineTo(x+i*.17,.37);ctx.stroke()}
-  ctx.fillStyle='#93a9b8';ctx.beginPath();ctx.moveTo(side*.29,-.32);ctx.lineTo(side*.46,-.13);ctx.lineTo(side*.48,.44);ctx.lineTo(side*.29,.63);ctx.fill();
- }
- // Canopy, service hatches, heatshield and engine cluster.
- ctx.fillStyle='#183a50';ctx.beginPath();ctx.ellipse(0,-.88,.18,.46,0,0,TAU);ctx.fill();ctx.strokeStyle='#a8e1f5';ctx.lineWidth=.026;ctx.stroke();
- ctx.strokeStyle='#547488';ctx.lineWidth=.025;for(let y of [-.27,.08,.42,.7]){ctx.beginPath();ctx.moveTo(-.25,y);ctx.lineTo(.25,y);ctx.stroke()}
- ctx.fillStyle='#203440';ctx.fillRect(-.17,.81,.34,.20);
- for(let x of [-.17,0,.17]){ctx.fillStyle='#74e5ff';ctx.beginPath();ctx.ellipse(x,1.04,.072,.08,0,0,TAU);ctx.fill()}
- ctx.fillStyle='rgba(97,208,242,.52)';ctx.beginPath();ctx.moveTo(-.16,1.09);ctx.lineTo(0,1.58+.08*Math.sin(now*9));ctx.lineTo(.16,1.09);ctx.fill();
- ctx.strokeStyle='#bce7f1';ctx.lineWidth=.016;ctx.beginPath();ctx.moveTo(0,-1.67);ctx.lineTo(0,-2.12);ctx.stroke();ctx.beginPath();ctx.arc(0,-2.13,.055,0,TAU);ctx.stroke();
- ctx.restore();
- ctx.save();ctx.globalAlpha=fade;ctx.fillStyle='#b0dce7';ctx.textAlign='center';ctx.font='10px ui-monospace,monospace';ctx.fillText('ODYSSEY · 01',center.x,center.y-size*2.4);ctx.restore();
-}
-// Inside-horizon conceptual scene: tidal light cones narrow, outgoing paths bend inward.
-// An illustrative comoving view, not a literal photograph or ray-traced GR solution.
-// Final 15%: illustrative tidal stretching and disruption (not a resolved singularity).
-function tidalFinale(cx,cy,depth){
- // Only reveal the symbolic Kerr ring during the final ~5 seconds.
- const q=Math.max(0,Math.min(1,(depth-.94)/.06));if(!q)return;
- const ease=v=>{v=Math.max(0,Math.min(1,v));return v*v*(3-2*v)};
- const impact=ease((q-.70)/.30),fade=ease((q-.95)/.05),reveal=ease(q/.22);
- const R=Math.min(w,h)*.145,minor=Math.max(.55,R*.012);
- // An extremely thin, rotatable rendering of the idealised Kerr ring singularity.
- // Kerr is a rotating solution; the exterior flight model remains Schwarzschild-based.
- const cyaw=Math.cos(tidalYaw),syaw=Math.sin(tidalYaw);
- const cp=Math.cos(tidalPitch),sp=Math.sin(tidalPitch);
- const project=(x,y,z)=>{
-  const X=x*cyaw+z*syaw,Z=z*cyaw-x*syaw;
-  const Y=y*cp-Z*sp,D=y*sp+Z*cp;
-  const k=540/(540+D);
-  return {x:cx+X*k,y:cy+Y*k,z:D,k};
- };
- ctx.save();ctx.globalCompositeOperation='lighter';
- const faces=[],N=150,M=6;
- for(let i=0;i<N;i++)for(let j=0;j<M;j++){
-  const u0=i*TAU/N,u1=(i+1)*TAU/N,v0=j*TAU/M,v1=(j+1)*TAU/M;
-  const at=(u,v)=>{const rad=R+minor*Math.cos(v);return project(rad*Math.cos(u),minor*Math.sin(v),rad*Math.sin(u))};
-  const pts=[at(u0,v0),at(u1,v0),at(u1,v1),at(u0,v1)];
-  const light=.5+.5*Math.cos((v0+v1)*.5-.8);
-  faces.push({pts,z:pts.reduce((sum,p)=>sum+p.z,0)/4,light,u:u0});
- }
- faces.sort((a,b)=>b.z-a.z);
- for(const face of faces){
-  const alpha=(.68+.26*face.light)*(1-.5*impact)*reveal;
-  ctx.fillStyle='hsla('+(210+42*face.light)+',95%,'+(42+38*face.light)+'%,'+alpha+')';
-  ctx.strokeStyle='rgba(179,211,255,.07)';ctx.lineWidth=.2;
-  ctx.beginPath();face.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();
- }
- ctx.restore();
- if(q>.82){
-  const flare=R*(.4+3*impact),g=ctx.createRadialGradient(cx,cy,0,cx,cy,flare);
-  g.addColorStop(0,'rgba(255,255,255,'+(.75*impact)+')');g.addColorStop(.35,'rgba(111,149,255,'+(.26*impact)+')');g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g;ctx.fillRect(cx-flare,cy-flare,flare*2,flare*2);
- }
- if(fade){ctx.fillStyle='rgba(0,0,6,'+fade+')';ctx.fillRect(0,0,w,h)}
- ctx.textAlign='center';ctx.fillStyle='#e5edff';ctx.font='600 13px system-ui';
- if(q<.97){
-  ctx.fillText('KERR BLACK HOLE · RING SINGULARITY',cx,h*.83);
-  ctx.font='11px system-ui';ctx.fillStyle='#9cb5d1';
-  ctx.fillText('Spinning black hole: idealised infinitesimally thin equatorial ring · drag to orbit',cx,h*.83+20);
- }else{
-  ctx.fillText('CLASSICAL MODEL ENDPOINT',cx,h*.48);
-  ctx.font='12px system-ui';ctx.fillText('Kerr ring is a classical prediction; the physical endpoint remains unknown.',cx,h*.53);
- }
-}
-function interiorScene(){
- const cx=w*.5,cy=h*.52,depth=Math.max(0,Math.min(1,interiorElapsed/85)),t=now;
- // Drag vertically to turn towards the exterior. Drag down to look forward into the fall.
- const look=interiorLook;
- ctx.save();ctx.fillStyle='#02030d';ctx.fillRect(0,0,w,h);
- const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.8);
- bg.addColorStop(0,'#211330');bg.addColorStop(.38,'#0b0920');bg.addColorStop(1,'#01020a');
- ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
- // No circular exterior disc: only directional light trails in the interior.
- const visibility=Math.max(0,Math.min(1,(look+.15)/1.25));
- // Inward-looking tidal streams grow more dominant as the view turns away.
- for(let i=0;i<110;i++){
-  const a=i*2.39996,rad=((i*41)%97)/97;
-  const z=(t*.09*(1+depth)+rad)%1;
-  const x=cx+Math.cos(a)*w*.6*z,y=cy+Math.sin(a)*h*.66*z;
-  const alpha=(.08+.38*z)*(.55+.45*(1-visibility))*(1-Math.max(0,(depth-.87)/.13));
-  ctx.strokeStyle='rgba(158,136,236,'+alpha+')';ctx.lineWidth=.5+z*1.5;
-  ctx.beginPath();ctx.moveTo(x,y);
-  ctx.lineTo(x+(x-cx)*(.07+.15*depth),y+(y-cy)*(.07+.15*depth));ctx.stroke();
- }
- tidalFinale(cx,cy,depth);
- ctx.textAlign='center';ctx.fillStyle='#d5e7fc';ctx.font='600 12px system-ui';
- ctx.fillText(depth>.94?'PHASE III · KERR-INSPIRED ENDPOINT':'PHASE II · INSIDE THE EVENT HORIZON',cx,Math.max(28,h*.12));
- ctx.fillStyle='#a3b7d0';ctx.font='11px system-ui';
- ctx.fillText('DRAG TO CHANGE VIEW · INWARD FALL VISUALISATION',cx,Math.max(47,h*.12+21));
- ctx.fillText('Conceptual interior · '+Math.ceil(Math.max(0,85-interiorElapsed))+' seconds to model endpoint',cx,Math.max(65,h*.12+40));
- ctx.restore();
-}
-// A short transition after horizon crossing: a central flash expands outward and
-// blue-shifted radial arcs sweep past the viewer (cinematic, not GR ray tracing).
-function horizonTransition(){
- const t=Math.max(0,Math.min(1,interiorElapsed/4)),cx=w*.5,cy=h*.52;
- if(t>=1)return;
- const pulse=Math.sin(Math.PI*t),r0=Math.max(w,h)*(.025+1.12*t);
- ctx.save();
- ctx.fillStyle='rgba(1,2,12,'+(.47*pulse)+')';ctx.fillRect(0,0,w,h);
- ctx.globalCompositeOperation='lighter';
- for(let i=0;i<32;i++){
-  const a=i*TAU/32+now*.06,rr=r0*(.82+.18*Math.sin(i*14.3));
-  ctx.strokeStyle='rgba(131,188,255,'+(pulse*.26)+')';ctx.lineWidth=1.2+2*pulse;
-  ctx.beginPath();ctx.arc(cx,cy,rr,a,a+.16+.15*pulse);ctx.stroke();
- }
- const glow=ctx.createRadialGradient(cx,cy,r0*.5,cx,cy,r0*1.2);
- glow.addColorStop(0,'rgba(86,146,255,0)');
- glow.addColorStop(.62,'rgba(118,185,255,'+(.35*pulse)+')');
- glow.addColorStop(1,'rgba(86,146,255,0)');
- ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
- ctx.restore();
- ctx.textAlign='center';ctx.font='600 14px system-ui';ctx.fillStyle='rgba(227,242,255,'+Math.sin(Math.PI*Math.min(1,t*1.4))+')';
- ctx.fillText('EVENT HORIZON CROSSED',cx,h*.80);
-}
-function drawScene(){
- camera();if(body==='bh'&&mode==='fall'&&r<=1){interiorScene();horizonTransition();return;}bg();orbitLines();diskDraw('far');lensedDisk();sphere(body==='bh'?1:2.35);diskDraw('near');craft();
- if(observer==='onboard'){
-  ctx.save();ctx.strokeStyle='#8ad9e588';ctx.lineWidth=1;
-  const cx=w*.5,cy=h*.55;ctx.beginPath();ctx.moveTo(cx-24,cy);ctx.lineTo(cx-8,cy);ctx.moveTo(cx+8,cy);ctx.lineTo(cx+24,cy);ctx.moveTo(cx,cy-24);ctx.lineTo(cx,cy-8);ctx.moveTo(cx,cy+8);ctx.lineTo(cx,cy+24);ctx.stroke();
-  ctx.fillStyle='#86c8de';ctx.font='10px ui-monospace,monospace';ctx.fillText('ONBOARD OPTICAL VIEW · ILLUSTRATIVE',12,h-20);ctx.restore();
- }else if(body==='bh'&&r<2.5&&mode==='fall'){
-  ctx.save();ctx.fillStyle='rgba(255,175,119,.85)';ctx.font='11px ui-monospace,monospace';ctx.fillText('SIGNAL REDSHIFT INCREASING',12,h-20);ctx.restore()
- }
- const v=ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*.15,w/2,h/2,Math.max(w,h)*.73);
- v.addColorStop(0,'#0000');v.addColorStop(1,'#0008');ctx.fillStyle=v;ctx.fillRect(0,0,w,h);
-}
-function draw(){
- const W=w,H=h;if(!split){observer='external';drawScene();return}
- for(let side=0;side<2;side++){
-  const width=W/2;ctx.save();ctx.beginPath();ctx.rect(side*width,0,width,H);ctx.clip();ctx.translate(side*width,0);
-  w=width;h=H;observer=side===0?'onboard':'external';drawScene();ctx.restore();
- }
- w=W;h=H;observer='external';
-}
-const rsSeconds=()=>9.8509819e-6*mass;function advance(dt){
- if(!playing)return;
- const d=Math.min(dt,.04)*speed;now+=d;
- shipPhase+=d*.11/Math.pow(Math.max(2,r)/6,1.1);
- if(mode==='fall'){
-  if(body==='bh'&&r<=1){
-   interiorElapsed=Math.min(85,interiorElapsed+d);
-   // Intentionally stretched cinematic interior duration (~85 simulated seconds).
-   // Radius is an illustrative progress coordinate, not a GR worldline solution.
-   const progress=Math.min(1,interiorElapsed/85);
-   r=Math.max(.12,1-.88*(progress*progress*(3-2*progress)));
-   proper+=d;
-   // The distant reference observer's local clock continues. After crossing,
-   // tick it against the animation's shared progression, NOT by extrapolating
-   // Schwarzschild exterior coordinate time into the interior.
-   far+=d;
-   return;
-  }
-  const scaled=d*.86;
-  for(let i=0;i<6;i++){
-   if(r<=(body==='bh'?.12:2.35))break;
-   const falling=Math.sqrt(Math.max(0,1/init-1/Math.max(r,.125)));
-   r-=scaled/6*Math.max(.30,falling*3.5);
-   r=Math.max(body==='bh'?1:2.35,r);
-  }
-  proper+=d;
-  if(body==='ns'){const lapse=Math.sqrt(Math.max(.000001,1-1/Math.max(r,1.00001)));far+=d/Math.max(.02,lapse)}
-  else if(r>1.0005){const lapse=Math.sqrt(Math.max(.000001,1-1/r));far+=d/Math.max(.02,lapse)}
- }else if(mode==='orbit'){proper+=d*Math.sqrt(Math.max(.03,1-1.5/Math.max(r,1.55)));far+=d}
- else{proper+=d*Math.sqrt(Math.max(.0001,1-1/Math.max(r,1.001)));far+=d}
-}
-function readouts(){
- const lapse=Math.sqrt(Math.max(0,1-1/Math.max(r,1)));
- const isBH=body==='bh',cross=isBH&&r<=1,surface=!isBH&&r<=2.35;
- $('radius').textContent=r.toFixed(2)+' rₛ';
- $('proper').textContent=proper.toFixed(1)+' s';
- $('far').textContent=far.toFixed(1)+' s';
- const clockNote=$('clockNote');
- if(clockNote)clockNote.textContent=cross
-  ?'Both clocks continue ticking. No light signal from inside the event horizon can reach the distant observer. The distant clock advances using an illustrative reference-time convention, not a direct comparison of simultaneous events.'
-  :'The spacecraft experiences its own time normally. The clocks accumulate different amounts of time because of gravity and relative motion.';
- $('redshift').textContent=cross?'No static observer':'z = '+(1/Math.max(.001,lapse)-1).toFixed(3);
- drawDial('properDial',proper,'#a8f4e5');
- drawDial('farDial',far,'#ffc995');
- $('eventStatus').textContent=
- isBH&&interiorElapsed>=85?'Model endpoint reached. The Kerr-inspired ring is an illustrative classical prediction; the physical endpoint remains unknown. Reset to repeat.':
- cross?(interiorElapsed>72?'FINAL PHASE · Extreme tidal stretching and structural breakup. This is a conceptual cutaway, not a resolved prediction of a singularity.':'INTERIOR PHASE · Light streaks sweep outward across your field of view as the craft falls inward. The scene is conceptual.'):
- surface?'Neutron-star surface reached. This is an idealised impact.':
- r<3?'Deep gravity well: strong gravitational effects and tidal forces.':
- r<5?'Near 3 rₛ: the Schwarzschild innermost stable circular orbit.':
- 'The spacecraft is approaching a powerful gravitational field.';
- const interior=isBH&&mode==='fall'&&r<=1;
- const remaining=Math.max(0,85-interiorElapsed);
- const progress=interior?Math.min(1,interiorElapsed/85):Math.max(0,Math.min(1,(init-r)/Math.max(.01,init-(isBH?1:2.35))));
- $('descentProgress').style.width=(progress*100).toFixed(1)+'%';
- $('progressStart').textContent=interior?'HORIZON':'START';
- $('progressEnd').textContent=interior?'SINGULARITY (MODEL)':'HORIZON / SURFACE';
- $('stage').textContent=isBH&&r<=1?(interiorElapsed>=85?'MODEL ENDPOINT REACHED':interiorElapsed>72?'FINAL APPROACH · '+remaining.toFixed(0)+' s LEFT':'TIME TO SINGULARITY · '+remaining.toFixed(0)+' s'):surface?'SURFACE IMPACT':r<2.3?'FINAL APPROACH':r<5?'INNER GRAVITY WELL':'DESCENT IN PROGRESS';
- if(isBH&&interiorElapsed>=85&&!singularitySoundPlayed){singularitySoundPlayed=true;playSingularityCrash()}
- if((isBH&&interiorElapsed>=85)||surface){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
-}
-function drawDial(id,seconds,color){
- const c=$(id),cctx=c.getContext('2d');if(!cctx)return;
- const D=window.devicePixelRatio||1,W=c.clientWidth||110,H=c.clientHeight||110;
- if(c.width!==Math.round(W*D)||c.height!==Math.round(H*D)){c.width=Math.round(W*D);c.height=Math.round(H*D)}
- cctx.setTransform(D,0,0,D,0,0);cctx.clearRect(0,0,W,H);
- const x=W/2,y=H/2,R=Math.min(W,H)*.44;
- cctx.fillStyle='#0a1b28';cctx.strokeStyle='#547382';cctx.lineWidth=2;
- cctx.beginPath();cctx.arc(x,y,R,0,TAU);cctx.fill();cctx.stroke();
- for(let i=0;i<60;i++){const a=i*TAU/60-Math.PI/2,major=i%5===0;
-  cctx.strokeStyle=major?'#cfe7e9':'#5b7383';cctx.lineWidth=major?1.7:.7;
-  cctx.beginPath();cctx.moveTo(x+Math.cos(a)*R*(major?.77:.87),y+Math.sin(a)*R*(major?.77:.87));
-  cctx.lineTo(x+Math.cos(a)*R*.94,y+Math.sin(a)*R*.94);cctx.stroke()
- }
- const minute=seconds/60%60,second=seconds%60;
- function hand(a,len,width,col){cctx.strokeStyle=col;cctx.lineWidth=width;cctx.lineCap='round';cctx.beginPath();cctx.moveTo(x,y);cctx.lineTo(x+Math.sin(a)*len,y-Math.cos(a)*len);cctx.stroke()}
- hand(minute*TAU/60,R*.53,3,'#e1f2f1');
- hand(second*TAU/60,R*.76,2,color);
- cctx.fillStyle=color;cctx.beginPath();cctx.arc(x,y,3,0,TAU);cctx.fill();
-}
-function frame(ts){let dt=last?(ts-last)/1000:0;last=ts;advance(Math.min(dt,.07));if(++frames%5===0)readouts();draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
-function sync(){init=+$('distance').value;mass=+$('mass').value;speed=+$('speed').value;disk=+$('disk').value/100;lensing=+$('lens').value/100;starBrightness=+$('starfield').value/100;mode=$('mode').value;$('distanceOut').textContent=init.toFixed(1)+' rₛ';$('massOut').textContent=mass+' M☉';$('speedOut').textContent=speed.toFixed(1)+'×';$('diskOut').textContent=Math.round(disk*100)+'%';$('lensOut').textContent=Math.round(lensing*100)+'%';$('starOut').textContent=Math.round(starBrightness*100)+'%';$('modeOut').textContent=mode==='fall'?'Radial freefall':mode==='orbit'?'Illustrative orbit':'Hover';readouts()}function reset(){r=init;now=proper=far=shipPhase=interiorElapsed=0;interiorLook=.15;tidalYaw=.6;tidalPitch=.24;singularitySoundPlayed=false;playing=true;$('play').textContent='Ⅱ Pause';$('play').classList.add('selected');readouts()}for(const id of ['distance','mass','speed','disk','lens','starfield','mode'])$(id).addEventListener('input',()=>{sync();if(id==='distance')reset()});$('bh').onclick=()=>{body='bh';$('bh').classList.add('selected');$('ns').classList.remove('selected');r=Math.max(r,3);reset()};$('ns').onclick=()=>{body='ns';$('ns').classList.add('selected');$('bh').classList.remove('selected');r=Math.max(r,3);reset()};$('play').onclick=()=>{if((body==='bh'&&interiorElapsed>=85)||(body==='ns'&&r<=2.35))reset();else playing=!playing;$('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').classList.toggle('selected',playing)};$('reset').onclick=reset;$('orbit').onclick=()=>{theta=.5;phi=.65;zoom=1;pan=[0,0]};$('follow').onclick=()=>{follow=!follow;$('follow').classList.toggle('selected',follow)};
-$('singleView').onclick=()=>{split=false;$('singleView').classList.add('selected');$('splitView').classList.remove('selected');$('splitLabels').hidden=true};
-$('splitView').onclick=()=>{split=true;$('splitView').classList.add('selected');$('singleView').classList.remove('selected');$('splitLabels').hidden=false};
-// Generative, non-diegetic soundtrack: space itself is silent.
-let audioWanted=true, audioMaster=null, audioDrone=null, audioPulse=null, audioShimmer=null, audioFilter=null;
-function playSingularityTone(){
- if(!actx||actx.state!=='running'||!audioWanted)return;
- const t=actx.currentTime;
- // Low musical D + tritone and falling partials; a single ominous endpoint cue.
- const out=actx.createGain();out.gain.value=.0001;out.connect(audioMaster);
- out.gain.setValueAtTime(.0001,t);out.gain.exponentialRampToValueAtTime(.42,t+.12);
- out.gain.exponentialRampToValueAtTime(.0001,t+5.5);
- for(const [freq,amp] of [[36.71,.48],[55,.24],[77.78,.16],[110,.10]]){
-  const o=actx.createOscillator(),g=actx.createGain();
-  o.type='sine';o.frequency.setValueAtTime(freq*1.23,t);o.frequency.exponentialRampToValueAtTime(freq*.77,t+4.6);
-  g.gain.value=amp;o.connect(g);g.connect(out);o.start(t);o.stop(t+5.6);
- }
-}
-function playSingularityCrash(){
- if(!actx||actx.state!=='running'||!audioWanted||!audioMaster)return;
- const t=actx.currentTime,out=actx.createGain();
- out.gain.setValueAtTime(.0001,t);out.gain.exponentialRampToValueAtTime(.38,t+.04);
- out.gain.exponentialRampToValueAtTime(.0001,t+3.2);out.connect(audioMaster);
- for(const [freq,vol,wave] of [[62,.67,'sine'],[220,.16,'triangle'],[311.13,.035,'sawtooth'],[369.99,.025,'sawtooth']]){
-  const o=actx.createOscillator(),g=actx.createGain();o.type=wave;
-  o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,freq*.39),t+2.6);
-  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+3);
-  o.connect(g);g.connect(out);o.start(t);o.stop(t+3.1);
- }
-}
-function setupAudio(){
- if(actx)return;
- const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw Error('Web Audio unavailable');
- actx=new AC();
- audioMaster=actx.createGain();audioMaster.gain.value=.48;
- const comp=actx.createDynamicsCompressor();comp.threshold.value=-20;comp.ratio.value=2;
- audioMaster.connect(comp);comp.connect(actx.destination);
- const pad=actx.createGain(),melody=actx.createGain(),bass=actx.createGain();
- pad.gain.value=.25;melody.gain.value=.22;bass.gain.value=.15;
- pad.connect(audioMaster);melody.connect(audioMaster);bass.connect(audioMaster);
- // Music only: every source is a pitched oscillator. No noise buffers, hiss or static.
- // D minor / suspended modal harmony: slowly shifting orchestral-like pads.
- const chords=[
-  [146.83,174.61,220.00,293.66], // Dm
-  [130.81,174.61,196.00,261.63], // Fmaj7 colour
-  [116.54,146.83,174.61,233.08], // Bbmaj7
-  [130.81,164.81,196.00,293.66]  // C add9
- ];
- let chordIndex=0,nextChord=actx.currentTime;
- const voices=[];
- for(let i=0;i<4;i++){
-  const o=actx.createOscillator(),g=actx.createGain(),pan=actx.createStereoPanner();
-  o.type=i%2?'sine':'triangle';o.frequency.value=chords[0][i];o.detune.value=i%2?3:-3;
-  g.gain.value=[.11,.085,.075,.048][i];pan.pan.value=[-.6,.45,-.25,.7][i];
-  o.connect(g);g.connect(pan);pan.connect(pad);o.start();nodes.push(o);voices.push(o);
- }
- const breath=actx.createOscillator(),breathGain=actx.createGain();
- breath.frequency.value=.055;breathGain.gain.value=.045;breath.connect(breathGain);breathGain.connect(pad.gain);breath.start();nodes.push(breath);
- const low=actx.createOscillator(),lowGain=actx.createGain();
- low.type='sine';low.frequency.value=73.42;lowGain.gain.value=.2;low.connect(lowGain);lowGain.connect(bass);low.start();nodes.push(low);
- function note(at,freq,duration,volume,panValue){
-  const o=actx.createOscillator(),g=actx.createGain(),p=actx.createStereoPanner();
-  o.type='sine';o.frequency.setValueAtTime(freq,at);
-  const end=at+duration;g.gain.setValueAtTime(.0001,at);
-  g.gain.exponentialRampToValueAtTime(volume,at+.065);
-  g.gain.exponentialRampToValueAtTime(.0001,end);
-  p.pan.value=panValue;o.connect(g);g.connect(p);p.connect(melody);o.start(at);o.stop(end+.03);
- }
- const phrases=[
-  [293.66,349.23,440,349.23,293.66,261.63],
-  [261.63,329.63,392,349.23,293.66,261.63],
-  [233.08,293.66,349.23,293.66,261.63,233.08],
-  [261.63,293.66,392,440,392,293.66]
- ];
- let nextNote=actx.currentTime+.3,step=0;
- function schedule(){
-  if(!actx||actx.state!=='running')return;
-  const t=actx.currentTime;
-  while(nextChord<t+2){
-   chordIndex=Math.floor(nextChord/18)%chords.length;
-   voices.forEach((v,i)=>v.frequency.setTargetAtTime(chords[chordIndex][i],Math.max(t,nextChord),2.8));
-   low.frequency.setTargetAtTime(chords[chordIndex][0]/2,Math.max(t,nextChord),2);
-   nextChord+=18;
-  }
-  while(nextNote<t+2){
-   const tension=Math.min(1,Math.max(0,(8-r)/7));
-   const interior=body==='bh'&&mode==='fall'&&r<=1;const phrase=phrases[Math.floor(step/6)%phrases.length],pitch=interior?phrase[(step+2)%6]*.5:phrase[step%6];
-   if(step%6!==5) {note(nextNote,pitch,3.5-tension*.8,interior?.19:.17,Math.sin(step*1.8)*.62);if(step%3===0)note(nextNote+.45,pitch*(interior?1.5:2),2.5,.07,-Math.sin(step*1.8)*.65);}
-   nextNote+=interior?1.9:2.45-tension*.55;
-   step++;
-  }
- }
- const ticker=setInterval(schedule,450);
- nodes.push({stop:()=>clearInterval(ticker)});
- schedule();
-}
-function setAudioButton(){
- $('audio').textContent=sound?'♫ Ambience on · mute':audioWanted?'♫ Sound ready on interaction':'♫ Ambience off · enable';
- $('audio').classList.toggle('selected',sound);
- $('audio').setAttribute('aria-pressed',String(sound));
-}
-async function startAudio(){
- if(!audioWanted||sound)return;
- try{setupAudio();await actx.resume();sound=actx.state==='running';setAudioButton()}
- catch(e){console.warn('Ambient audio could not start',e);setAudioButton()}
-}
-$('audio').onclick=async()=>{
- if(audioWanted&&sound){audioWanted=false;await actx.suspend();sound=false}
- else{audioWanted=true;await startAudio()}
- setAudioButton();
-};
-for(const event of ['pointerdown','keydown','touchstart']){
- document.addEventListener(event,()=>{if(audioWanted&&!sound)void startAudio()},{capture:true,passive:true});
-}
-setAudioButton();
-void startAudio();
-C.addEventListener('pointerdown',e=>{C.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,shift:e.shiftKey}});C.addEventListener('pointermove',e=>{if(!drag)return;let dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(body==='bh'&&mode==='fall'&&r<=1){if(interiorElapsed>=79.9){tidalYaw+=dx*.009;tidalPitch=Math.max(-1.2,Math.min(1.2,tidalPitch+dy*.008))}else{interiorLook=Math.max(-.65,Math.min(1.2,interiorLook-dy*.008))}}else if(drag.shift){pan[0]+=dx;pan[1]+=dy}else{phi+=dx*.006;theta=Math.max(-1.45,Math.min(1.45,theta+dy*.006))}drag.x=e.clientX;drag.y=e.clientY});C.addEventListener('pointerup',()=>drag=null);C.addEventListener('pointercancel',()=>drag=null);C.addEventListener('wheel',e=>{e.preventDefault();if(body==='bh'&&mode==='fall'&&r<=1)return;zoom=Math.max(.3,Math.min(4,zoom*Math.exp(e.deltaY*.001)))},{passive:false});C.addEventListener('contextmenu',e=>e.preventDefault());addEventListener('keydown',e=>{if(['INPUT','SELECT','BUTTON'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();$('play').click()}if(e.key.toLowerCase()==='r')reset()});function setPanelCollapsed(collapsed){$('controls').classList.toggle('collapsed',collapsed);$('togglePanel').setAttribute('aria-expanded',String(!collapsed));$('togglePanel').textContent=collapsed?'⚙ Show controls':'Hide controls ×'}$('togglePanel').onclick=()=>setPanelCollapsed(!$('controls').classList.contains('collapsed'));setPanelCollapsed(innerWidth<1050);sync();reset();if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){playing=false;$('play').textContent='▶ Play';$('play').classList.remove('selected')}
-})();
-</script><div id="cabinet-tools" role="group" aria-label="Exhibit controls"><button type="button" id="cabinet-fullscreen" aria-label="Toggle fullscreen">⛶ Fullscreen</button><button type="button" id="cabinet-info-toggle" aria-expanded="false" aria-controls="cabinet-info">ⓘ About</button></div><aside id="cabinet-info" hidden aria-label="Exhibit information"><strong>Falling Through Spacetime</strong><p>Explore gravitational time dilation, horizon crossing and a conceptual interior journey. The exterior uses illustrative Schwarzschild-based effects; the final Kerr ring is a separate artistic model, not a physically consistent continuation.</p><a href="https://science.nasa.gov/universe/black-holes/" target="_blank" rel="noopener noreferrer">Background and references ↗</a><button type="button" id="cabinet-info-close">Close</button></aside><style>
-#cabinet-tools{position:fixed;z-index:9998;right:12px;top:56px;display:flex;gap:6px;font:12px system-ui,sans-serif}
-#cabinet-tools button,#cabinet-info button{cursor:pointer;color:#e5f0ee;background:#0c1920ed;border:1px solid #8299a4aa;border-radius:24px;padding:9px 13px;font:600 12px system-ui}
-#cabinet-tools button:hover,#cabinet-info button:hover{background:#274047}
-#cabinet-tools button:focus-visible,#cabinet-info button:focus-visible{outline:3px solid #d6f3a1;outline-offset:2px}
-#cabinet-info{position:fixed;z-index:9999;top:102px;right:12px;max-width:min(360px,calc(100vw - 24px));background:#101e25f7;border:1px solid #64867d;border-radius:16px;padding:20px;box-shadow:0 20px 60px #000a;color:#e6f0ed;font:14px/1.55 system-ui,sans-serif}
-#cabinet-info[hidden]{display:none!important}#cabinet-info strong{font-size:17px}#cabinet-info p{color:#b8d0ca}#cabinet-info a{color:#d6f3a1;display:block;margin-bottom:16px}#cabinet-info button{margin-top:8px}
-@media(max-width:600px){#cabinet-tools{top:auto;bottom:56px;right:12px}#cabinet-info{top:auto;bottom:106px;max-height:60vh;overflow:auto}}
-</style>
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Into the Kerr Black Hole — a relativistic simulator</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif;color:#dfe8ff}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+#overlay2d{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+.panel{position:fixed;background:rgba(8,12,24,.62);backdrop-filter:blur(6px);border:1px solid rgba(140,170,255,.18);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.45}
+#hud{left:14px;top:14px;width:290px}
+#hud h1{font-size:14px;margin:0 0 6px;letter-spacing:.06em;font-weight:600;color:#fff}
+#hud .row{display:flex;justify-content:space-between}
+#hud .v{font-variant-numeric:tabular-nums;color:#fff;font-family:ui-monospace,Consolas,monospace}
+#region{margin-top:6px;padding:4px 6px;border-radius:5px;background:rgba(255,255,255,.06);font-weight:600}
+#dilbar{height:7px;border-radius:4px;background:rgba(255,255,255,.1);margin:4px 0 2px;overflow:hidden}
+#dilfill{height:100%;width:100%;background:linear-gradient(90deg,#ff4d2e,#ffd27a,#7fd3ff)}
+#graphs{right:14px;top:14px;width:260px}
+#graphs canvas{width:236px;display:block;margin-top:4px}
+#gTau{height:105px}#gEmb{height:110px}
+#ctrl{left:50%;transform:translateX(-50%);bottom:14px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:center;max-width:94vw}
+#ctrl button,#ctrl select{background:rgba(120,150,255,.16);color:#e8eeff;border:1px solid rgba(150,180,255,.3);border-radius:6px;padding:5px 9px;font-size:12.5px;cursor:pointer}
+#ctrl button:hover{background:rgba(120,150,255,.3)}
+#ctrl label{display:flex;align-items:center;gap:5px}
+#ctrl input[type=range]{width:90px}
+#ctrl input[type=number]{width:52px;background:rgba(0,0,0,.4);color:#fff;border:1px solid #446;border-radius:4px}
+#msg{position:fixed;left:50%;top:22%;transform:translateX(-50%);text-align:center;font-size:15px;color:#fff;text-shadow:0 0 12px #000;pointer-events:none;transition:opacity .8s;opacity:0;max-width:640px}
+#finale{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;pointer-events:none}
+#finale h2{font-size:34px;font-weight:300;letter-spacing:.12em;margin:0 0 14px;color:#fff;text-shadow:0 0 30px #9cf}
+#finBtns{margin-top:18px;display:flex;gap:12px;justify-content:center;pointer-events:auto}#finBtns button{font-size:14px;padding:8px 16px}
+#climHud{position:fixed;left:50%;top:70px;transform:translateX(-50%);display:none;font:12px ui-monospace,monospace;color:#ffb0a0;text-align:center;border-color:rgba(255,90,60,.6)}
+#finale p{max-width:640px;font-size:15px;line-height:1.6;color:#d8e4ff;margin:4px 20px}
+#start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle,rgba(0,0,0,.35),rgba(0,0,0,.85));cursor:pointer;z-index:10;text-align:center}
+#start h2{font-weight:300;font-size:30px;letter-spacing:.1em;margin:0 0 10px}
+#start p{max-width:560px;color:#bcd;font-size:14px;line-height:1.6}
+#start .go{margin-top:14px;padding:10px 24px;border:1px solid #9bf;border-radius:30px;font-size:15px}
+#side{position:fixed;right:12px;top:12px;width:272px;max-height:calc(100vh - 24px);overflow-y:auto;background:rgba(8,12,24,.58);backdrop-filter:blur(8px);border:1px solid rgba(140,170,255,.18);border-radius:12px;padding:8px 10px;font-size:12px;color:#d8e2ff;scrollbar-width:thin;z-index:4}
+#side .sec,#side details{border-top:1px solid rgba(140,170,255,.14);padding:6px 0 4px}
+#side .sh,#side summary{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#aebfff;cursor:pointer;margin-bottom:4px}
+#side details>*:not(summary){margin:4px 0}#side label{display:flex;align-items:center;gap:6px;margin:3px 0}
+#side label.rng input[type=range]{flex:1;min-width:0}#side input[type=number]{width:60px;background:rgba(0,0,0,.4);color:#fff;border:1px solid #446;border-radius:4px}
+#side button,#side select{background:rgba(120,150,255,.16);color:#e8eeff;border:1px solid rgba(150,180,255,.3);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer}
+#side select{width:100%}#side button:hover{background:rgba(120,150,255,.3)}
+#topbar{display:flex;gap:6px;align-items:center;padding-bottom:6px}#topbar .pri{font-weight:600;min-width:92px;background:rgba(120,170,255,.3)}#fps{margin-left:auto}
+.btnrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#side .row{display:flex;justify-content:space-between;gap:6px}#side .v{font-family:ui-monospace,Consolas,monospace;color:#fff}
+#side #clocks,#side #graphs{position:static;width:auto}#side #graphs canvas{width:100%}
+#side #traj{position:static;width:auto;padding:0;z-index:auto}#side #traj .tr{grid-template-columns:78px 1fr 44px}#side #capbar{margin-left:84px;width:calc(100% - 130px)}
+#start{background:radial-gradient(circle,rgba(0,0,0,.05),rgba(0,0,0,.45));pointer-events:none;padding-right:290px;justify-content:flex-end;padding-bottom:60px;box-sizing:border-box}
+#start>*{pointer-events:auto}#bBig{margin:16px 0 8px;font-size:22px;padding:14px 38px;border-radius:40px;border:1px solid #9bf;background:rgba(90,140,255,.28);color:#fff;cursor:pointer;box-shadow:0 0 30px rgba(110,160,255,.45)}#bBig:hover{background:rgba(90,140,255,.5)}
+#stageCap{position:fixed;left:16px;top:16px;width:330px;background:rgba(6,8,18,.55);backdrop-filter:blur(6px);border-left:3px solid #8ab4ff;border-radius:8px;padding:10px 12px;opacity:0;transition:opacity 1.2s;pointer-events:none}
+#stageCap .sn{font-size:10.5px;letter-spacing:.14em;color:#8ab4ff;text-transform:uppercase}#stageCap h4{margin:3px 0 6px;font-size:15px;font-weight:600;color:#fff}#stageCap p{margin:0 0 6px;font-size:12.5px;line-height:1.45;color:#d8e2ff}#stageCap .gr{font-size:11.5px;color:#a9b9d6;border-top:1px solid rgba(255,255,255,.12);padding-top:5px;margin:0}
+body.paused::after{content:'❚❚  PAUSED';position:fixed;left:50%;top:18px;transform:translateX(-50%);padding:6px 16px;border-radius:16px;background:rgba(0,0,0,.55);color:#fff;font-size:13px;letter-spacing:.2em;pointer-events:none}
+#err{position:fixed;left:10px;bottom:70px;color:#f88;font-size:12px;white-space:pre-wrap;max-width:60vw}
+.small{font-size:11px;color:#9ab}
+#clocks{right:14px;top:14px;width:260px}
+#clocks .ck{display:flex;gap:8px;justify-content:space-between}
+#clocks .ck>div{flex:1;text-align:center}
+#clocks canvas{width:122px;height:122px;display:block;margin:2px auto}
+#clocks .lab{font-size:11px;font-weight:600;color:#fff;line-height:1.25;min-height:28px}
+#clocks .dig{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:#fff}
+#clocks .note{font-size:10.5px;color:#9ab;min-height:14px}
+#graphs{top:262px}
+#viewbtns{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:6px}
+#viewbtns button,#traj button,#traj select{background:rgba(120,150,255,.16);color:#e8eeff;border:1px solid rgba(150,180,255,.3);border-radius:6px;padding:5px 9px;font-size:12.5px;cursor:pointer}
+#hint{position:fixed;left:12px;bottom:10px;font-size:10.5px;color:#bcd;background:rgba(0,0,0,.35);padding:3px 10px;border-radius:12px;pointer-events:none;transition:opacity 1s}
+#traj{left:14px;bottom:14px;width:300px;display:none;z-index:5}
+#traj h3{margin:0 0 6px;font-size:13px;color:#fff;letter-spacing:.05em}
+#traj .tr{display:grid;grid-template-columns:96px 1fr 52px;gap:6px;align-items:center;margin:3px 0}
+#traj input[type=range]{width:100%}
+#traj .v{font-family:ui-monospace,Consolas,monospace;color:#fff;text-align:right}
+#capbar{position:relative;height:6px;margin:0 0 4px 102px;width:calc(100% - 160px);background:rgba(255,255,255,.12);border-radius:3px}
+#capzone{position:absolute;top:0;height:100%;background:rgba(255,90,60,.65);border-radius:3px}
+#capmark{position:absolute;top:-3px;width:2px;height:12px;background:#fff}
+#outc{margin-top:6px;padding:5px 7px;border-radius:5px;background:rgba(255,255,255,.06);font-size:12px;min-height:32px}
+
+@media (max-width:900px){#graphs,#clocks{display:none}}
+body.fin #hint{opacity:0!important}body.fin #side{opacity:.12;transition:opacity 1s}body.fin #side:hover{opacity:1}
+</style></head><body>
+<canvas id="gl"></canvas><canvas id="overlay2d"></canvas>
+<div id="hud" style="display:none"><span id="hTau"></span><span id="hT"></span><span id="hR"></span><span id="hV"></span><span id="hOm"></span><span id="hHor"></span><span id="hIsco"></span><span id="hC1"></span><span id="hC2"></span></div>
+<div id="side">
+ <div id="topbar"><button id="bPlay" class="pri">▶ Play</button><button id="bRestart">↺ Restart</button><span class="small" id="fps"></span></div>
+ <div class="sec" id="clocks"><div class="sh">Time dilation</div>
+ <div class="ck"><div><div class="lab">Spaceship clock<br><span style="font-weight:400">(proper time τ)</span></div><canvas id="ckShip" width="244" height="244"></canvas><div class="dig" id="dShip"></div><div class="note" id="nShip"></div></div>
+ <div><div class="lab">Distant observer clock<br><span style="font-weight:400">(coordinate time t)</span></div><canvas id="ckFar" width="244" height="244"></canvas><div class="dig" id="dFar"></div><div class="note" id="nFar"></div></div></div>
+ <div class="small" id="ckScale" style="text-align:center"></div>
+ <div class="row"><span>Clock rate dτ/dt</span><span class="v" id="hDil"></span></div>
+ <div id="dilbar"><div id="dilfill"></div></div><div class="small" id="hDilTxt"></div><div id="region"></div><div class="row"><span>Tide across 50 m hull</span><span class="v" id="hTide"></span></div><div class="small" id="hTideTxt"></div></div>
+ <details id="dTime"><summary>Timeline</summary><div id="tlNote" class="small"></div>
+ <div class="small"><b>Event horizon crossing</b> <span id="tl1v" class="v"></span></div><div class="tlw"><input id="tl1" type="range" min="0" max="1000" value="0" step="1"><div class="tk" id="tk1a" title="r₊ crossing"></div></div>
+ <div class="small"><b>Approach to the singularity</b> <span id="tl2v" class="v"></span></div><div class="tlw"><input id="tl2" type="range" min="0" max="1000" value="0" step="1"><div class="tk" id="tk2a" title="r₋"></div><div class="tk" id="tk2b" title="finale start" style="background:#f6a"></div></div>
+ <div class="btnrow"><button id="bTlRes" style="display:none">▶ Resume from here</button></div></details>
+<style>.tlw{position:relative}.tlw input{width:100%}.tk{position:absolute;top:-3px;width:2px;height:8px;background:#7cf;pointer-events:none}</style>
+<details id="dView"><summary>View</summary><div class="btnrow"><button id="bLook">Look back</button><label class="rng"><input type="checkbox" id="cRingArt" checked> Ring glow (artistic)</label></div>
+  <select id="selCam"><option value="distant">Camera: distant observer</option><option value="chase" selected>Camera: chase (follow ship)</option><option value="eye">Camera: ship's-eye view</option></select>
+  <div class="btnrow"><button id="bZin" title="Zoom in">＋ Zoom</button><button id="bZout" title="Zoom out">－ Zoom</button><button id="bReset" title="Reset view">⟲ Reset</button></div>
+  <label><input type="checkbox" id="cGrid"> Spacetime grid</label><label><input type="checkbox" id="cDop"> Show Doppler shift</label>
+  <div id="dopleg" style="display:none;text-align:center;margin-top:4px"><div class="small">disc false colour: g = ν<sub>obs</sub>/ν<sub>em</sub> (Doppler + gravitational)</div><div style="width:260px;height:10px;margin:4px auto;border-radius:5px;background:linear-gradient(90deg,#ff1404,#fff,#0d59ff)"></div><div style="display:flex;justify-content:space-between;font-size:11px"><span>0.56</span><span>redshift ← g → blueshift</span><span>1.8</span></div><div class="small" id="gRange"></div></div><div id="msg"></div>
+  <label class="rng">Speed <input id="sSpeed" type="range" min="0.25" max="20" step="0.25" value="4"><span id="lSpeed">4</span></label>
+  <label class="rng">Spin a/M <input id="sSpin" type="range" min="0.1" max="0.998" step="0.001" value="0.9"><span id="lSpin">0.900</span></label>
+  <label class="rng">Mass <input id="nMass" type="number" min="1" max="1e10" value="4300000">M☉</label><select id="selMass"><option value="10">Stellar · 10 M☉</option><option value="4300000" selected>Sgr A* · 4.3×10⁶ M☉</option><option value="6500000000">M87* · 6.5×10⁹ M☉</option></select>
+  <select id="selQ"><option value="1">Quality: ultra (native)</option><option value="0.75" selected>Quality: high</option><option value="0.5">Quality: medium</option><option value="0.35">Quality: low</option></select><label><input type="checkbox" id="cAuto" checked> Adaptive quality</label>
+ </details>
+ <details id="dTraj"><summary>Trajectory</summary><button id="bTraj" style="display:none"></button>
+ <div id="traj">
+ <div class="tr"><span>Preset</span><select id="tPre" style="grid-column:span 2">
+  <option value="default">Fall to the ring singularity (default)</option><option value="straight">Straight plunge (L = 0)</option>
+  <option value="spiral">Spiral plunge (near-critical prograde)</option><option value="retro">Retrograde plunge</option>
+  <option value="polar">Polar / off-plane plunge</option><option value="flyby">Near-miss flyby (escapes)</option>
+  <option value="stable">Stable circular orbit</option><option value="custom">Custom</option></select></div>
+ <div class="tr"><span>Start radius r₀</span><input id="tR" type="range" min="8" max="60" step="0.5"><span class="v" id="vR"></span></div>
+ <div class="tr"><span>Energy E</span><input id="tE" type="range" min="0.90" max="1.30" step="0.002"><span class="v" id="vE"></span></div>
+ <div class="small" id="eTxt" style="margin-left:102px"></div>
+ <div class="tr"><span>Ang. mom. L</span><input id="tL" type="range" min="-8" max="8" step="0.01"><span class="v" id="vL"></span></div>
+ <div id="capbar"><div id="capzone"></div><div id="capmark"></div></div>
+ <div class="small" id="capTxt" style="margin-left:102px"></div>
+ <div class="tr"><span>Carter Q (off-plane)</span><input id="tQ" type="range" min="0" max="30" step="0.1"><span class="v" id="vQ"></span></div>
+ <div id="outc"></div>
+ <div style="display:flex;gap:8px;margin-top:6px;align-items:center"><button id="bLaunch">🚀 Launch</button><label class="small"><input type="checkbox" id="cPath" checked> Show path preview</label><button id="bTclose" style="margin-left:auto">✕</button></div>
+ <div class="small" style="margin-top:4px">Path preview is drawn unlensed (straight-line projection) as a guide. Starts at θ = 90°, moving inwards.</div>
+</div>
+ </details>
+ <details id="dGraphs"><summary>Graphs</summary><div id="graphs"><div><b>Proper time τ vs distant time t</b></div>
+ <canvas id="gTau" width="472" height="250"></canvas>
+ <div class="small">τ stays finite while t → ∞ at the horizon.</div>
+ <div style="margin-top:8px"><b>Embedding diagram (equatorial slice)</b></div>
+ <canvas id="gEmb" width="472" height="260"></canvas>
+ <div class="small" id="embTxt">Curvature of space drawn as a funnel (schematic).</div></div></details>
+ <details id="dAudio"><summary>Audio</summary><div class="btnrow"><button id="bMute">♪ Mute</button><label class="rng">Volume <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8"></label></div><div class="small">Score reacts to the physics: slows with time dilation, darkens near the horizon, changes at each interior stage.</div></details>
+</div>
+<div id="hint">Drag to orbit · scroll to zoom · right-drag to pan · Space = pause</div>
+<div id="stageCap"><div class="sn" id="scN"></div><h4 id="scH"></h4><p id="scP"></p><p class="gr" id="scG"></p></div>
+<div id="finale"><h2 id="finH">RING SINGULARITY</h2><p id="finTxt"></p><div id="finBtns"><button id="bAgain">↺ Watch again</button><button id="bOther">🛰 Try another trajectory</button></div></div><div id="climHud" class="panel"></div>
+<div id="start"><h2>INTO THE KERR BLACK HOLE</h2><p>A ship falls into a rapidly spinning black hole: every pixel is a light ray traced through curved Kerr spacetime.</p><button id="bBig">▶ Play</button><div class="small">with sound · Space pauses</div></div>
+<div id="err"></div>
 <script>
-(()=>{const full=document.getElementById('cabinet-fullscreen'),toggle=document.getElementById('cabinet-info-toggle'),panel=document.getElementById('cabinet-info'),close=document.getElementById('cabinet-info-close');
-function updateFull(){full.textContent=document.fullscreenElement?'⛶ Exit fullscreen':'⛶ Fullscreen'}
-full.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch(e){full.textContent='Fullscreen unavailable'}});
-document.addEventListener('fullscreenchange',()=>{updateFull();window.dispatchEvent(new Event('resize'))});
-function setInfo(open){panel.hidden=!open;toggle.setAttribute('aria-expanded',String(open));if(open)close.focus();else toggle.focus()}
-toggle.addEventListener('click',()=>setInfo(panel.hidden));close.addEventListener('click',()=>setInfo(false));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)setInfo(false)});
-})();
+// ===== Kerr physics (G=c=M=1), ingoing Kerr–Schild Cartesian coordinates =====
+const KP = {};
+KP.rKS = (a,x,y,z)=>{const R2=x*x+y*y+z*z-a*a;const r2=0.5*(R2+Math.sqrt(R2*R2+4*a*a*z*z));return Math.sqrt(Math.max(r2,0));};
+KP.fl = (a,x,y,z)=>{const r=KP.rKS(a,x,y,z);const r2=r*r,d=r2+a*a;
+  const f=2*r2*r/(r2*r2+a*a*z*z);return {r,f,l:[(r*x+a*y)/d,(r*y-a*x)/d,z/r]};};
+// lower metric g_{mu nu} = eta + f l_mu l_nu, l_mu=(1,lx,ly,lz)
+KP.gLow=(a,X)=>{const {f,l}=KP.fl(a,X[1],X[2],X[3]);const L=[1,l[0],l[1],l[2]];const g=[];
+  for(let i=0;i<4;i++){g.push([]);for(let j=0;j<4;j++)g[i].push((i===j?(i===0?-1:1):0)+f*L[i]*L[j]);}return g;};
+KP.dot=(g,u,v)=>{let s=0;for(let i=0;i<4;i++)for(let j=0;j<4;j++)s+=g[i][j]*u[i]*v[j];return s;};
+KP.lower=(g,v)=>[0,1,2,3].map(i=>g[i][0]*v[0]+g[i][1]*v[1]+g[i][2]*v[2]+g[i][3]*v[3]);
+KP.S=(a,x,y,z,P)=>{const {f,l}=KP.fl(a,x,y,z);const lp=-P[0]+l[0]*P[1]+l[1]*P[2]+l[2]*P[3];return f*lp*lp;};
+KP.H=(a,X,P)=>0.5*(-P[0]*P[0]+P[1]*P[1]+P[2]*P[2]+P[3]*P[3]-KP.S(a,X[1],X[2],X[3],P));
+KP.deriv=(a,X,P)=>{const {f,l}=KP.fl(a,X[1],X[2],X[3]);const lp=-P[0]+l[0]*P[1]+l[1]*P[2]+l[2]*P[3];
+  const dX=[-P[0]+f*lp, P[1]-f*l[0]*lp, P[2]-f*l[1]*lp, P[3]-f*l[2]*lp];
+  const r=KP.rKS(a,X[1],X[2],X[3]);const h=1e-6*Math.max(r,1e-3);const dP=[0,0,0,0];
+  for(let i=1;i<4;i++){const A=X.slice(),B=X.slice();A[i]+=h;B[i]-=h;
+    dP[i]=0.5*(KP.S(a,A[1],A[2],A[3],P)-KP.S(a,B[1],B[2],B[3],P))/(2*h);}
+  return [dX,dP];};
+KP.rk4=(a,X,P,h)=>{const ad=(V,D,s)=>V.map((v,i)=>v+D[i]*s);
+  const [x1,p1]=KP.deriv(a,X,P);const [x2,p2]=KP.deriv(a,ad(X,x1,h/2),ad(P,p1,h/2));
+  const [x3,p3]=KP.deriv(a,ad(X,x2,h/2),ad(P,p2,h/2));const [x4,p4]=KP.deriv(a,ad(X,x3,h),ad(P,p3,h));
+  return [X.map((v,i)=>v+h/6*(x1[i]+2*x2[i]+2*x3[i]+x4[i])),P.map((v,i)=>v+h/6*(p1[i]+2*p2[i]+2*p3[i]+p4[i]))];};
+KP.horizons=a=>{const s=Math.sqrt(1-a*a);return [1+s,1-s];};
+KP.isco=a=>{const z1=1+Math.cbrt(1-a*a)*(Math.cbrt(1+a)+Math.cbrt(1-a));const z2=Math.sqrt(3*a*a+z1*z1);
+  return 3+z2-Math.sqrt((3-z1)*(3+z1+2*z2));};
+KP.rstar=(a,r)=>{const [rp,rm]=KP.horizons(a);return r+2*rp/(rp-rm)*Math.log(Math.abs(r-rp))-2*rm/(rp-rm)*Math.log(Math.abs(r-rm)+1e-300);};
+// Carter constant Q from KS covariant momentum (mu^2 = 1)
+KP.carter=(a,X,P)=>{const [x,y,z]=[X[1],X[2],X[3]];const r=KP.rKS(a,x,y,z);const c=z/r;const s2=Math.max(1-c*c,1e-12);const s=Math.sqrt(s2);
+  const pth=(c/s)*(x*P[1]+y*P[2])-r*s*P[3];const E=-P[0],L=x*P[2]-y*P[1];
+  return pth*pth+c*c*(a*a*(1-E*E)+L*L/s2);};
+KP.Rpot=(a,E,L,r)=>{const D=r*r-2*r+a*a;const A=E*(r*r+a*a)-a*L;return A*A-D*(r*r+(L-a*E)**2);};
+// choose a prograde equatorial plunge that reaches the ring (no radial turning point in (0,r0))
+KP.chooseL=(a,E,r0)=>{const rm=KP.horizons(a)[1];for(let L=0.6*Math.min(a*E,2*rm*E/a);L>-3;L-=0.02){let ok=true;for(let r=1e-4;r<r0;r*=1.01){if(KP.Rpot(a,E,L,r)<=0){ok=false;break;}}if(ok)return L;}return 0;};
+KP.shipPath=(a,r0=30)=>{
+  const E=1.0, L=KP.chooseL(a,E,r0);const [rp,rm]=KP.horizons(a);
+  const D=r0*r0-2*r0+a*a;const R=KP.Rpot(a,E,L,r0);
+  const prBL=-Math.sqrt(R)/D;const pxr=prBL-(2*r0*(-E)+a*L)/D; // KS radial covector
+  const x=r0,y=a; const px=pxr, py=(L+y*px)/x;
+  let X=[0,x,y,0],P=[-E,px,py,0];
+  const out=[];let tau=0,tBL=0,prevR=r0;const rs0=KP.rstar(a,r0);
+  let crossOut=null,crossIn=null;
+  for(let n=0;n<200000;n++){
+    const r=KP.rKS(a,X[1],X[2],X[3]);
+    const [dX]=KP.deriv(a,X,P);
+    if(n>0){ if(prevR>rp&&r>rp+1e-9){const rm_=0.5*(r+prevR);const Dm=rm_*rm_-2*rm_+a*a;tBL+=(X[0]-out[out.length-1].t)-(2*rm_/Dm)*(r-prevR);} }
+    const outside=r>rp+1e-9;
+    if(crossOut===null&&!outside)crossOut=tau; if(crossIn===null&&r<rm)crossIn=tau;
+    out.push({tau,t:X[0],x:X[1],y:X[2],z:X[3],r,u:dX.slice(),P:P.slice(),tBL:outside?tBL:NaN,
+      uret:outside?tBL-KP.rstar(a,r):NaN});
+    if(r<0.004)break;
+    const v=Math.hypot(dX[1],dX[2],dX[3]);const h=Math.min(0.25,0.004*r/v,0.003*Math.pow(r,1.5)+1e-8);
+    [X,P]=KP.rk4(a,X,P,h);tau+=h;prevR=r;
+  }
+  return {a,E,L,path:out,crossOut,crossIn,rp,rm,isco:KP.isco(a)};
+};
+
+KP.RpotQ=(a,E,L,Q,r)=>{const D=r*r-2*r+a*a;const A=E*(r*r+a*a)-a*L;return A*A-D*(r*r+(L-a*E)**2+Q);};
+KP.circular=(a,r,pro=1)=>{const s=Math.sqrt(r),r15=r*s,aa=pro*a;const den=Math.pow(r,.75)*Math.sqrt(r15-3*s+2*aa);
+  return {E:(r15-2*s+aa)/den,L:pro*(r*r-2*aa*s+a*a)/den};};
+// captured (no radial turning point between horizon and r0)?
+KP.captured=(a,E,L,Q,r0)=>{const rp=KP.horizons(a)[0];for(let r=rp*1.0001;r<r0;r*=1.003)if(KP.RpotQ(a,E,L,Q,r)<0)return false;return true;};
+KP.captureRange=(a,E,Q,r0)=>{const f=L=>KP.captured(a,E,L,Q,r0);if(!f(0))return null;
+  const bis=(lo,hi)=>{for(let k=0;k<40;k++){const m=(lo+hi)/2;f(m)?lo=m:hi=m;}return lo;};return [bis(0,-30),bis(0,30)];};
+// general geodesic from BL (r0, theta=pi/2, phi=0) with constants E,L,Q; radial direction dir=-1 inward
+KP.shipPathGen=(a,o)=>{
+  const r0=o.r0,E=o.E,L=o.L,Q=Math.max(0,o.Q||0),dir=o.dir||-1;const [rp,rm]=KP.horizons(a);
+  const D=r0*r0-2*r0+a*a;let R=KP.RpotQ(a,E,L,Q,r0);
+  if(R<-1e-6*Math.max(1,r0**4))return {err:'This combination is not allowed at the starting radius (the ship would need imaginary speed). Lower |L| or Q, or raise E.'};
+  R=Math.max(R,0);const prBL=dir*Math.sqrt(R)/D;const pr=prBL-(2*r0*(-E)+a*L)/D;const pth=-Math.sqrt(Q)*(o.thSign||1);
+  // KS Cartesian map at theta=pi/2, phi=0: x=r cos - a sin.., derivatives
+  const x=r0,y=a; // dX/dr=(1,0,0), dX/dth=(0,0,-r0), dX/dphi=(-a,r0,0)
+  const px=pr, pz=-pth/r0, py=(L+a*px)/r0;
+  let X=[0,x,y,0],P=[-E,px,py,pz];
+  const H0=KP.H(a,X,P);
+  const out=[];let tau=0,tBL=0,prevR=r0,prevT=0;let crossOut=null,crossIn=null,outcome='orbit',minR=r0,turned=false;
+  const tauMax=o.tauMax||2500,rEsc=Math.max(r0*1.6,70);
+  for(let n=0;n<400000;n++){
+    const r=KP.rKS(a,X[1],X[2],X[3]);
+    const [dX]=KP.deriv(a,X,P);
+    if(!(isFinite(r)&&dX.every(isFinite))||(r>0.05&&Math.abs(dX[0])>2e3)||Math.abs(KP.H(a,X,P)-H0)>(r<0.05?0.05:1e-2)){outcome='breakdown';break;}
+    if(n>0&&prevR>rp&&r>rp+1e-9){const rm_=0.5*(r+prevR);const Dm=rm_*rm_-2*rm_+a*a;tBL+=(X[0]-prevT)-(2*rm_/Dm)*(r-prevR);}
+    const outside=r>rp+1e-9;
+    if(crossOut===null&&!outside)crossOut=tau; if(crossIn===null&&r<rm)crossIn=tau;minR=Math.min(minR,r);
+    out.push({tau,t:X[0],x:X[1],y:X[2],z:X[3],r,u:dX.slice(),P:P.slice(),tBL:outside?tBL:NaN,uret:outside?tBL-KP.rstar(a,r):NaN});
+    if(r<0.004){outcome=Math.abs(X[3])<0.02?'singularity':'disc';break;}
+    if(r<0.03&&Math.abs(X[3])>0.01&&crossIn!==null){outcome='disc';break;}
+    if(r>rEsc&&dX[1]*X[1]+dX[2]*X[2]+dX[3]*X[3]>0){outcome='escape';break;}
+    if(tau>tauMax){outcome='orbit';break;}
+    const v=Math.hypot(dX[1],dX[2],dX[3]);const h=Math.min(0.25*Math.max(1,r/15),0.004*r/v,0.003*Math.pow(r,1.5)+1e-8);
+    prevT=X[0];[X,P]=KP.rk4(a,X,P,h);tau+=h;prevR=r;
+  }
+  if(outcome==='breakdown'&&crossOut!==null&&Math.abs(out[out.length-1].r-rm)<0.05)outcome='cauchy';
+  return {a,E,L,Q,path:out,crossOut,crossIn,rp,rm,isco:KP.isco(a),outcome,minR};
+};
+KP.shipPath=(a,r0=30)=>KP.shipPathGen(a,{r0,E:1,L:KP.chooseL(a,1,r0),Q:0});
+//!=='undefined')module.exports=KP;
+
+</script>
+<script id="fs" type="x-shader/x-fragment">#version 300 es
+precision highp float;
+uniform vec2 uRes; uniform float uDop;uniform float uA,uFov,uRp,uRm,uIsco,uRout,uTime,uShipOn,uShipSize,uGrid,uInside,uResc,uTmax,uFmax,uShipGlow,uClimax,uStretch;uniform vec4 uStageFx;uniform float uHorShell,uRingArt;uniform vec3 uGrade;
+uniform int uMaxSteps;uniform float uDbg;int dbgI=0;
+uniform vec3 uCam,uShip,uShipDir,uShipTint;
+uniform vec4 uE0,uEF,uEU,uER;
+out vec4 outCol;
+#define PI 3.14159265
+float hash(vec3 p){p=fract(p*0.3183099+.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+vec3 hash3(vec3 p){return vec3(hash(p),hash(p+19.19),hash(p+47.3));}
+float noise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);
+ return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+ mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float fbm(vec3 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*noise(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=.5;}return s;}
+vec3 bb(float T){float t=clamp(T,800.,40000.)/100.;float r,g,b;
+ if(t<=66.){r=1.;g=clamp(.39008*log(t)-.631841,0.,1.);}else{r=clamp(1.292936*pow(t-60.,-.1332047),0.,1.);g=clamp(1.12989*pow(t-60.,-.0755148),0.,1.);}
+ if(t>=66.)b=1.;else if(t<=19.)b=0.;else b=clamp(.543206*log(t-10.)-1.196254,0.,1.);
+ vec3 c=vec3(r,g,b);c=pow(c,vec3(2.2));return c;}
+float rOf(vec3 p){float R2=dot(p,p)-uA*uA;float r2=.5*(R2+sqrt(R2*R2+4.*uA*uA*p.z*p.z));return sqrt(max(r2,1e-10));}
+void fl(vec3 p,out float r,out float f,out vec3 l){r=rOf(p);float r2=r*r,d=r2+uA*uA;f=2.*r2*r/(r2*r2+uA*uA*p.z*p.z);l=vec3((r*p.x+uA*p.y)/d,(r*p.y-uA*p.x)/d,p.z/r);}
+float Sf(vec3 x,float pt,vec3 p){float r,f;vec3 l;fl(x,r,f,l);float lp=-pt+dot(l,p);return f*lp*lp;}
+void deriv(vec3 x,vec3 p,float pt,out vec3 dx,out vec3 dp){float r,f;vec3 l;fl(x,r,f,l);float lp=-pt+dot(l,p);dx=p-f*l*lp;
+ float h=2e-3*max(r,.05);
+ dp.x=(Sf(x+vec3(h,0,0),pt,p)-Sf(x-vec3(h,0,0),pt,p));
+ dp.y=(Sf(x+vec3(0,h,0),pt,p)-Sf(x-vec3(0,h,0),pt,p));
+ dp.z=(Sf(x+vec3(0,0,h),pt,p)-Sf(x-vec3(0,0,h),pt,p));
+ dp*=.25/h;}
+vec3 sky(vec3 d,float g){g=clamp(g,0.,8.);if(g!=g)g=1.;
+ vec3 c=vec3(0);
+ // galactic band
+ vec3 n=normalize(vec3(.25,-.55,.8));float b=dot(d,n);
+ float band=exp(-b*b/.035);float dust=fbm(d*7.)*fbm(d*3.+5.);
+ vec3 core=normalize(vec3(.8,.5,.3));float bulge=exp(-pow(length(d-core),2.)/.12)*band;
+ vec3 gal=mix(vec3(.55,.62,.85),vec3(1.,.82,.6),bulge)*(band*(.35+.9*fbm(d*14.))*(1.-.85*smoothstep(.35,.6,dust)*band)+bulge*1.2);
+ c+=gal*.22;
+ c+=vec3(.25,.12,.45)*pow(fbm(d*2.5+11.),3.)*.35+vec3(.05,.2,.35)*pow(fbm(d*3.3-4.),4.)*.4;
+ for(int L=0;L<3;L++){float sc=70.*pow(2.2,float(L));vec3 q=d*sc;vec3 id=floor(q);vec3 fr=fract(q)-.5;float h=hash(id+float(L)*13.);
+  float thr=.82+float(L)*.04+ .12*(1.-band);
+  if(h>thr){vec3 o=(hash3(id)-.5)*.6;float dd=length(fr-o);float br=pow(hash(id+3.1),6.)*6.+.15;float T=2800.+9000.*hash(id+8.);
+   c+=bb(T*g)*br*exp(-dd*dd*90.)*(L==0?2.5:1.);}}
+ float gg=clamp(g,.05,8.);c*=gg*gg*gg;float lm=dot(c,vec3(.3,.5,.2));c*=(.6+.4/(1.+.15*gg*gg))/(1.+lm);
+ // spectral shift tint of diffuse light
+ c*=mix(vec3(1.,.55,.3),vec3(.6,.8,1.3),smoothstep(.5,2.,gg));
+ if(uGrid>.5){float lat=asin(clamp(d.z,-1.,1.)),lon=atan(d.y,d.x);float s=PI/12.;
+  float w=min(abs(fract(lat/s+.5)-.5),abs(fract(lon/s+.5)-.5)*cos(lat));c+=vec3(.15,.6,.7)*.25*smoothstep(.06,.0,w);}
+ return c;}
+float sdBox(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);}
+float sdEll(vec3 p,vec3 r){float k0=length(p/r),k1=length(p/(r*r));return k0*(k0-1.)/max(k1,1e-6);}
+float sdCyl(vec3 p,float r,float h){vec2 d=abs(vec2(length(p.xy),p.z))-vec2(r,h);return min(max(d.x,d.y),0.)+length(max(d,0.));}
+vec2 shipSDF0(vec3 p);
+vec2 shipSDF(vec3 p){float s=uStretch;vec3 q=vec3(p.xy/(1.-.6*s),p.z/(1.+4.*s));vec2 m=shipSDF0(q);m.x*=(1.-.6*s);return m;}
+vec2 shipSDF0(vec3 p){
+ float hull=sdEll(p-vec3(0,0,.05),vec3(.075,.06,.40));
+ hull=min(hull,sdCyl(p-vec3(0,0,-.22),.07,.14)-.008);
+ float ring=sdCyl(p-vec3(0,0,-.08),.088,.012);
+ vec2 m=vec2(min(hull,ring),1.);
+ float ck=sdEll(p-vec3(0,.045,.25),vec3(.04,.03,.09));if(ck<m.x)m=vec2(ck,2.);
+ vec3 q=p;q.x=abs(q.x);
+ float rad=sdBox(q-vec3(.2,0,-.02),vec3(.11,.003,.15));float strut=sdBox(q-vec3(.1,0,-.02),vec3(.04,.008,.012));
+ if(rad<m.x)m=vec2(rad,3.);if(strut<m.x)m=vec2(strut,1.);
+ vec3 nq=q-vec3(.038,0,-.4);float noz=max(sdCyl(nq,.038+.25*(-.4-p.z)*.5,.05),-sdCyl(nq-vec3(0,0,-.012),.03,.05));
+ if(noz<m.x)m=vec2(noz,4.);
+ float gr=sdBox(p-vec3(0,-.065,.0),vec3(.025,.012,.12));if(gr<m.x)m=vec2(gr,5.);
+ return m;}
+vec3 shipN(vec3 p){vec2 e=vec2(.0015,0);return normalize(vec3(shipSDF(p+e.xyy).x-shipSDF(p-e.xyy).x,shipSDF(p+e.yxy).x-shipSDF(p-e.yxy).x,shipSDF(p+e.yyx).x-shipSDF(p-e.yyx).x));}
+vec2 segSeg(vec3 p0,vec3 p1,vec3 a,vec3 b){// returns (dist, param on ray seg)
+ vec3 d1=p1-p0,d2=b-a,r=p0-a;float A=dot(d1,d1),E=dot(d2,d2),F=dot(d2,r),c=dot(d1,r),B=dot(d1,d2);float den=A*E-B*B;
+ float s=den>1e-9?clamp((B*F-c*E)/den,0.,1.):0.;float t=clamp((B*s+F)/E,0.,1.);s=clamp((B*t-c)/A,0.,1.);
+ return vec2(length(p0+d1*s-(a+d2*t)),s);}
+vec3 dimSky(vec3 q){vec3 sk=sky(normalize(q),1.);float l=dot(sk,vec3(.3,.5,.2));return .15*vec3(l/(1.+l))*vec3(.7,.8,1.)+.006*vec3(.5,.6,.9);}
+void main(){
+ vec2 uv=(gl_FragCoord.xy-.5*uRes)/uRes.y;vec2 uv0=uv;
+ if(uStageFx.x>0.){float rr=length(uv);float an=atan(uv.y,uv.x)+uStageFx.x*(.9/(rr+.3))*(.75+.25*sin(uTime*.35));uv=rr*vec2(cos(an),sin(an));}
+ if(uStageFx.z>0.)uv*=1.+uStageFx.z*dot(uv,uv)*1.6;
+ if(uClimax>0.){float c=uClimax;float rr=length(uv),an=atan(uv.y,uv.x)+c*c*3.*rr+c*c*c*uTime*.6;
+  float seg=PI/(3.+floor(c*4.));float af=abs(mod(an,2.*seg)-seg);float k=smoothstep(.45,.95,c);
+  an=mix(an,af,k);uv=rr*vec2(cos(an),sin(an))*(1.+3.*c*c);}
+ vec3 d=normalize(vec3(uv*2.*tan(.5*uFov),1.));
+ vec4 v=-uE0+d.x*uER+d.y*uEU+d.z*uEF;
+ vec3 x=uCam;float r,f;vec3 l;fl(x,r,f,l);
+ float lv=v.x+dot(l,v.yzw);float pt=-v.x+f*lv;vec3 p=v.yzw+f*l*lv;
+ vec3 col=vec3(0);float T=1.;bool done=false;float minD=1e9;float gHit=0.;
+ vec3 sa=uShip-uShipDir*uShipSize*.5,sb=uShip+uShipDir*uShipSize*.5;float srad=uShipSize*.22;
+ float rprev=r;float ringD=1e9;vec3 ringC=vec3(0);float dPrev=1e9;bool dDec=false;vec3 hoop=vec3(0);vec3 pd=p;float thr=0.;
+ for(int i=0;i<1200;i++){
+  if(i>=uMaxSteps)break;dbgI=i;
+  vec3 dx,dp;deriv(x,p,pt,dx,dp);
+  float h=clamp(.06*r,.0015,2.5)/max(1.,length(dx));
+  if(uInside<.5) h=min(h,max(.25*(r-uRp),.004));
+  vec3 k1x=dx,k1p=dp,k2x,k2p,k3x,k3p,k4x,k4p;
+  deriv(x+.5*h*k1x,p+.5*h*k1p,pt,k2x,k2p);
+  deriv(x+.5*h*k2x,p+.5*h*k2p,pt,k3x,k3p);
+  deriv(x+h*k3x,p+h*k3p,pt,k4x,k4p);
+  vec3 xn=x+h/6.*(k1x+2.*k2x+2.*k3x+k4x);vec3 pn=p+h/6.*(k1p+2.*k2p+2.*k3p+k4p);
+  float rn=rOf(xn);
+  // ship
+  if(uShipOn>.5){vec2 sd=segSeg(x,xn,sa,sb);if(sd.x==sd.x)minD=min(minD,sd.x);
+   if(sd.x<uShipSize*.6){
+    vec3 F=uShipDir,R=normalize(cross(F,abs(F.z)<.95?vec3(0,0,1):vec3(1,0,0))),Uu=cross(R,F);float isz=1./uShipSize;
+    vec3 o=x-uShip,dv=xn-x;vec3 lo=vec3(dot(o,R),dot(o,Uu),dot(o,F))*isz,ld=vec3(dot(dv,R),dot(dv,Uu),dot(dv,F))*isz;float sl=length(ld);ld/=sl;
+    float bb=dot(lo,ld),cc=dot(lo,lo)-.36,disc_=bb*bb-cc;
+    if(disc_>0.){float t0=max(-bb-sqrt(disc_),0.),t1=min(-bb+sqrt(disc_),sl);float t=t0;bool hit=false;
+     vec3 plume=vec3(0);
+     for(int k=0;k<56;k++){if(t>t1)break;vec3 pp=lo+ld*t;vec2 m=shipSDF(pp);
+      // exhaust plume (emissive, optically thin)
+      vec3 pq=pp;pq.x=abs(pq.x)-.038;float zz=-.45-pq.z;if(zz>0.){float w=.02+.12*zz;plume+=vec3(.5,.75,1.6)*exp(-dot(pq.xy,pq.xy)/(w*w))*exp(-zz*1.6)*1.4*min(m.x,.03)/w;}
+      if(m.x<.0008){hit=true;
+       vec3 n=shipN(pp);vec3 Vw=-ld;
+       // world-space vectors for lighting
+       vec3 hpw=uShip+(R*pp.x+Uu*pp.y+F*pp.z)*uShipSize;vec3 nw=normalize(R*n.x+Uu*n.y+F*n.z),vw=normalize(-(R*ld.x+Uu*ld.y+F*ld.z));
+       float phs=atan(hpw.y,hpw.x);vec3 Qa=6.*vec3(cos(phs+1.57),sin(phs+1.57),0),Qb=6.*vec3(cos(phs-1.57),sin(phs-1.57),0);
+       vec3 La=normalize(Qa-hpw),Lb=normalize(Qb-hpw),Lc=normalize(-hpw);
+       float sa_=dot(vec3(-sin(phs+1.57),cos(phs+1.57),0),hpw-Qa)>0.?1.:0.;
+       vec3 ca=mix(vec3(1.,.42,.18),vec3(.55,.75,1.4),sa_),cb=mix(vec3(1.,.42,.18),vec3(.55,.75,1.4),1.-sa_),cc_=vec3(1.,.8,.6);
+       float mt=m.y;vec3 alb=vec3(.62,.64,.68);float met=.85,rough=.35;
+       if(mt==2.){alb=vec3(.05,.08,.12);met=.1;rough=.05;}
+       if(mt==3.){alb=vec3(.85,.82,.75);met=.2;rough=.6;}
+       if(mt==4.){alb=vec3(.25,.22,.2);met=.9;rough=.3;}
+       if(mt==5.){alb=vec3(.3,.31,.33);}
+       float pl=step(.94,fract(pp.z*16.))+step(.95,fract(atan(pp.y,pp.x)*1.91));if(mt==1.)alb*=1.-.45*min(pl,1.);
+       if(mt==3.)alb*=.8+.2*step(.5,fract(pp.z*28.));
+       float ao=clamp(.4+12.*shipSDF(pp+n*.03).x,0.,1.);
+       vec3 sc=vec3(0);vec3 Ls[3];Ls[0]=La;Ls[1]=Lb;Ls[2]=Lc;vec3 Cs[3];Cs[0]=ca;Cs[1]=cb;Cs[2]=cc_*1.4;
+       for(int li=0;li<3;li++){vec3 L=Ls[li];float nl=max(dot(nw,L),0.);vec3 H=normalize(L+vw);float sp=pow(max(dot(nw,H),0.),mix(220.,12.,rough))*(1.-rough)*2.;
+        vec3 f0=mix(vec3(.04),alb,met);vec3 fr=f0+(1.-f0)*pow(1.-max(dot(H,vw),0.),5.);
+        sc+=Cs[li]*(nl*alb*(1.-met)*.9+sp*fr*nl+nl*alb*met*.25);}
+       sc*=.9;sc+=alb*vec3(.05,.06,.09)*ao;
+       sc+=vec3(.4,.6,1.)*pow(1.-max(dot(nw,vw),0.),4.)*.35;// rim
+       sc*=ao;
+       if(mt==2.)sc+=vec3(.25,.6,.9)*.25*(.5+.5*fract(pp.z*40.));// lit windows
+       if(mt==4.&&pp.z<-.43&&length(vec2(abs(pp.x)-.038,pp.y))<.031)sc+=vec3(1.2,1.6,3.)*2.;
+       float blink=step(.8,fract(uTime*.7));
+       if(mt==3.&&abs(pp.x)>.3&&pp.z>.11)sc+=(pp.x>0.?vec3(.2,3.,.4):vec3(3.,.2,.2))*(.5+blink);
+       sc+=vec3(1.,.35,.08)*uStretch*uStretch*5.*(.6+.4*sin(pp.z*80.+uTime*20.));
+       col+=T*(sc+plume)*uShipTint;T=0.;break;}
+      t+=max(m.x*.9,.002);}
+     if(!hit)col+=T*plume*uShipTint;
+     if(hit)break;}}}
+  // disc
+  if(x.z*xn.z<0.){float s=x.z/(x.z-xn.z);vec3 xc=mix(x,xn,s);vec3 pc=mix(p,pn,s);float rc=rOf(xc);
+   if(uGrid>.5&&rc>uRp&&rc<40.){float ph=atan(xc.y,xc.x);float w1=abs(fract(rc/2.+.5)-.5)*2.;float w2=abs(fract(ph/(PI/12.)+.5)-.5)*(PI/6.)*rc;
+    float gl=max(smoothstep(.08,0.,w1),smoothstep(.12,0.,w2));col+=T*vec3(.2,.85,1.)*gl*.35*(rc>uRout?1.:.5);}
+   if(rc>uIsco&&rc<uRout){
+    float sr=sqrt(rc),r15=rc*sr;float Om=1./(r15+uA);float ut=(r15+uA)/(sqrt(sr)*rc*0.0+pow(rc,.75)*sqrt(r15-3.*sr+2.*uA));
+    float pphi=xc.x*pc.y-xc.y*pc.x;float g=1./(ut*(pt+Om*pphi));
+    float F=(1.-sqrt(uIsco/rc))/(rc*rc*rc);float Fn=F/uFmax;float Te=uTmax*pow(max(Fn,0.),.25);
+    float ph=atan(xc.y,xc.x)-Om*uTime;
+    vec3 q=vec3(cos(ph),sin(ph),0.)*log(rc)*2.5;
+    float tex=.55+.9*fbm(vec3(log(rc)*9.,cos(ph)*2.,sin(ph)*2.)+q*.4);tex*=.75+.5*noise(vec3(rc*3.,ph*6./PI,1.));tex*=.35+1.1*fbm(vec3(log(rc)*38.,cos(ph)*1.5,sin(ph)*1.5));tex=pow(tex,1.6);
+    float gc=clamp(g,0.,3.);
+    vec3 em=bb(Te*gc)*pow(gc,4.)*Fn*tex*1.0;em*=12./(12.+max(em.r,max(em.g,em.b)));em=max(mix(vec3(dot(em,vec3(.3,.5,.2))),em,1.5),0.);
+    if(gHit==0.)gHit=max(g,1e-3);
+    if(uDop>.5){float q=clamp(log(max(g,1e-3))/log(1.8),-1.,1.);vec3 cm=q<0.?mix(vec3(1.,1.,1.),vec3(1.,.08,.02),-q):mix(vec3(1.,1.,1.),vec3(.05,.35,1.),q);
+     em=cm*(.35+.9*sqrt(max(Fn,0.)))*(.7+.3*tex)*1.4;}
+    float edge=smoothstep(uIsco,uIsco*1.15,rc)*smoothstep(uRout,uRout*.6,rc);
+    float al=.95*edge;col+=T*em*al;T*=1.-al;if(T<.02){done=true;break;}}}
+  // horizon marker shell at the crossing (visualisation aid): faint lat/long grid on r = r+
+  if(uHorShell>0.&&(r-uRp)*(rn-uRp)<0.){float s_=(r-uRp)/(r-rn);vec3 xc=mix(x,xn,s_);float ph=atan(xc.y,xc.x),th=acos(clamp(xc.z/uRp,-1.,1.));
+   float gl=max(smoothstep(.06,0.,abs(fract(ph/(PI/12.)+.5)-.5)),smoothstep(.06,0.,abs(fract(th/(PI/12.)+.5)-.5)));col+=T*vec3(.35,.8,1.)*(.05+.35*gl)*uHorShell;}
+  // ergosphere / horizon shells (illustration)
+  if(uGrid>.5){float c0=x.z/r,c1=xn.z/rn;float re0=1.+sqrt(max(1.-uA*uA*c0*c0,0.)),re1=1.+sqrt(max(1.-uA*uA*c1*c1,0.));
+   if((r-re0)*(rn-re1)<0.)col+=T*vec3(.7,.25,1.)*.12;
+   if(uInside>.5){if((r-uRp)*(rn-uRp)<0.)col+=T*vec3(1.,.55,.2)*.18;if((r-uRm)*(rn-uRm)<0.)col+=T*vec3(1.,.2,.4)*.18;}}
+  // ring singularity (r=0, theta=pi/2): thin tube around the circle |xy|=a, z=0, sampled along the segment
+  if(uStageFx.w>0.){float dm=1e9;vec3 xm=x;for(int k=0;k<5;k++){vec3 q=mix(x,xn,(float(k)+.5)/5.);float dd=length(vec2(length(q.xy)-uA,q.z));if(dd<dm){dm=dd;xm=q;}}
+   float ang=atan(xm.y,xm.x);float fl_=.75+.25*sin(uTime*3.+ang*5.);vec3 rc_=mix(vec3(1.,.6,.35),vec3(.65,.8,1.5),.5+.5*sin(ang*3.-uTime));if(dm<ringD){ringD=dm;ringC=T*rc_*fl_;}
+   float dN=length(vec2(length(xn.xy)-uA,xn.z));
+   if(dDec&&dN>dm&&dm<.06&&hoop.x==0.){float w=.0035*max(length(xm-uCam),.05);hoop+=T*vec3(.85,.9,1.)*exp(-dm*dm/(w*w));}
+   dDec=dN<dPrev;dPrev=dN;}
+  // rays through the r=0 disc inside the ring pass into the r<0 sheet: show that universe's sky dimly and stop
+  if(uInside>.5&&x.z*xn.z<0.){float s_=x.z/(x.z-xn.z);vec3 xc=mix(x,xn,s_);if(length(xc.xy)<uA*.995){{col+=T*dimSky(pd);thr=1.;}done=true;break;}}
+  if(any(isnan(xn))||any(isnan(pn))||isnan(rn)){col+=T*dimSky(pd);done=true;break;}
+  x=xn;p=pn;rprev=r;r=rn;if(dot(p,p)>1e-12&&dot(p,p)<1e12)pd=p;
+  if(uInside<.5&&r<uRp+.015){done=true;break;}
+  if(!(r<1e6)||!(abs(pt)<1e6)||!(dot(p,p)<1e12)){done=true;break;}
+  if(r<.02){col+=T*dimSky(pd);done=true;break;}
+  if(r>uResc&&dot(x,dx)>0.){col+=T*sky(normalize(p),uInside>.5?clamp(1./max(pt,1e-3),.3,2.5):1./max(pt,1e-3));done=true;break;}
+ }
+ if(!done&&r>6.)col+=T*sky(normalize(p),clamp(1./max(pt,1e-3),0.,4.));
+ // inside the horizon: rays that run out of steps still carry light that fell in alongside the ship;
+ // show a faint, distorted image of the sky along their final direction instead of a flat void
+ else if(!done&&uInside>.5)col+=T*dimSky(pd);
+ if(uShipOn>.5&&minD<1e3)col+=uShipTint*vec3(.6,.85,1.)*uShipGlow*exp(-minD*minD/(uShipSize*uShipSize*1.2));
+ if(uDbg>2.5){float lu=dot(col,vec3(.3,.5,.2));col=vec3(gHit>0.?1.:0.,clamp(log(lu+1e-6)/9.2+.5,0.,1.),lu!=lu?1.:0.);}else if(uDbg>1.5)col=vec3(minD/5.,col.b*10.,T);else if(uDbg>.5)col=vec3(float(dbgI)/float(uMaxSteps),done?1.:0.,clamp((r-uRp)*5.,0.,1.))*3.;
+ if(uStageFx.y>0.){float rr=length(uv0);float an=atan(uv0.y,uv0.x);float hs=fract(sin(floor(an*36.)*91.7)*43758.5);float st=pow(hs,40.)*smoothstep(.3,.9,rr)*(1.-smoothstep(.0,.5,abs(fract(an*36./6.2832)-.5)*0.))*.35*(.5+.5*sin(rr*9.-uTime*7.+hs*40.));col+=uStageFx.y*vec3(.6,.8,1.4)*st*3.;}
+ float dEnd=length(vec2(length(x.xy)-uA,x.z));// only rays that graze the ring and leave it again; rays that fall into it are absorbed
+ // lensed starlight rim: escaping rays that skimmed the ring are brightened (strong bending); captured rays stay dark
+ if(uStageFx.w>0.&&ringD<1e8&&dEnd>.15)col*=1.+uStageFx.w*1.5*exp(-ringD*ringD/.0015);
+
+
+ if(uStageFx.w>0.&&ringD<1e8&&dEnd>.15)col+=ringC*uStageFx.w*uRingArt*(2.5*exp(-ringD*ringD/.0015)+.01/(1.+ringD*ringD/.002));
+ col*=uGrade;
+ if(uClimax>0.){float c=uClimax;float rr=length(uv);col*=mix(vec3(1.),vec3(.55,.8,1.9),c)*(1.+6.*c*c);
+  col+=vec3(.5,.8,2.2)*exp(-pow((rr-.9+.6*c)/(.04+.05*c),2.))*12.*c*c;
+  col+=.12*c*c*c*(.5+.5*cos(6.2832*(vec3(0.,.33,.67)+rr*1.2-uTime*.4)));}
+ if(any(isnan(col))||any(isinf(col)))col=vec3(0);col=clamp(col,0.,64.);if(isnan(gHit)||isinf(gHit))gHit=0.;
+ float msk=(uStageFx.w>0.&&(thr>0.||r<.05||(!done&&ringD<.06)))?1.:0.;outCol=vec4(col,msk>.5?-1.-gHit:gHit);
+}
+</script>
+<script id="vs" type="x-shader/x-vertex">#version 300 es
+in vec2 aP;out vec2 vUv;void main(){vUv=aP*.5+.5;gl_Position=vec4(aP,0,1);}
+</script>
+<script id="fsBright" type="x-shader/x-fragment">#version 300 es
+precision highp float;in vec2 vUv;uniform sampler2D uT;uniform vec2 uTexel;out vec4 o;
+void main(){vec3 c=vec3(0);for(int i=-1;i<=1;i++)for(int j=-1;j<=1;j++)c+=texture(uT,vUv+vec2(i,j)*uTexel).rgb;c/=9.;
+if(any(isnan(c))||any(isinf(c)))c=vec3(0);c=clamp(c,0.,64.);float l=dot(c,vec3(.3,.6,.1));o=vec4(c*smoothstep(1.,4.,l),1);}
+</script>
+<script id="fsBlur" type="x-shader/x-fragment">#version 300 es
+precision highp float;in vec2 vUv;uniform sampler2D uT;uniform vec2 uDir;out vec4 o;
+void main(){float w[7]=float[](.1964,.1748,.1216,.0656,.0274,.0088,.0022);vec3 c=texture(uT,vUv).rgb*w[0];
+for(int i=1;i<7;i++){c+=texture(uT,vUv+uDir*float(i)).rgb*w[i];c+=texture(uT,vUv-uDir*float(i)).rgb*w[i];}if(any(isnan(c))||any(isinf(c)))c=vec3(0);o=vec4(c,1);}
+</script>
+<script id="fsComp" type="x-shader/x-fragment">#version 300 es
+precision highp float;in vec2 vUv;uniform sampler2D uT,uB1,uB2;uniform float uExp,uFlash,uFade,uTimeS,uHasBloom,uHoop;uniform vec2 uPx;out vec4 o;
+vec3 aces(vec3 x){return clamp((x*(2.51*x+.03))/(x*(2.43*x+.59)+.14),0.,1.);}
+void main(){vec3 c=texture(uT,vUv).rgb;if(uHasBloom>.5)c+=texture(uB1,vUv).rgb*.14+texture(uB2,vUv).rgb*.08;
+if(uHoop>0.){float m=0.;for(int i=0;i<12;i++){float an=float(i)*.5236;m+=texture(uT,vUv+uPx*1.6*vec2(cos(an),sin(an))).a<0.?1.:0.;}m/=12.;float e=clamp(4.*m*(1.-m),0.,1.);c+=vec3(.8,.87,1.)*e*e*uHoop*2.5;}
+c*=uExp;{float l=max(c.r,max(c.g,c.b));vec3 hp=c*(aces(vec3(l)).x/max(l,1e-5));c=mix(aces(c),hp,.75);}c=pow(c,vec3(1./2.2));
+vec2 q=vUv-.5;c*=1.-.35*dot(q,q)*2.;
+c+=(fract(sin(dot(gl_FragCoord.xy+uTimeS,vec2(12.9898,78.233)))*43758.5453)-.5)/255.;
+c*=1.-uFade;c=mix(c,vec3(1.,.97,.92),uFlash);if(any(isnan(c))||any(isinf(c)))c=vec3(0);o=vec4(c,1);}
+</script>
+<script>
+"use strict";const qs=new URLSearchParams(location.search);if(qs.get("ui")==="0")document.head.insertAdjacentHTML("beforeend","<style>#side,#stageCap,#hint{display:none!important}</style>");
+const $=id=>document.getElementById(id);
+const errBox=$('err');function logErr(s){errBox.textContent+=s+'\n';console.error(s);}
+const cv=$('gl');const gl=cv.getContext('webgl2',{antialias:false,preserveDrawingBuffer:true});
+if(!gl){logErr('WebGL2 is not available in this browser.');}
+const hasFloat=!!gl.getExtension('EXT_color_buffer_float');gl.getExtension('OES_texture_float_linear');
+function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src.trim());gl.compileShader(s);
+ if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){logErr('Shader error: '+gl.getShaderInfoLog(s));}return s;}
+function prog(fsId){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,$('vs').textContent));
+ gl.attachShader(p,sh(gl.FRAGMENT_SHADER,$(fsId).textContent));gl.bindAttribLocation(p,0,'aP');gl.linkProgram(p);
+ if(!gl.getProgramParameter(p,gl.LINK_STATUS))logErr('Link error: '+gl.getProgramInfoLog(p));
+ const U={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const nm=gl.getActiveUniform(p,i).name;U[nm]=gl.getUniformLocation(p,nm);}
+ return {p,U};}
+const P={trace:prog('fs'),bright:prog('fsBright'),blur:prog('fsBlur'),comp:prog('fsComp')};
+const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+function mkTarget(w,h){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);
+ if(hasFloat)gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA16F,w,h,0,gl.RGBA,gl.HALF_FLOAT,null);else gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+ const fb=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+ return {t,fb,w,h};}
+let T={},rw=0,rh=0;
+function ensureTargets(w,h){if(w===rw&&h===rh)return;rw=w;rh=h;for(const k in T){gl.deleteTexture(T[k].t);gl.deleteFramebuffer(T[k].fb);}
+ T.hdr=mkTarget(w,h);const w2=Math.max(1,w>>1),h2=Math.max(1,h>>1),w4=Math.max(1,w>>2),h4=Math.max(1,h>>2),w8=Math.max(1,w>>3),h8=Math.max(1,h>>3);
+ T.a2=mkTarget(w2,h2);T.b2=mkTarget(w2,h2);T.a4=mkTarget(w4,h4);T.b4=mkTarget(w4,h4);T.a8=mkTarget(w8,h8);T.b8=mkTarget(w8,h8);}
+function draw(target,prg,setup){gl.bindFramebuffer(gl.FRAMEBUFFER,target?target.fb:null);
+ gl.viewport(0,0,target?target.w:cv.width,target?target.h:cv.height);gl.useProgram(prg.p);setup(prg.U);gl.drawArrays(gl.TRIANGLES,0,3);}
+function tex(U,name,unit,t){gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);gl.uniform1i(U[name],unit);}
+
+// ---------- state ----------
+const S={a:0.9,mass:4.3e6,speed:4,playing:true,tau:0,cam:'chase',grid:false,q:0.75,auto:true,scale:1,az:-1.75,incl:1.40,dist:42,pan:[0,0,0],cyaw:0,cpitch:0,czoom:1,cpan:[0,0],eyaw:0,epitch:0,efov:1,showPath:true,
+ traj:{preset:'default',r0:30,E:1,L:0,Q:0},
+ finale:false,finT:0,muted:false,started:false,wallT:0,discT:0,fixed:null};
+let ship=null;
+const PRESETS={default:a=>({r0:30,E:1,L:KP.chooseL(a,1,30),Q:0}),straight:a=>({r0:30,E:1,L:0,Q:0}),
+ spiral:a=>{const c=KP.captureRange(a,1,0,30);return {r0:30,E:1,L:+(c[1]*0.97).toFixed(2),Q:0};},retro:a=>({r0:30,E:1,L:-3,Q:0}),
+ polar:a=>({r0:30,E:1,L:0,Q:8}),flyby:a=>({r0:40,E:1.02,L:6,Q:0}),stable:a=>{const c=KP.circular(a,12);return {r0:12,E:+c.E.toFixed(5),L:+c.L.toFixed(4),Q:0};}};
+function computePath(){const T=S.traj;return KP.shipPathGen(S.a,{r0:T.r0,E:T.E,L:T.L,Q:T.Q});}
+let preview=null;
+function buildShip(){const np=computePath();if(np.err){flash(np.err,'err'+Math.random());if(ship)return;S.traj=Object.assign(S.traj,PRESETS.default(S.a));return buildShip();}ship=np;preview=null;const p=ship.path;
+ // precompute arrays
+ ship.N=p.length;ship.tauEnd=p[p.length-1].tau;
+ let lastOut=0;for(let i=0;i<p.length;i++)if(!isNaN(p[i].uret))lastOut=i;ship.lastOut=lastOut;
+ ship.captured=ship.crossOut!==null;
+ ship.kappa=(ship.rp-ship.rm)/(2*(ship.rp*ship.rp+S.a*S.a));
+ ship.Fmax=0;for(let r=ship.isco;r<40;r*=1.002){const F=(1-Math.sqrt(ship.isco/r))/(r*r*r);if(F>ship.Fmax)ship.Fmax=F;}
+ ship.tauClim=null;if(ship.outcome==='singularity'){for(let i=0;i<p.length;i++){if(p[i].r<.35&&(ship.crossIn==null||p[i].tau>ship.crossIn)){ship.tauClim=p[i].tau;break;}}}
+ ship.stg=null;if(ship.tauClim!=null&&ship.crossOut!=null){const rp=ship.rp,rm=ship.rm;const th=[rp-.35*(rp-rm),rm+.12,rm-.05,Math.min(rm-.1,.47)];const k=[ship.crossOut];
+  for(const rt of th){let v=null;for(let i=0;i<p.length;i++)if(p[i].tau>k[k.length-1]&&p[i].r<rt){v=p[i].tau;break;}k.push(Math.min(v??ship.tauClim,ship.tauClim));}
+  k.push(ship.tauClim);for(let i=1;i<k.length;i++)k[i]=Math.max(k[i],k[i-1]+1e-6);ship.stg=k;}
+ S.tau=0;S.finale=false;S.finT=0;S.climT=0;S.climC=0;S.inT=0;S.stage=0;$('finale').style.display='none';shown={};window.__ship=ship;}
+function sampleAt(tau){const p=ship.path;let lo=0,hi=p.length-1;if(tau<=p[0].tau)return {i:0,s:0};if(tau>=p[hi].tau)return {i:hi-1,s:1};
+ while(hi-lo>1){const m=(lo+hi)>>1;if(p[m].tau<=tau)lo=m;else hi=m;}return {i:lo,s:(tau-p[lo].tau)/(p[hi].tau-p[lo].tau)};}
+function lerpS(i,s){const a=ship.path[i],b=ship.path[Math.min(i+1,ship.N-1)];const L=(k)=>a[k]+(b[k]-a[k])*s;
+ return {tau:L('tau'),t:L('t'),x:L('x'),y:L('y'),z:L('z'),r:L('r'),tBL:L('tBL'),u:a.u.map((v,k)=>v+(b.u[k]-v)*s),P:a.P.map((v,k)=>v+(b.P[k]-v)*s),i};}
+// ---------- tetrads ----------
+function sub3(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function norm3(a){const l=Math.hypot(...a)||1;return a.map(v=>v/l);}
+function tetrad(pos,u,fwd,up){const X=[0,...pos];const g=KP.gLow(S.a,X);
+ let n=KP.dot(g,u,u);if(!(n<-1e-9))return null;const e0=u.map(v=>v/Math.sqrt(-n));
+ const ortho=(v,basis)=>{let w=v.slice();for(const [e,sg] of basis){const c=KP.dot(g,w,e)*sg;w=w.map((x,i)=>x-c*e[i]);}const m=KP.dot(g,w,w);if(!(m>1e-12))return null;return w.map(x=>x/Math.sqrt(m));};
+ const eF=ortho([0,...fwd],[[e0,-1]]);if(!eF)return null;
+ const eU=ortho([0,...up],[[e0,-1],[eF,1]]);if(!eU)return null;
+ const eR=ortho([0,...cross(fwd,up)],[[e0,-1],[eF,1],[eU,1]]);if(!eR)return null;
+ return {e0,eF,eU,eR,pos,fwd3:fwd};}
+function rotAx(v,k,t){const c=Math.cos(t),s_=Math.sin(t),d=k[0]*v[0]+k[1]*v[1]+k[2]*v[2],x=cross(k,v);return v.map((q,i)=>q*c+x[i]*s_+k[i]*d*(1-c));}
+const camE={pos:[0,0,0],F:[1,0,0],R:[0,1,0],U:[0,0,1],fov:1.2,mode:'chase'};
+function distantSeen(cur){// image of ship as seen by distant observer at current BL time
+ const p=ship.path;const rsc=KP.rstar(S.a,S.dist);let Tobs;
+ if(!isNaN(cur.tBL)&&cur.i<ship.lastOut)Tobs=cur.tBL;else{const lo=p[ship.lastOut];Tobs=lo.tBL+(S.tau-lo.tau)*60;}
+ const target=Tobs-rsc+KP.rstar(S.a,30)*0;
+ let lo=0,hi=ship.lastOut;if(target<=p[0].uret)return {i:0,s:0,fade:1,g:1};
+ if(target>=p[hi].uret){if(!ship.captured)return {i:hi,s:0,fade:1,g:1};return {i:hi,s:0,fade:Math.exp(-ship.kappa*(target-p[hi].uret)),g:(p[hi].tau-p[hi-1].tau)/(p[hi].uret-p[hi-1].uret),frozen:true};}
+ while(hi-lo>1){const m=(lo+hi)>>1;if(p[m].uret<=target)lo=m;else hi=m;}
+ const s=(target-p[lo].uret)/(p[hi].uret-p[lo].uret);const g=(p[hi].tau-p[lo].tau)/(p[hi].uret-p[lo].uret);return {i:lo,s,fade:1,g};}
+// ---------- UI ----------
+let shown={};function flash(txt,key){if(shown[key])return;shown[key]=1;const m=$('msg');m.innerHTML=txt;m.style.opacity=1;clearTimeout(m._t);m._t=setTimeout(()=>m.style.opacity=0,5200);}
+$('bPlay').onclick=()=>{if(!S.started){$('start').click();return;}S.playing=!S.playing;if(S.playing){S.scrub=false;$('bTlRes').style.display='none';}$('bPlay').textContent=S.playing?'❚❚ Pause':'▶ Resume';document.body.classList.toggle('paused',!S.playing);Audio_.setPaused&&Audio_.setPaused(!S.playing);};
+$('bAgain').onclick=()=>$('bRestart').click();$('bOther').onclick=()=>{$('bRestart').click();if($('traj').style.display!=='block')$('bTraj').click();};
+$('bRestart').onclick=()=>{buildShip();lastStage=0;Audio_.restart&&Audio_.restart();for(const id of ['hud','clocks','ckShip','ckFar'])$(id).style.transform=$(id).style.filter='';$('stageCap').style.opacity=0;};
+$('sSpeed').oninput=e=>{S.speed=+e.target.value;$('lSpeed').textContent=S.speed;};
+$('sSpin').oninput=e=>{S.a=+e.target.value;$('lSpin').textContent=S.a.toFixed(3);};
+$('sSpin').onchange=()=>{if(PRESETS[S.traj.preset])Object.assign(S.traj,PRESETS[S.traj.preset](S.a));buildShip();if($('traj').style.display==='block')updatePreview();};
+$('nMass').onchange=e=>{S.mass=Math.max(1e-3,+e.target.value||4.3e6);};$('selMass').onchange=e=>{$('nMass').value=e.target.value;S.mass=+e.target.value;};if(qs.get('mass')){S.mass=+qs.get('mass');$('nMass').value=S.mass;}
+$('selCam').onchange=e=>{S.cam=e.target.value;};
+$('cGrid').onchange=e=>{S.grid=e.target.checked;};$('cDop').onchange=e=>{S.dop=e.target.checked;$('dopleg').style.display=S.dop?'block':'none';};
+let mouse=null;cv.addEventListener('mousemove',e=>mouse=[e.clientX,e.clientY]);cv.addEventListener('mouseleave',()=>mouse=null);let gBuf=null,gBufT=0,gBufW=0,gBufH=0;
+$('selQ').onchange=e=>{S.q=+e.target.value;S.scale=1;};
+$('cAuto').onchange=e=>{S.auto=e.target.checked;S.scale=1;};
+$('vol').oninput=e=>Audio_.setVol(+e.target.value);
+$('bMute').onclick=()=>{S.muted=!S.muted;$('bMute').textContent=S.muted?'♪ Unmute':'♪ Mute';Audio_.setMute&&Audio_.setMute(S.muted);};
+addEventListener('keydown',e=>{if(e.code==='Space'){$('bPlay').click();e.preventDefault();}
+ if(e.key==='c'){const o=['distant','chase','eye'];S.cam=o[(o.indexOf(S.cam)+1)%3];$('selCam').value=S.cam;}
+ if(e.key==='g'){$('cGrid').click();} if(e.key==='m')$('bMute').click();});
+const ptrs=new Map();let pinch0=null;
+function zoomBy(f){if(S.cam==='distant')S.dist=Math.min(120,Math.max(2.4,S.dist*f));else if(S.cam==='chase')S.czoom=Math.min(6,Math.max(.1,S.czoom*f));else S.efov=Math.min(1.5,Math.max(.35,S.efov*Math.pow(f,.6)));}
+function resetView(){Object.assign(S,{az:-1.75,incl:1.40,dist:42,pan:[0,0,0],cyaw:0,cpitch:0,czoom:1,cpan:[0,0],eyaw:0,epitch:0,efov:1});}
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,pan:e.button===2||e.shiftKey});pinch0=null;$('hint').style.opacity=.35;});
+const endPtr=e=>{ptrs.delete(e.pointerId);pinch0=null;};cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+ if(ptrs.size>=2){const [A,B]=[...ptrs.values()];const d=Math.hypot(A.x-B.x,A.y-B.y);if(pinch0)zoomBy(pinch0/d);pinch0=d;return;}
+ if(p.pan||e.shiftKey){if(S.cam==='distant'){const k=S.dist*.0015;S.pan=S.pan.map((v,i)=>v-camE.R[i]*dx*k+camE.U[i]*dy*k);const m=Math.hypot(...S.pan);if(m>25)S.pan=S.pan.map(v=>v*25/m);}
+  else if(S.cam==='chase'){S.cpan=[Math.max(-3,Math.min(3,S.cpan[0]-dx*.004)),Math.max(-3,Math.min(3,S.cpan[1]+dy*.004))];}
+  else{S.eyaw+=dx*.003;S.epitch=Math.max(-1.4,Math.min(1.4,S.epitch+dy*.003));}return;}
+ if(S.cam==='distant'){S.az-=dx*.005;S.incl=Math.min(3.0,Math.max(.12,S.incl-dy*.005));}
+ else if(S.cam==='chase'){S.cyaw-=dx*.006;S.cpitch=Math.max(-1.3,Math.min(1.3,S.cpitch+dy*.006));}
+ else{S.eyaw+=dx*.004;S.epitch=Math.max(-1.45,Math.min(1.45,S.epitch-dy*.004));}});
+cv.addEventListener('wheel',e=>{zoomBy(Math.exp(e.deltaY*.001));e.preventDefault();},{passive:false});
+$('bZin').onclick=()=>zoomBy(1/1.2);$('bZout').onclick=()=>zoomBy(1.2);$('bReset').onclick=resetView;
+setTimeout(()=>$('hint').style.opacity=.55,9000);
+// ---- trajectory panel ----
+const TR={r0:'tR',E:'tE',L:'tL',Q:'tQ'};
+function syncTrajUI(){const T=S.traj;$('tPre').value=T.preset;for(const k in TR)$(TR[k]).value=T[k];
+ $('vR').textContent=T.r0.toFixed(1);$('vE').textContent=T.E.toFixed(3);$('vL').textContent=T.L.toFixed(2);$('vQ').textContent=T.Q.toFixed(1);
+ $('eTxt').textContent=T.E<0.9995?'bound (E < 1): cannot reach infinity':T.E<=1.0005?'marginally bound (E = 1): falls from rest at infinity':'unbound (E > 1): arrives with speed from infinity';
+ const cr=KP.captureRange(S.a,T.E,T.Q,T.r0);const X=v=>(v+8)/16*100;
+ if(cr){$('capzone').style.left=X(cr[0])+'%';$('capzone').style.width=(X(cr[1])-X(cr[0]))+'%';$('capTxt').textContent=`Captured if ${cr[0].toFixed(2)} < L < ${cr[1].toFixed(2)} (red); retrograde L < 0`;}
+ else{$('capzone').style.width='0';$('capTxt').textContent='No capture possible for these E, Q from this radius';}
+ $('capmark').style.left=X(T.L)+'%';}
+const OUT={singularity:'Falls through r₊ and r₋ and reaches the ring singularity.',
+ cauchy:'Captured: crosses the event horizon, then meets the inner (Cauchy) horizon on the branch that ingoing Kerr–Schild coordinates cannot follow — the simulation ends there.',
+ disc:'Captured: off the equator the ship misses the ring and passes through the disc spanning it (r = 0) towards the negative-r region, which is not modelled — the simulation ends there.',
+ breakdown:'Captured, but the integration breaks down (coordinate singularity) before the end — the simulation stops there.',
+ escape:'Not captured: swings past the hole and escapes to infinity.',orbit:'Not captured: stays bound and keeps orbiting.'};
+function outcomeText(sh){if(sh.err)return '<span style="color:#f88">'+sh.err+'</span>';const e=sh.path[sh.path.length-1];
+ let t=OUT[sh.outcome]+` <span class="small">Closest approach ${sh.minR.toFixed(3)} M; τ shown ${e.tau.toFixed(1)} M (${fmtTime(e.tau)}).</span>`;
+ if(sh.outcome==='orbit')t+=' <span class="small">(Shown for τ = '+e.tau.toFixed(0)+' M; it would continue indefinitely.)</span>';return t;}
+let prevT=null;function updatePreview(){syncTrajUI();clearTimeout(prevT);prevT=setTimeout(()=>{preview=computePath();$('outc').innerHTML=outcomeText(preview);},120);}
+for(const k in TR)$(TR[k]).oninput=e=>{S.traj[k]=+e.target.value;S.traj.preset='custom';updatePreview();};
+$('tPre').onchange=e=>{const p=e.target.value;S.traj.preset=p;if(PRESETS[p])Object.assign(S.traj,PRESETS[p](S.a));updatePreview();};
+$('bTraj').onclick=()=>{const t=$('traj');t.style.display=t.style.display==='block'?'none':'block';if(t.style.display==='block')updatePreview();};
+$('bTclose').onclick=()=>$('traj').style.display='none';$('cPath').onchange=e=>S.showPath=e.target.checked;
+$('bLaunch').onclick=()=>{buildShip();S.playing=true;S.started=true;$('start').style.display='none';document.body.classList.remove('paused');Audio_.init();Audio_.setPaused&&Audio_.setPaused(false);$('bPlay').textContent='❚❚ Pause';Audio_.restart&&Audio_.restart();$('outc').innerHTML=outcomeText(ship);};
+$('start').onclick=e=>{if(e&&e.target&&e.target.id!=='bBig'&&e.isTrusted)return;$('start').style.display='none';S.started=true;S.playing=true;$('bPlay').textContent='❚❚ Pause';Audio_.init();};
+$('bBig').onclick=()=>{};
+$('dTraj').addEventListener('toggle',()=>{const o=$('dTraj').open;$('traj').style.display=o?'block':'none';if(o)updatePreview();});$('bTraj').onclick=()=>{$('dTraj').open=!$('dTraj').open;};$('bTclose').onclick=()=>{$('dTraj').open=false;};
+
+// ---------- audio: spooky psychedelic generative score (Web Audio, all synthesised) ----------
+const Audio_={ctx:null,vol:.8,
+ init(){if(this.ctx){this.ctx.resume&&this.ctx.resume();return;}try{const C=window.AudioContext||window.webkitAudioContext;const ctx=this.ctx=new C();ctx.resume&&ctx.resume();
+  const t0=ctx.currentTime,sr=ctx.sampleRate;
+  const out=this.out=ctx.createGain();out.gain.value=this.vol;const comp=ctx.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=4;out.connect(comp);comp.connect(ctx.destination);
+  const master=this.master=ctx.createGain();master.gain.setValueAtTime(0,t0);master.gain.linearRampToValueAtTime(S.muted?0:1,t0+4);
+  // global "muffle" lowpass (inside the hole) feeding the output
+  const muf=this.muf=ctx.createBiquadFilter();muf.type='lowpass';muf.frequency.value=18000;muf.Q.value=.9;master.connect(muf);muf.connect(out);
+  // big generated convolution reverb (8 s, decorrelated L/R, slow modulated decay)
+  const len=sr*8|0,ir=ctx.createBuffer(2,len,sr);for(let c=0;c<2;c++){const d=ir.getChannelData(c);let lp=0;for(let i=0;i<len;i++){const x=i/len;lp+=.35*((Math.random()*2-1)-lp);d[i]=lp*Math.pow(1-x,2.4)*(1+.3*Math.sin(i/sr*2*Math.PI*(.7+c*.3)));}}
+  const rev=this.rev=ctx.createConvolver();rev.buffer=ir;const rg=ctx.createGain();rg.gain.value=1.1;rev.connect(rg);rg.connect(master);
+  // ping-pong delay
+  const dL=ctx.createDelay(3),dR=ctx.createDelay(3);dL.delayTime.value=.48;dR.delayTime.value=.72;const fL=ctx.createGain(),fR=ctx.createGain();fL.gain.value=.5;fR.gain.value=.5;
+  const dTone=ctx.createBiquadFilter();dTone.type='bandpass';dTone.frequency.value=1200;dTone.Q.value=.6;
+  const mg=ctx.createChannelMerger(2);dL.connect(fL);fL.connect(dR);dR.connect(fR);fR.connect(dTone);dTone.connect(dL);dL.connect(mg,0,0);dR.connect(mg,0,1);mg.connect(master);mg.connect(rev);
+  this.delayIn=dL;this.dL=dL;this.dR=dR;
+  // shared pitch bus: bend (cents, time dilation) + tape warble LFOs -> every oscillator's detune
+  const bend=this.bend=ctx.createConstantSource();bend.offset.value=0;bend.start();
+  const w1=ctx.createOscillator();w1.frequency.value=.31;const w2=ctx.createOscillator();w2.frequency.value=4.7;const wg1=this.wg1=ctx.createGain(),wg2=this.wg2=ctx.createGain();wg1.gain.value=9;wg2.gain.value=2.5;
+  w1.connect(wg1);w2.connect(wg2);w1.start();w2.start();
+  const pitch=this.pitch=ctx.createGain();pitch.gain.value=1;bend.connect(pitch);wg1.connect(pitch);wg2.connect(pitch);
+  // pad bus with a 4-stage phaser (LFO-swept allpasses) and a resonant lowpass
+  const pad=this.pad=ctx.createBiquadFilter();pad.type='lowpass';pad.frequency.value=1200;pad.Q.value=3;
+  let node=pad;const ph=ctx.createOscillator();ph.frequency.value=.07;const phg=this.phg=ctx.createGain();phg.gain.value=600;ph.connect(phg);ph.start();
+  for(let k=0;k<4;k++){const ap=ctx.createBiquadFilter();ap.type='allpass';ap.frequency.value=500+k*350;ap.Q.value=.8;phg.connect(ap.frequency);node.connect(ap);node=ap;}
+  const padOut=ctx.createGain();padOut.gain.value=.55;node.connect(padOut);pad.connect(padOut);padOut.connect(master);padOut.connect(rev);
+  const fl=ctx.createOscillator();fl.frequency.value=.04;const flg=ctx.createGain();flg.gain.value=700;fl.connect(flg);flg.connect(pad.frequency);fl.start();
+  const mk=(type,f,g,det,dest)=>{const o=ctx.createOscillator();o.type=type;o.frequency.value=f;o.detune.value=det;pitch.connect(o.detune);const gg=ctx.createGain();gg.gain.value=g;o.connect(gg);gg.connect(dest);o.start();return o;};
+  // detuned drone (E Phrygian root + fifth + flat-2 cluster)
+  this.drone=[mk('sawtooth',41.2,.05,-9,pad),mk('sawtooth',41.2,.05,8,pad),mk('sine',82.4,.10,0,pad),mk('triangle',123.47,.03,-5,pad),mk('sawtooth',87.31,.012,4,pad)];
+  // theremin: sine with vibrato, gliding between eerie notes
+  const th=this.th=ctx.createOscillator();th.type='sine';th.frequency.value=330;pitch.connect(th.detune);const vib=ctx.createOscillator();vib.frequency.value=5.2;const vg=ctx.createGain();vg.gain.value=14;vib.connect(vg);vg.connect(th.detune);vib.start();
+  const thg=this.thg=ctx.createGain();thg.gain.value=0;th.connect(thg);thg.connect(master);thg.connect(rev);thg.connect(dL);th.start();
+  // noise buffer for whisper swells
+  const nb=this.nb=ctx.createBuffer(1,sr*3,sr);{const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+  this.phryg=[0,1,3,5,7,8,10];this.whole=[0,2,4,6,8,10];this.root=164.81;this.dil=1;this.depth=0;this.inside=0;this.clim=0;this.next=t0+1.5;this.nextTh=t0+3;this.nextFx=t0+6;this.step=0;
+  setInterval(()=>this.tick(),100);}catch(e){console.warn('audio',e);}},
+ note(f,t,dur,g,type='sine',toDelay=true){const ctx=this.ctx;const o=ctx.createOscillator();o.type=type;o.frequency.value=f;this.pitch.connect(o.detune);
+  const o2=ctx.createOscillator();o2.type='sine';o2.frequency.value=f*2.756;this.pitch.connect(o2.detune);// inharmonic bell partial
+  const e=ctx.createGain();e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(g,t+.015);e.gain.exponentialRampToValueAtTime(.0003,t+dur);
+  const e2=ctx.createGain();e2.gain.value=.18;o.connect(e);o2.connect(e2);e2.connect(e);e.connect(this.rev);e.connect(this.master);if(toDelay)e.connect(this.delayIn);
+  o.start(t);o2.start(t);o.stop(t+dur+.05);o2.stop(t+dur+.05);setTimeout(()=>{try{this.pitch.disconnect(o.detune);this.pitch.disconnect(o2.detune);}catch(_){}} ,(t-ctx.currentTime+dur+.2)*1000);},
+ tick(){const ctx=this.ctx;if(!ctx||this.silent)return;const now=ctx.currentTime;
+  // slow arpeggio; tempo scales with dτ/dt (time dilation) and drifts from Phrygian into whole-tone near the horizon
+  while(this.next<now+.3){const t=this.next;const sc=this.depth>.5||this.inside?this.whole:this.phryg;const pat=[0,2,4,1,5,3,6,2];const deg=pat[this.step%pat.length]+(this.step%16>=8?2:0);this.step++;
+   const st=sc[deg%sc.length]+12*Math.floor(deg/sc.length);const f=this.root*Math.pow(2,st/12)*(Math.random()<.15?.5:1);
+   if(Math.random()<.88)this.note(f,t,2.2+2*this.depth,.045*(1+this.clim*2),Math.random()<.3?'triangle':'sine');
+   this.next+=(.42+.25*(this.step%3===0))/Math.max(.18,this.dil)*(1+this.clim*1.5);}
+  // theremin glides
+  if(now>this.nextTh){const t=now;const st=this.phryg[Math.floor(Math.random()*7)]+12*(Math.random()<.5?0:1);const f=this.root*2*Math.pow(2,st/12);
+   this.th.frequency.cancelScheduledValues(t);this.th.frequency.setValueAtTime(this.th.frequency.value,t);this.th.frequency.exponentialRampToValueAtTime(f,t+1.8+Math.random()*2);
+   this.thg.gain.cancelScheduledValues(t);this.thg.gain.setTargetAtTime(.035+.03*this.depth,t,.8);this.thg.gain.setTargetAtTime(.004,t+4,1.5);this.nextTh=t+5+Math.random()*6;}
+  // whispers (band-passed noise swells) and metallic shimmer
+  if(now>this.nextFx){const t=now;if(Math.random()<.6){const s=ctx.createBufferSource();s.buffer=this.nb;s.loop=true;const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.Q.value=9;
+    bp.frequency.setValueAtTime(500+Math.random()*600,t);bp.frequency.exponentialRampToValueAtTime(1800+Math.random()*2500,t+3);const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05+.05*this.depth,t+1.6);g.gain.linearRampToValueAtTime(0,t+3.4);
+    const pn=ctx.createStereoPanner();pn.pan.setValueAtTime(-1,t);pn.pan.linearRampToValueAtTime(1,t+3.4);s.connect(bp);bp.connect(g);g.connect(pn);pn.connect(this.rev);pn.connect(this.master);s.start(t);s.stop(t+3.5);}
+   else{for(let k=0;k<5;k++)this.note(this.root*8*Math.pow(2,(k*3.3+Math.random())/12),t+k*.07,1.6,.012,'sine',true);}
+   this.nextFx=t+(5+Math.random()*7)*(1-.6*this.depth);}},
+ // physics -> sound: cents (shift), cut (Hz), dil = dτ/dt (0..1), depth 0..1 (near horizon), inside flag
+ update(cents,cut,dil=1,depth=0,inside=0){if(!this.ctx||this.silent)return;const t=this.ctx.currentTime;this.dil=dil;this.depth=depth;this.inside=inside;
+  if(!this.clim)this.bend.offset.setTargetAtTime(cents,t,.4);this.pad.frequency.setTargetAtTime(Math.max(120,cut),t,.5);this.pad.Q.setTargetAtTime(3+9*depth,t,.5);
+  this.wg1.gain.setTargetAtTime(9+60*depth+40*inside+300*this.clim,t,.5);this.wg2.gain.setTargetAtTime(2.5+12*depth+25*this.clim,t,.5);this.phg.gain.setTargetAtTime(600+1500*depth,t,.5);
+  this.muf.frequency.setTargetAtTime(inside?(700-400*this.clim+1600*this.clim*this.clim):18000,t,.6);
+  this.dL.delayTime.setTargetAtTime(.48/Math.max(.3,dil),t,1);this.dR.delayTime.setTargetAtTime(.72/Math.max(.3,dil),t,1);},
+ climax(c){if(!this.ctx||this.silent)return;this.clim=c;const t=this.ctx.currentTime;if(!S.muted)this.master.gain.setTargetAtTime(1+1.6*c*c,t,.3);this.bend.offset.setTargetAtTime(-1200+2400*c*c,t,.3);},
+ finale(){if(!this.ctx)return;const t=this.ctx.currentTime;this.silent=true;this.clim=0;this.master.gain.cancelScheduledValues(t);this.master.gain.setValueAtTime(this.master.gain.value,t);this.master.gain.linearRampToValueAtTime(0,t+.04);
+  // after ~1.6 s of total silence, one soft resolving tone with the white-out
+  setTimeout(()=>{if(!this.ctx||!this.silent)return;const t=this.ctx.currentTime;this.muf.frequency.setValueAtTime(18000,t);this.bend.offset.setValueAtTime(0,t);this.master.gain.setValueAtTime(S.muted?0:1,t);
+   [82.4,123.47,164.81,246.94,329.63].forEach((f,k)=>this.note(f,t+k*.04,9,.05,'sine',false));},1600);},
+ restart(){if(!this.ctx)return;this.silent=false;this.clim=0;this.root=164.81;try{this.ctx.resume()}catch(_){};const Dr=[41.2,41.2,82.4,123.47,87.31];this.drone&&this.drone.forEach((o,k)=>o.frequency.setValueAtTime(Dr[k],this.ctx.currentTime));const t=this.ctx.currentTime;this.master.gain.cancelScheduledValues(t);this.master.gain.setValueAtTime(.0001,t);this.master.gain.linearRampToValueAtTime(S.muted?0:1,t+3);this.next=t+1;},
+ setMute(m){if(!this.ctx)return;this.master.gain.cancelScheduledValues(this.ctx.currentTime);this.master.gain.setTargetAtTime(m||this.silent?0:1,this.ctx.currentTime,.1);},
+ setPaused(p){if(!this.ctx)return;try{p?this.ctx.suspend():this.ctx.resume();}catch(_){}},
+ creak(k){if(!this.ctx||this.silent||!this.nb)return;const ctx=this.ctx,t=ctx.currentTime;const s=ctx.createBufferSource();s.buffer=this.nb;const lp=ctx.createBiquadFilter();lp.type='bandpass';lp.Q.value=18;lp.frequency.setValueAtTime(90+Math.random()*120,t);lp.frequency.exponentialRampToValueAtTime(60,t+1.2);const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25*k,t+.15);g.gain.exponentialRampToValueAtTime(.001,t+1.3);s.connect(lp);lp.connect(g);g.connect(this.rev);g.connect(this.master);s.start(t);s.stop(t+1.4);},
+ stage(n){if(!this.ctx||this.silent)return;const ctx=this.ctx,t=ctx.currentTime;
+  if(n===1){const m=this.master.gain;m.cancelScheduledValues(t);m.setValueAtTime(m.value,t);m.linearRampToValueAtTime(m.value*.15,t+1.2);m.linearRampToValueAtTime(m.value,t+9);this.note(this.root*.5,t+.8,9,.06,'sine',true);return;}
+  const RT=[164.81,174.61,155.56,185,138.59,123.47];this.root=RT[n]||164.81;
+  [.25,.5,.75,1,1.335].forEach((m,k)=>this.note(this.root*m,t+k*.03,8,.045,'sine',k>2));
+  const s=ctx.createBufferSource();s.buffer=this.nb;s.loop=true;const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.Q.value=4;const up=n===1||n===3;
+  bp.frequency.setValueAtTime(up?200:5000,t);bp.frequency.exponentialRampToValueAtTime(up?5000:180,t+4);const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.09,t+2);g.gain.linearRampToValueAtTime(0,t+4.5);
+  s.connect(bp);bp.connect(g);g.connect(this.rev);g.connect(this.master);s.start(t);s.stop(t+4.6);
+  if(n===3)for(let k=0;k<18;k++)this.note(this.root*2*Math.pow(2,k/5),t+2.6+k*.11,2.4,.016,'sine',true);
+  if(n===4){this.wg1.gain.setTargetAtTime(160,t,.3);this.wg1.gain.setTargetAtTime(60,t+3,1);}
+  if(n===5)this.drone.forEach((o,k)=>o.frequency.setTargetAtTime(o.frequency.value*.94,t,3));},
+ setVol(v){this.vol=v;if(this.out)this.out.gain.setTargetAtTime(v,this.ctx.currentTime,.05);}};
+
+
+// ---------- formatting ----------
+const MSUN_S=4.925491e-6,MSUN_KM=1.476625;
+function fmtTime(m){const s=m*MSUN_S*S.mass;if(!isFinite(s))return '∞';if(s<1e-3)return (s*1e6).toFixed(1)+' µs';if(s<1)return (s*1e3).toFixed(2)+' ms';if(s<3600)return s.toFixed(2)+' s';if(s<86400*365)return (s/3600).toFixed(2)+' h';return (s/3.156e7).toPrecision(3)+' yr';}
+// ---------- graphs ----------
+function drawGraphs(cur,dil){const c=$('gTau'),x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);
+ const p=ship.path;const tMax=p[ship.lastOut].tBL*1.0;const tPlot=ship.captured?Math.min(tMax,ship.crossOut*2.2):Math.max(tMax,1);const tauMax=ship.tauEnd*1.05;
+ const X=t=>36+(W-50)*Math.min(t,tPlot)/tPlot,Y=v=>H-26-(H-40)*v/tauMax;
+ x.strokeStyle='rgba(160,180,255,.25)';x.lineWidth=1;x.beginPath();x.moveTo(36,10);x.lineTo(36,H-26);x.lineTo(W-10,H-26);x.stroke();
+ x.strokeStyle='rgba(255,255,255,.25)';x.setLineDash([4,4]);x.beginPath();x.moveTo(X(0),Y(0));x.lineTo(X(tauMax),Y(tauMax));x.stroke();x.setLineDash([]);
+ x.fillStyle='#8aa';x.font='18px sans-serif';x.fillText('t',W-22,H-6);x.fillText('τ',8,22);x.fillText('τ = t (no dilation)',X(tPlot*.42),Y(tPlot*.42*0.9)+0);
+ x.strokeStyle='#ffd27a';x.lineWidth=3;x.beginPath();let first=true;for(let i=0;i<=ship.lastOut;i+=1){const q=p[i];if(q.tBL>tPlot)break;if(first){x.moveTo(X(q.tBL),Y(q.tau));first=false;}else x.lineTo(X(q.tBL),Y(q.tau));}x.stroke();
+ if(ship.captured){x.strokeStyle='rgba(255,90,60,.8)';x.setLineDash([6,4]);x.beginPath();x.moveTo(36,Y(ship.crossOut));x.lineTo(W-10,Y(ship.crossOut));x.stroke();x.setLineDash([]);
+ x.fillStyle='#f87';x.fillText('event horizon: τ finite, t → ∞',42,Y(ship.crossOut)-6);}
+ const tt=isNaN(cur.tBL)?tPlot:Math.min(cur.tBL,tPlot);x.fillStyle='#fff';x.beginPath();x.arc(X(tt),Y(cur.tau),6,0,7);x.fill();
+ // embedding
+ const e=$('gEmb'),y=e.getContext('2d'),w=e.width,h=e.height;y.clearRect(0,0,w,h);const rp=ship.rp;
+ const zf=r=>-2*Math.sqrt(Math.max(rp*(r-rp),0));const cx=w/2,cy=40+2*Math.sqrt(rp*(22-rp))*(w/2/22),sc=w/2/22,tilt=.28;
+ const P3=(r,ph)=>{const z=zf(r);return [cx+r*Math.cos(ph)*sc,cy+r*Math.sin(ph)*sc*tilt+z*sc*1.0];};
+ y.lineWidth=1;for(let r=rp;r<=22;r+=r<4?.5:2){y.strokeStyle=`rgba(90,200,255,${r<rp+.01?.9:.35})`;y.beginPath();for(let k=0;k<=64;k++){const q=P3(r,k/64*2*Math.PI);k?y.lineTo(...q):y.moveTo(...q);}y.stroke();}
+ for(let k=0;k<24;k++){const ph=k/24*2*Math.PI;y.strokeStyle='rgba(90,200,255,.22)';y.beginPath();for(let r=rp;r<=22;r+=.25){const q=P3(r,ph);r===rp?y.moveTo(...q):y.lineTo(...q);}y.stroke();}
+ const sr=Math.min(cur.r,22),sph=Math.atan2(cur.y,cur.x);let sp;if(cur.r>rp){sp=P3(sr,sph);}else{sp=[cx,cy+12+(1-cur.r/rp)*40];}
+ y.fillStyle='#ffd27a';y.shadowColor='#ffd27a';y.shadowBlur=12;y.beginPath();y.arc(sp[0],Math.min(sp[1],h-6),6,0,7);y.fill();y.shadowBlur=0;
+ $('embTxt').textContent=cur.r>rp?'Curvature of space drawn as a funnel (schematic, equatorial slice). Gold dot = ship.':'Inside r₊ the radius r is a time-like direction: no static spatial slice to embed. The ship has left the funnel.';}
+
+// ---------- clocks ----------
+function niceDial(sec){const e=Math.pow(10,Math.floor(Math.log10(sec)));for(const m of [1,2,5,10])if(m*e>=sec)return m*e;return 10*e;}
+function unitOf(sec){return sec<1e-3?['µs',1e6]:sec<1?['ms',1e3]:['s',1];}
+function drawClock(id,val,D,u,grey,label){const c=$(id),x=c.getContext('2d'),W=c.width,R=W/2-8;x.clearRect(0,0,W,W);x.save();x.translate(W/2,W/2);
+ x.globalAlpha=grey?.4:1;x.fillStyle='rgba(10,16,30,.85)';x.strokeStyle=grey?'#666':'#9bf';x.lineWidth=4;x.beginPath();x.arc(0,0,R,0,7);x.fill();x.stroke();
+ for(let k=0;k<50;k++){const an=k/50*2*Math.PI,big=k%5===0;x.strokeStyle=big?'#cde':'#567';x.lineWidth=big?3:1.5;x.beginPath();x.moveTo(Math.sin(an)*(R-4),-Math.cos(an)*(R-4));x.lineTo(Math.sin(an)*(R-(big?18:10)),-Math.cos(an)*(R-(big?18:10)));x.stroke();}
+ x.fillStyle='#cde';x.font='bold 17px sans-serif';x.textAlign='center';x.textBaseline='middle';
+ for(let k=0;k<10;k++){const an=k/10*2*Math.PI;const v=D*k/10*u[1];x.fillText(+v.toPrecision(2)+'',Math.sin(an)*(R-34),-Math.cos(an)*(R-34));}
+ x.font='15px sans-serif';x.fillStyle='#9ab';x.fillText(u[0],0,R*.38);
+ // revolutions counter
+ if(isFinite(val)){const rev=Math.floor(val/D);x.fillText('×'+rev+' turns',0,-R*.36);
+  const an=(val/D)%1*2*Math.PI;x.strokeStyle=grey?'#888':(id==='ckShip'?'#ffd27a':'#7fd3ff');x.lineWidth=5;x.lineCap='round';x.beginPath();x.moveTo(0,0);x.lineTo(Math.sin(an)*(R-22),-Math.cos(an)*(R-22));x.stroke();}
+ else{x.fillStyle='#f87';x.font='bold 40px sans-serif';x.fillText('∞',0,8);}
+ x.fillStyle='#fff';x.beginPath();x.arc(0,0,6,0,7);x.fill();x.restore();}
+let lastFarS=0;
+function drawClocks(cur,farOK){const sec=m=>m*MSUN_S*S.mass;const ref=sec(ship.captured?ship.crossOut:Math.min(ship.tauEnd,300));const D=niceDial(Math.max(ref/4,1e-12));const u=unitOf(D);
+ const ts=sec(cur.tau);drawClock('ckShip',ts,D,u,false);$('dShip').textContent=fmtTime(cur.tau);$('nShip').textContent=cur.r<ship.rp?'ticks normally for the crew':'';
+ if(farOK){const tf=sec(cur.tBL);lastFarS=tf;drawClock('ckFar',tf,D,u,false);$('dFar').textContent=fmtTime(cur.tBL);$('nFar').textContent=cur.tBL>cur.tau*1.5?'racing ahead of the ship':'';$('nFar').style.color='#9ab';}
+ else{drawClock('ckFar',Infinity,D,u,true);$('dFar').textContent='undefined';$('nFar').textContent='never sees the crossing (t → ∞)';$('nFar').style.color='#f87';}
+ $('ckScale').textContent=`Both dials: one turn = ${+(D*u[1]).toPrecision(3)} ${u[0]} for a ${S.mass} M☉ hole`;}
+function climaxFX(cur){const c=S.finale?0:(S.climC||0);const box=$('climHud');
+ if(c<=0){if(box.style.display!=='none'){box.style.display='none';for(const id of ['hud','clocks','ckShip','ckFar'])$(id).style.transform=$(id).style.filter='';}return;}
+ box.style.display='block';const r=Math.max(cur.r,1e-5);const Mm=S.mass*1476.6;const K=48/Math.pow(r,6)/Math.pow(Mm,4);const tid=2*6.674e-11*S.mass*1.989e30*50/Math.pow(r*Mm,3);
+ const gl_=n=>Math.random()<c*c*.5?n.replace(/[0-9]/g,()=>'0123456789#%&?'[Math.random()*14|0]):n;
+ box.innerHTML=gl_(`⚠ TIDAL BREAKUP · r = ${r.toFixed(4)} M`)+'<br>'+gl_(`Kretschmann K = 48M²/r⁶ = ${K.toExponential(2)} m⁻⁴ → ∞`)+'<br>'+gl_(`tidal accel. over 50 m hull: ${tid.toExponential(2)} m/s² (${(tid/9.81).toExponential(1)} g)`)+'<br>'+gl_(`hull stretch ×${(1+4*c).toFixed(2)} (visualised) · proper time left ${(ship.tauEnd-S.tau).toExponential(1)} M`);
+ const j=c*c;const rnd=()=>(Math.random()-.5);
+ $('hud').style.transform=Math.random()<j?`translate(${rnd()*14*j}px,${rnd()*8*j}px) skewX(${rnd()*12*j}deg)`:'';$('hud').style.filter=Math.random()<j?`hue-rotate(${rnd()*360}deg) saturate(3)`:'';
+ $('clocks').style.filter=Math.random()<j?'invert(1) hue-rotate(180deg)':'';
+ $('ckShip').style.transform=`rotate(${rnd()*60*j+c*c*c*720*Math.random()}deg)`;$('ckFar').style.transform=`rotate(${rnd()*30*j}deg)`;}
+// radial tidal acceleration across L metres (Kerr, Carter frame): 2 M r (r²-3a²cos²θ)/Σ³ · c²/M_m² · L
+function tide(cur,L=50){const r=Math.max(Math.abs(cur.r),1e-6),ct=Math.max(-1,Math.min(1,cur.z/r)),a=S.a,Sg=r*r+a*a*ct*ct;const Mm=S.mass*1476.6;
+ return Math.abs(2*r*(r*r-3*a*a*ct*ct)/Math.pow(Sg,3))*299792458**2/(Mm*Mm)*L;}
+function fmtG(v){return v<1e-3||v>=1e4?v.toExponential(2):v.toPrecision(3);}
+let spagShown=false;function tideUI(cur){const T=tide(cur),gs=T/9.81;$('hTide').textContent=`${fmtG(T)} m/s² (${fmtG(gs)} g)`;
+ const out=cur.r>ship.rp;let msg=gs<.01?'Unnoticeable: far gentler than a lift starting.':gs<1?'Faintly felt: a slight pull between bow and stern.':gs<10?'Felt clearly: the hull creaks under the stretch.':gs<1e3?'⚠ Hull stress: tides beyond 10 g, structure deforming.':gs<1e5?'⚠ Hull failing: no material survives this.':'☠ Spaghettification: the ship is pulled into a stream of atoms.';
+ if(out&&gs>1e3)msg+=' This happens OUTSIDE the horizon, because a stellar-mass hole is small and its tides are steep (tide at r₊ ∝ 1/M²).';
+ $('hTideTxt').textContent=msg;S.tideG=gs;
+ if(out&&gs>1e3&&!spagShown&&!S.fixed){spagShown=true;const el=$('stageCap');$('scN').textContent='Before the horizon';$('scH').textContent='Spaghettified outside';$('scP').textContent='For a 10 M☉ hole the tidal stretch across the hull passes 1000 g well before r₊. The ship is torn apart before it ever reaches the horizon.';$('scG').textContent='Real GR (Newtonian-like tide 2GML/r³). For Sgr A* or M87* the same crossing is gentle.';el.style.opacity=1;}
+ if(cur.r>ship.rp*1.5)spagShown=false;}
+const CLIM_S=12,STG_S=[9,10,11,10,12];
+// ---------- timeline scrubbers ----------
+function tauAtR(rt,after){const p=ship.path;for(let i=0;i<p.length;i++)if(p[i].r<=rt&&(after==null||p[i].tau>=after))return p[i].tau;return null;}
+function tlRanges(){if(!ship.stg||ship.tauClim==null)return null;const t0=tauAtR(2.5*ship.rp)??0,tc=ship.stg[0];const t1=tc+(ship.stg[1]-tc)*.6;
+ return [[t0,t1,[tc]],[tc,ship.tauEnd,[ship.crossIn??ship.stg[2],ship.tauClim]]];}
+function setTau(tau){const st=ship.stg;S.finale=false;S.finT=0;$('finale').style.display='none';
+ if(!st||tau<st[0]){S.inT=0;S.climT=0;S.climC=0;}
+ else if(tau<ship.tauClim){let i=0;while(i<4&&tau>=st[i+1])i++;let w=0;for(let k=0;k<i;k++)w+=STG_S[k];S.inT=w+STG_S[i]*(tau-st[i])/(st[i+1]-st[i]);S.climT=0;S.climC=0;}
+ else{S.inT=STG_S.reduce((a,b)=>a+b,0);const u=1-Math.pow(Math.max(0,1-(tau-ship.tauClim)/(ship.tauEnd-ship.tauClim)),2/3);S.climT=u*CLIM_S;S.climC=u;}
+ S.tau=Math.min(tau,ship.tauEnd);}
+function tlScrub(k,v){const R_=tlRanges();if(!R_)return;const [a,b]=R_[k];S.scrub=true;if(!S.started){S.started=true;$('start').style.display='none';}
+ if(S.playing){S.playing=false;$('bPlay').textContent='▶ Resume';document.body.classList.add('paused');Audio_.setPaused&&Audio_.setPaused(true);}
+ setTau(a+(b-a)*v/1000);$('bTlRes').style.display='';}
+function tlUI(cur){const R_=tlRanges();const dis=!R_;['tl1','tl2'].forEach(id=>$(id).disabled=dis);
+ $('tlNote').textContent=dis?'This trajectory does not fall into the hole, so the scrubbers are disabled.':'Dragging pauses the simulation.';if(dis)return;
+ const lab=`τ = ${fmtTime(S.tau)} · r = ${cur.r.toFixed(3)} M · ${S.stage?STAGES[Math.floor(S.stage)].n:(cur.r>ship.rp?'outside':'inside')}`;
+ R_.forEach(([a,b,tk],k)=>{const el=$('tl'+(k+1));if(document.activeElement!==el)el.value=Math.max(0,Math.min(1000,(S.tau-a)/(b-a)*1000));
+  $('tl'+(k+1)+'v').textContent=S.tau>=a&&S.tau<=b?lab:'';tk.forEach((t,j)=>{const e=$('tk'+(k+1)+'ab'[j]);if(e)e.style.left=(100*(t-a)/(b-a)).toFixed(1)+'%';});});}
+$('tl1').oninput=e=>tlScrub(0,+e.target.value);$('tl2').oninput=e=>tlScrub(1,+e.target.value);
+$('bTlRes').onclick=()=>{S.scrub=false;$('bTlRes').style.display='none';if(!S.playing)$('bPlay').click();};
+$('bLook').onclick=()=>{S.lookBack=!S.lookBack;S.eyaw=S.lookBack?Math.PI:0;S.epitch=0;$('bLook').textContent=S.lookBack?'Look forward':'Look back';};
+$('cRingArt').onchange=e=>{S.ringArt=e.target.checked;};if(qs.get('back')){S.lookBack=true;S.eyaw=Math.PI;}
+const STAGES=[null,
+ {n:'Stage 1 of 5 · r₊',h:'You have crossed the event horizon',p:'Nothing felt different. But every future path now leads inward. Behind you the outside universe keeps shrinking into a dimming, reddened window behind you, and the distant clock can no longer be compared.',g:'Real GR: for a big hole the horizon has no local landmark and gentle tides. The translucent shell is a visualisation aid, not something you would see.'},
+ {n:'Stage 2 of 5 · between the horizons',h:'The sky falls together',p:'Space is dragged round the spin axis faster than anything could resist. Light from outside is smeared and swirled as the ship is carried around with the hole.',g:'Real GR (Kerr frame dragging). The on-screen swirl is exaggerated for clarity.'},
+ {n:'Stage 3 of 5 · approaching r₋',h:'The inner (Cauchy) horizon',p:'Light that falls in after you, the entire future history of the universe, piles up here infinitely blue-shifted: a dazzling flash.',g:'Exact for an idealised eternal Kerr hole. In a real hole this blue-shift drives “mass inflation” and r₋ probably becomes a singularity itself; beyond here is speculative.'},
+ {n:'Stage 4 of 5 · beyond r₋',h:'Gravity turns repulsive',p:'Past the Cauchy horizon r is a space direction again. Near the ring, Kerr gravity becomes repulsive, and an ideally aimed ship could even avoid r = 0.',g:'Idealised: the exact Kerr interior is a mathematical extension that probably does not exist in nature.'},
+ {n:'Stage 5 of 5 · the ring',h:'The ring singularity looms',p:'Ahead: the ring singularity. It emits no light; you see it by how it bends starlight. The tidal readout climbs as 1/r³ and blows up near the ring.',g:'Real (in Kerr): curvature → ∞ at the ring. The dark hoop and its bright lensed rim are traced light paths; the coloured glow is artistic (toggle in View).'}];
+function stageOf(){if(!ship.stg||S.finale||S.tau<ship.stg[0])return 0;if(S.tau>=ship.tauClim)return 5.999;let i=0;while(i<4&&S.tau>=ship.stg[i+1])i++;return 1+i+Math.min(.999,(S.tau-ship.stg[i])/(ship.stg[i+1]-ship.stg[i]));}
+function stageFx(){const s=stageOf();S.stage=s;if(!s)return {fx:[0,0,0,0],g:[1,1,1]};const i=Math.floor(s),f=s-i;
+ const G=[[1,1,1],[.97,.99,1.05],[1.05,.82,1.25],[.9,1,1.45],[1.35,.92,.72],[1.2,.9,1.1],[1.2,.9,1.1]];const lerp=(a,b)=>a.map((v,k)=>v+(b[k]-v)*f);
+ const sw=[0,0,.6*f+.2,.6,.35,.5,.5][i],st=[0,0,0,.15+f*.35,.12,.25,.25][i],le=[0,0,.1,.15,.3+.3*f,.65,.7][i],rg=i<4?0:i===4?.25*f:.3+.7*f;
+ const M=(qs.get('sfx')||'1,1,1,1').split(',').map(Number);return {fx:[sw*M[0],st*M[1],le*M[2],rg*M[3]],g:qs.get('sfx')?[1,1,1]:lerp(G[i],G[Math.min(6,i+1)])};}
+let lastStage=0;function stageUI(){const s=Math.floor(S.stage||0);const el=$('stageCap');
+ if(s!==lastStage){if(s>=1&&s<=5){const T=STAGES[s];$('scN').textContent=T.n;$('scH').textContent=T.h;$('scP').textContent=T.p;$('scG').textContent=T.g;el.style.opacity=1;Audio_.stage&&!S.fixed&&!S.scrub&&Audio_.stage(s);}else el.style.opacity=0;if(s===0&&Audio_.ctx){Audio_.root=164.81;}lastStage=s;}
+ if(S.finale||S.climC>.05)el.style.opacity=0;}
+// ---------- main loop ----------
+let last=performance.now(),fpsAcc=0,fpsN=0,fpsT=0;
+function frame(now){const dtw=Math.min(.1,(now-last)/1000);last=now;
+ if(S.fixed){Object.assign(S,S.fixed);}
+ const cur0=lerpS(...Object.values(sampleAt(S.tau)));
+ 
+ if(!S.fixed&&ship.stg&&!S.finale&&S.tau>=ship.stg[0]&&S.tau<ship.tauClim){if(S.playing&&S.started)S.inT+=dtw*Math.min(3,Math.max(.5,S.speed/4));
+  let w=S.inT,i=0;while(i<4&&w>STG_S[i]){w-=STG_S[i];i++;}const fr=Math.min(1,w/STG_S[i]);S.tau=ship.stg[i]+(ship.stg[i+1]-ship.stg[i])*fr;if(i===4&&fr>=1)S.tau=ship.tauClim;}
+ if(!S.fixed&&ship.tauClim!=null&&!S.finale&&S.tau>=ship.tauClim){if(S.playing)S.climT+=dtw;const u=Math.min(1,S.climT/CLIM_S);S.climC=u;S.tau=ship.tauClim+(ship.tauEnd-ship.tauClim)*(1-Math.pow(1-u,1.5));if(u>=1)S.tau=ship.tauEnd;!S.scrub&&Audio_.climax&&Audio_.climax(u);}
+ else if(!S.fixed&&!S.finale)S.climC=0;
+ if(S.playing&&S.started&&!S.finale&&!S.fixed&&!(ship.tauClim!=null&&S.tau>=ship.tauClim)&&!(ship.stg&&S.tau>=ship.stg[0])){const slow=Math.min(1,Math.max(.03,cur0.r/5));S.tau+=dtw*S.speed*slow;}
+ if(!S.fixed)S.discT+=dtw*(S.playing?S.speed:0)*(S.finale?0:1);
+ if(S.tau>=ship.tauEnd&&!S.finale){S.tau=ship.tauEnd;S.finale=true;S.finT=0;Audio_.finale();}
+ if(S.finale&&!S.fixed)S.finT+=dtw;
+ const cur=lerpS(...Object.values(sampleAt(S.tau)));
+ const a=S.a,[rp,rm]=[ship.rp,ship.rm];
+ // ---- camera ----
+ let cam=S.cam,td=null,shipPos=[cur.x,cur.y,cur.z],shipVel=norm3(cur.u.slice(1)),shipOn=1,tint=[1,1,1],glow=.12,shipSize=.55,seen=null;
+ if(cam==='chase'){const back=shipVel;const side0=norm3(cross(back,[0,0,1]));let zoom=S.czoom;
+  for(let tries=0;tries<10&&!td;tries++){const k=Math.min(3.2,Math.max(.2,.7*cur.r))*zoom;
+   let off=[-back[0]*k+side0[0]*k*.35,-back[1]*k+side0[1]*k*.35,-back[2]*k+k*.55];
+   off=rotAx(off,[0,0,1],S.cyaw);const hz=norm3(cross(off,[0,0,1]));off=rotAx(off,hz,S.cpitch);
+   const pos=[cur.x+off[0],cur.y+off[1],cur.z+off[2]];
+   const pr=KP.rKS(a,...pos);if(cur.r>rp&&pr<Math.min(1.6,cur.r)){zoom*=.75;continue;}
+   const f0=norm3(off.map(v=>-v));const R0=norm3(cross(f0,[0,0,1]));const U0=cross(R0,f0);
+   const ah=k*.45*Math.max(0,Math.cos(S.cyaw))*Math.max(0,Math.cos(S.cpitch));const look=[cur.x+back[0]*ah+(R0[0]*S.cpan[0]+U0[0]*S.cpan[1])*k,cur.y+back[1]*ah+(R0[1]*S.cpan[0]+U0[1]*S.cpan[1])*k,cur.z+(R0[2]*S.cpan[0]+U0[2]*S.cpan[1])*k];
+   shipSize=.4;
+   const fwd=norm3(sub3(look,pos));td=tetrad(pos,cur.u.slice(),fwd,[0,0,1]);if(!td)zoom*=.75;}
+  if(!td)cam='eye';}
+ if(cam==='eye'){shipOn=0;let fwd=norm3([-cur.x+0.0001,-cur.y,-cur.z]);fwd=rotAx(fwd,[0,0,1],S.eyaw);const hz=norm3(cross(fwd,[0,0,1]));fwd=norm3(rotAx(fwd,hz,S.epitch));
+  td=tetrad(shipPos,cur.u.slice(),fwd,[0,0,1]);}
+ if(cam==='distant'||!td){const th=S.incl,ph=S.az,R=S.dist;const pos=[Math.sqrt(R*R+a*a)*Math.sin(th)*Math.cos(ph),Math.sqrt(R*R+a*a)*Math.sin(th)*Math.sin(ph),R*Math.cos(th)];
+  const g=KP.gLow(a,[0,...pos]);const u=[1/Math.sqrt(-g[0][0]),0,0,0];td=tetrad(pos,u,norm3(sub3(S.pan,pos)),[0,0,1]);
+  seen=distantSeen(cur);const sp=lerpS(seen.i,seen.s);shipPos=[sp.x,sp.y,sp.z];shipVel=norm3(sp.u.slice(1));shipSize=1.0;
+  const gg=Math.min(1,Math.max(0,seen.g));const br=seen.fade*Math.pow(gg,1.5);tint=[br*(.4+.6*Math.min(1,gg*1.4)),br*Math.pow(gg,1.2),br*Math.pow(gg,2.5)];glow=.45;cam='distant';}
+ const fov=(cam==='eye'?1.75*S.efov:cam==='chase'?1.25:1.2);
+ {const F=td.fwdE||null;}
+ camE.pos=td.pos;camE.F=norm3(td.fwd3);camE.R=norm3(cross(camE.F,[0,0,1]));camE.U=cross(camE.R,camE.F);camE.fov=fov;camE.mode=cam;
+ if(S.climC>0&&!S.finale){const sh=S.climC*S.climC*.05;for(const k of [0,1,2,3]){td.eF[k]+=(Math.random()-.5)*sh*td.eR[k]+(Math.random()-.5)*sh*td.eU[k];}}
+ const camR=KP.rKS(a,...td.pos);const inside=camR<rp?1:0;
+ // ---- resolution ----
+ const dpr=window.devicePixelRatio||1;const cw=Math.round(innerWidth*dpr),ch=Math.round(innerHeight*dpr);if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch;}
+ const sc=S.q*S.scale;const w=Math.max(64,Math.round(cw*sc)),h=Math.max(36,Math.round(ch*sc));ensureTargets(w,h);
+ let steps=S.q>=1?520:S.q>=.75?420:S.q>=.5?320:240;if(camR<ship.rp)steps=Math.min(1150,Math.round(steps*2.2));if(qs.get('steps'))steps=+qs.get('steps');
+ draw(T.hdr,P.trace,U=>{gl.uniform2f(U.uRes,w,h);gl.uniform1f(U.uA,a);gl.uniform1f(U.uFov,fov);
+  gl.uniform1f(U.uRp,rp);gl.uniform1f(U.uRm,rm);gl.uniform1f(U.uIsco,ship.isco);gl.uniform1f(U.uRout,22.);gl.uniform1f(U.uTime,S.discT);
+  gl.uniform1f(U.uShipOn,shipOn);gl.uniform1f(U.uShipSize,shipSize);gl.uniform1f(U.uShipGlow,glow);gl.uniform1f(U.uGrid,S.grid?1:0);gl.uniform1f(U.uInside,inside);
+  gl.uniform1f(U.uResc,camR<ship.rp?14:Math.max(45,camR*1.4));gl.uniform1f(U.uTmax,7000);gl.uniform1f(U.uDop,S.dop?1:0);gl.uniform1f(U.uClimax,S.finale?0:S.climC);gl.uniform1f(U.uHorShell,S.horShell||0);gl.uniform1f(U.uRingArt,S.ringArt===false?0:1);{const F=stageFx();gl.uniform4f(U.uStageFx,...F.fx);gl.uniform3f(U.uGrade,...F.g);}gl.uniform1f(U.uStretch,S.finale?0:Math.max(S.climC,Math.min(.6,Math.max(0,Math.log10(Math.max(S.tideG||0,1e-9)/10)/3*.6))));gl.uniform1f(U.uFmax,ship.Fmax);gl.uniform1i(U.uMaxSteps,steps);gl.uniform1f(U.uDbg,+(qs.get("dbg")||0));
+  gl.uniform3fv(U.uCam,td.pos);gl.uniform3fv(U.uShip,shipPos);gl.uniform3fv(U.uShipDir,shipVel);gl.uniform3fv(U.uShipTint,tint);
+  gl.uniform4fv(U.uE0,td.e0);gl.uniform4fv(U.uEF,td.eF);gl.uniform4fv(U.uEU,td.eU);gl.uniform4fv(U.uER,td.eR);});
+ if(hasFloat&&(now-gBufT>400||!gBuf)){gBufT=now;gBufW=w;gBufH=h;if(!gBuf||gBuf.length!==w*h*4)gBuf=new Float32Array(w*h*4);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,T.hdr.fb);gl.readPixels(0,0,w,h,gl.RGBA,gl.FLOAT,gBuf);let mn=1e9,mx=0;for(let i=3;i<gBuf.length;i+=16){const g=gBuf[i];if(g>0){if(g<mn)mn=g;if(g>mx)mx=g;}}
+  {const Ls=[];let sl=0;for(let i=0;i<gBuf.length;i+=4*37){const L=.3*gBuf[i]+.5*gBuf[i+1]+.2*gBuf[i+2];if(L>=0&&L<1e8){Ls.push(L);sl+=Math.log(L+1e-4);}}
+   if(Ls.length>50){Ls.sort((p,q)=>p-q);const avg=Math.exp(sl/Ls.length),p97=Ls[Math.floor(Ls.length*.97)];
+    let e=Math.min(.18/Math.max(avg,1e-4),1.1/Math.max(p97,1e-4));e=Math.min(1.25,Math.max(.04,e));S.autoExp=S.autoExp?S.autoExp*Math.pow(e/S.autoExp,.5):e;if(qs.get("dbgexp"))console.log("AUTOEXP",avg,p97,e);}}
+  if(S.dop)$('gRange').innerHTML=mx>0?`on screen now: g<sub>min</sub> = ${mn.toFixed(2)} · g<sub>max</sub> = ${mx.toFixed(2)}`:'disc not in view';}
+ const bloom=hasFloat&&!qs.get('nobloom');
+ if(bloom){draw(T.a2,P.bright,U=>{tex(U,'uT',0,T.hdr.t);gl.uniform2f(U.uTexel,1/w,1/h);});
+  draw(T.b2,P.blur,U=>{tex(U,'uT',0,T.a2.t);gl.uniform2f(U.uDir,1.5/T.a2.w,0);});draw(T.a2,P.blur,U=>{tex(U,'uT',0,T.b2.t);gl.uniform2f(U.uDir,0,1.5/T.a2.h);});
+  draw(T.a4,P.blur,U=>{tex(U,'uT',0,T.a2.t);gl.uniform2f(U.uDir,2/T.a4.w,0);});draw(T.b4,P.blur,U=>{tex(U,'uT',0,T.a4.t);gl.uniform2f(U.uDir,0,2/T.a4.h);});
+  draw(T.a8,P.blur,U=>{tex(U,'uT',0,T.b4.t);gl.uniform2f(U.uDir,2.5/T.a8.w,0);});draw(T.b8,P.blur,U=>{tex(U,'uT',0,T.a8.t);gl.uniform2f(U.uDir,0,2.5/T.a8.h);});}
+ let fl=S.finale?Math.min(1,S.finT/0.6)*Math.max(0,1-(S.finT-0.6)/2.5):0;let fade=S.finale?Math.min(1,Math.max(0,(S.finT-1.2)/2)):0;
+ if(!S.finale&&S.stage>=3&&S.stage<4){const f=S.stage-3;fl=Math.max(fl,.85*Math.exp(-Math.pow((f-.8)/.09,2)));}
+ if(S.finale&&ship.outcome==='singularity'){fade=1;const f=S.finT;fl=f<1.6?0:f<2.0?(f-1.6)/.4:Math.max(.0,Math.exp(-(f-2.0)/.9));}
+ draw(null,P.comp,U=>{tex(U,'uT',0,T.hdr.t);tex(U,'uB1',1,(bloom?T.a2:T.hdr).t);tex(U,'uB2',2,(bloom?T.b8:T.hdr).t);
+  gl.uniform1f(U.uExp,S.autoExp||1.25*Math.min(1,Math.max(0.12,Math.pow(Math.max(camR,0.01)/9,1.6))));gl.uniform1f(U.uFlash,fl);gl.uniform1f(U.uFade,fade);gl.uniform1f(U.uTimeS,now%1000);gl.uniform1f(U.uHasBloom,bloom?1:0);gl.uniform1f(U.uHoop,(qs.get('hoop')==='0'||S.finale)?0:stageFx().fx[3]*(1-Math.min(1,(S.climC||0)*3)));gl.uniform2f(U.uPx,1/T.hdr.w,1/T.hdr.h);});
+ // ---- 2D overlay (cockpit frame in ship's-eye) ----
+ const o=$('overlay2d');if(o.width!==innerWidth||o.height!==innerHeight){o.width=innerWidth;o.height=innerHeight;}const ox=o.getContext('2d');ox.clearRect(0,0,o.width,o.height);
+ {const F_=stageFx(),w_=F_.fx[3]*(1-Math.min(1,(S.climC||0)*3));if(qs.get('hoop')==='proj'&&td&&w_>.01&&!S.finale){
+  const g=KP.gLow(a,[0,...td.pos]);const gd=(u,v)=>{let q=0;for(let i=0;i<4;i++)for(let j=0;j<4;j++)q+=g[i][j]*u[i]*v[j];return q;};
+  const k=2*Math.tan(.5*fov),H_=o.height,sw=F_.fx[0],le=F_.fx[2],rot=sw*.9*(.75+.25*Math.sin(S.discT*.35));const pts=[];
+  for(let i=0;i<=256;i++){const ph=i/256*2*Math.PI;const D=[0,a*Math.cos(ph)-td.pos[0],a*Math.sin(ph)-td.pos[1],-td.pos[2]];
+   const cF=gd(D,td.eF);if(cF<=1e-5){pts.push(null);continue;}let ux=gd(D,td.eR)/cF/k,uy=gd(D,td.eU)/cF/k;
+   // undo the shader's screen-space lens and swirl so the hoop lands where the traced ring appears
+   const R0=Math.hypot(ux,uy);let rr=R0;for(let n=0;n<8;n++){const f_=rr*(1+le*1.6*rr*rr)-R0,d_=1+3*le*1.6*rr*rr;rr-=f_/d_;}
+   let an=Math.atan2(uy,ux)-rot/(rr+.3);pts.push([o.width/2+rr*Math.cos(an)*H_,H_/2-rr*Math.sin(an)*H_]);}
+  ox.save();ox.globalCompositeOperation='lighter';ox.lineJoin='round';
+  for(const [lw,al] of [[7,.07],[3.5,.16],[1.4,.7]]){ox.lineWidth=lw*Math.max(1,H_/720);ox.strokeStyle=`rgba(205,220,255,${al*Math.min(1,w_*1.6)})`;ox.beginPath();let pen=false;
+   for(const p of pts){if(!p||Math.abs(p[0])>4*o.width||Math.abs(p[1])>4*H_){pen=false;continue;}pen?ox.lineTo(p[0],p[1]):ox.moveTo(p[0],p[1]);pen=true;}ox.stroke();}
+  ox.restore();}}
+{const cr_=KP.rKS(S.a,...camE.pos),ins=cr_<ship.rp;
+ if(camE.mode==='eye'&&ins&&Math.cos(S.eyaw)<0&&!S.finale){ox.fillStyle='rgba(170,215,255,.85)';ox.font='14px sans-serif';ox.textAlign='center';ox.fillText('Behind you, the whole outside universe is squeezed into a shrinking window,',o.width/2,o.height-Math.max(78,o.height*.15));ox.fillText(cr_<ship.rm+.3?'now fiercely blue-shifted near the inner horizon.':'dimmed and reddened as you fall away from it.',o.width/2,o.height-Math.max(78,o.height*.15)+19);ox.textAlign='left';}
+ if((S.horShell||0)>.05){ox.globalAlpha=Math.min(1,S.horShell*1.5);ox.fillStyle='rgba(140,210,255,.85)';ox.font='13px sans-serif';ox.textAlign='center';ox.fillText('Event-horizon shell r₊ (visualisation aid, not visible in reality)',o.width/2,o.height*.86);ox.textAlign='left';ox.globalAlpha=1;}}
+ const proj=P3=>{const v=sub3(P3,camE.pos);const z=v[0]*camE.F[0]+v[1]*camE.F[1]+v[2]*camE.F[2];if(z<.05)return null;const k=o.height/(2*Math.tan(.5*camE.fov))/z;
+  return [o.width/2+k*(v[0]*camE.R[0]+v[1]*camE.R[1]+v[2]*camE.R[2]),o.height/2-k*(v[0]*camE.U[0]+v[1]*camE.U[1]+v[2]*camE.U[2])];};
+ const pathFor=($('traj').style.display==='block'&&preview&&!preview.err)?preview:(S.showPath&&(S.tau<1e-9||!S.started)?ship:null);
+ if(pathFor&&S.showPath&&camE.mode!=='eye'){const pp=pathFor.path;const st=Math.max(1,Math.floor(pp.length/1500));ox.lineWidth=2;let prev=null;
+  for(let i=0;i<pp.length;i+=st){const q=pp[i];const P2=proj([q.x,q.y,q.z]);const col=q.r>pathFor.rp?'rgba(255,214,120,.85)':q.r>pathFor.rm?'rgba(255,140,60,.9)':'rgba(255,70,110,.95)';
+   if(P2&&prev){ox.strokeStyle=col;ox.beginPath();ox.moveTo(...prev);ox.lineTo(...P2);ox.stroke();}prev=P2;}
+  const e=pp[pp.length-1],P2=proj([e.x,e.y,e.z]);if(P2){ox.fillStyle='#fff';ox.font='12px sans-serif';ox.fillText({singularity:'✶ ring singularity',cauchy:'✕ ends at inner horizon',disc:'✕ through ring disc',breakdown:'✕ integration stops',escape:'→ escapes',orbit:'↻ orbits on'}[pathFor.outcome]||'',P2[0]+6,P2[1]-6);}
+  const s0=proj([pp[0].x,pp[0].y,pp[0].z]);if(s0){ox.fillStyle='#7fd3ff';ox.beginPath();ox.arc(s0[0],s0[1],4,0,7);ox.fill();ox.fillText('start',s0[0]+6,s0[1]+14);}}
+ if(S.dop&&mouse&&gBuf){const px=Math.floor(mouse[0]/innerWidth*gBufW),py=Math.floor((1-mouse[1]/innerHeight)*gBufH);const g=gBuf[(py*gBufW+px)*4+3];
+  if(g>0){ox.fillStyle='rgba(0,0,0,.6)';ox.fillRect(mouse[0]+12,mouse[1]-24,118,20);ox.fillStyle='#fff';ox.font='12px monospace';ox.fillText('g = '+g.toFixed(3)+(g>1?' (blue)':' (red)'),mouse[0]+16,mouse[1]-10);}}
+ if(cam==='eye'&&!S.finale){ox.strokeStyle='rgba(150,200,255,.35)';ox.lineWidth=1.5;const W=o.width,H=o.height;ox.beginPath();ox.arc(W/2,H/2,18,0,7);ox.moveTo(W/2-40,H/2);ox.lineTo(W/2-22,H/2);ox.moveTo(W/2+22,H/2);ox.lineTo(W/2+40,H/2);ox.stroke();
+  const ins_=camR<ship.rp;if(!ins_){ox.fillStyle='rgba(10,14,22,.9)';ox.beginPath();ox.moveTo(0,H);ox.lineTo(W*.18,H*.82);ox.lineTo(W*.82,H*.82);ox.lineTo(W,H);ox.fill();}ox.fillStyle='rgba(150,200,255,'+(ins_?.45:.7)+')';ox.font=(ins_?'10px':'12px')+' monospace';ox.fillText((Math.cos(S.eyaw)<0&&camE.mode==='eye'?'LOOKING BACK · REAR VIEW':'LOOKING TOWARDS THE CENTRE · FORWARD CAMERA')+' · RELATIVISTIC ABERRATION ON',W*.3,H*.93);}
+ // ---- telemetry ----
+ const X4=[cur.t,cur.x,cur.y,cur.z];const E=-cur.P[0],Lz=cur.x*cur.P[2]-cur.y*cur.P[1];
+ const r=cur.r,Del=r*r-2*r+a*a;const cth=cur.z/r,sig=r*r+a*a*cth*cth,s2=1-cth*cth;const A=(r*r+a*a)**2-a*a*Del*s2;
+ let dil=NaN,vZ=NaN,omZ=2*a*r/A;
+ if(r>rp+1e-6){const alpha=Math.sqrt(sig*Del/A);const gam=(E-omZ*Lz)/alpha;vZ=Math.sqrt(Math.max(0,1-1/(gam*gam)));
+  const i=cur.i;const p=ship.path;if(i+1<=ship.lastOut){dil=(p[i+1].tau-p[i].tau)/(p[i+1].tBL-p[i].tBL);}else dil=0;}
+ const M_km=MSUN_KM*S.mass;
+ $('hTau').textContent=cur.tau.toFixed(3)+' M ('+fmtTime(cur.tau)+')';
+ $('hT').textContent=r>rp+1e-6&&cur.i<ship.lastOut?cur.tBL.toFixed(2)+' M ('+fmtTime(cur.tBL)+')':'∞ (never seen to cross)';
+ $('hDil').textContent=isNaN(dil)?'no comparison possible':dil<1e-4?dil.toExponential(2):dil.toFixed(4);
+ $('dilfill').style.width=(isNaN(dil)?0:Math.max(1,dil*100))+'%';
+ $('hDilTxt').textContent=isNaN(dil)?'No distant clock can be compared inside the horizon: nothing here can stay still or signal outwards, so there is no shared "now" with the outside.':
+   (dil>0?`1 s on the ship ≙ ${(1/dil)<1e4?(1/dil).toFixed(2):(1/dil).toExponential(2)} s far away (gravity + motion)`:'');
+ $('hR').textContent=r.toFixed(3)+' M · '+(r*M_km<1000?(r*M_km).toFixed(2)+' km':(r*M_km).toExponential(3)+' km');
+ $('hV').textContent=isNaN(vZ)?'no ZAMOs inside r₊':(vZ).toFixed(4)+' c';
+ $('hOm').textContent=(omZ).toFixed(4)+' /M';
+ $('hHor').textContent=rp.toFixed(3)+' / '+rm.toFixed(3)+' M';$('hIsco').textContent=ship.isco.toFixed(3)+' M';
+ if(ship.crossOut!==null&&S.tau>=ship.crossOut)$('hC1').textContent=ship.crossOut.toFixed(3)+' M';else $('hC1').textContent='—';
+ if(ship.crossIn!==null&&S.tau>=ship.crossIn)$('hC2').textContent=ship.crossIn.toFixed(3)+' M';else $('hC2').textContent='—';
+ const cE=cth*cth;const rErg=1+Math.sqrt(1-a*a*cE);
+ const reg=r>rErg?['Outside: stationary observers possible','#7fd3ff']:r>rp?['Ergosphere: space itself is dragged round — nothing can stand still','#c89bff']:r>rm?['Between horizons: r is now a time direction; r=0 is inevitable','#ffb36b']:['Inside the Cauchy horizon: predictability breaks down','#ff6b8a'];
+ $('region').textContent=reg[0];$('region').style.color=reg[1];
+ if(r<rErg&&r>rp)flash('Entering the ergosphere — frame dragging forces the ship to co-rotate with the hole.','erg');
+ if(false)flash('Event horizon crossed. A distant observer will <b>never</b> see this: the ship\'s image freezes and fades there.','hor');
+ if(false)flash('Inner (Cauchy) horizon crossed. Ahead lies the ring singularity.','cau');
+ if(cam==='distant'&&seen&&seen.frozen)flash('From far away the ship appears frozen at the horizon, ever more red-shifted and dim.','frz');
+ drawGraphs(cur,dil);drawClocks(cur,r>rp+1e-6&&cur.i<ship.lastOut);climaxFX(cur);stageUI();tideUI(cur);tlUI(cur);{const st=S.stage||0;S.horShell=st>=1&&st<1.35?Math.sin(Math.PI*(st-1)/.35)*.9:0;}if(!S.fixed&&S.playing&&S.tideG>1&&S.tideG<1e4&&Math.random()<.004*Math.log10(S.tideG*10))Audio_.creak&&Audio_.creak(Math.min(1,.3+Math.log10(S.tideG)/4));
+ document.body.classList.toggle('fin',!!S.finale&&S.finT>2.3);if(S.finale&&ship.outcome!=='singularity'){$('finale').style.display='flex';$('finale').style.opacity=Math.min(1,S.finT/2);
+  $('finH').textContent={escape:'ESCAPED',orbit:'STILL ORBITING',cauchy:'END OF THE MAP',disc:'THROUGH THE RING',breakdown:'END OF THE MAP'}[ship.outcome];
+  $('finTxt').innerHTML=OUT[ship.outcome]+`<br>Proper time elapsed: <b>${ship.tauEnd.toFixed(2)} M</b> (${fmtTime(ship.tauEnd)}). Closest approach ${ship.minR.toFixed(3)} M.`+(ship.captured?`<br><span class="small">The idealised Kerr interior beyond this point needs coordinates (or physics) this simulator does not include, so it stops honestly rather than inventing a path.</span>`:'')+'<br><br><span class="small">Press Restart, or choose another trajectory.</span>';}
+ else if(S.finale){$('finH').textContent='Ring singularity reached — proper time τ = '+ship.tauEnd.toFixed(2)+' M';$('finale').style.display=S.finT>2.3?'flex':'none';$('finale').style.opacity=Math.min(1,Math.max(0,(S.finT-2.3)/1.6));
+  $('finTxt').innerHTML=`The ship reached the ring singularity (r = 0, θ = π/2, ring radius a = ${a.toFixed(3)} M) after <b>${ship.tauEnd.toFixed(2)} M</b> of its own proper time — <b>${fmtTime(ship.tauEnd)}</b> for a ${S.mass} M☉ hole.<br>For the outside universe this moment never happens: their clocks reached infinity before the ship crossed r₊ = ${rp.toFixed(3)} M.<br><span class="small">Here curvature diverges and general relativity stops making predictions. (In reality the inner horizon is thought to be unstable — “mass inflation” — so this idealised Kerr interior is a mathematical extension.)</span><br><br><span class="small">Press Restart to fall again.</span>`;}
+ // audio mapping: distant view hears red-shifted signal; aboard, the music darkens with depth
+ let cents=0,cut=1500;if(cam==='distant'&&seen){cents=Math.max(-2400,1200*Math.log2(Math.max(1e-3,Math.min(1,seen.g))));cut=300+1200*Math.min(1,seen.g)*seen.fade;}
+ else{const depth=Math.max(0,1-r/6);cents=-500*depth;cut=1500-1100*depth;}
+ const ddil=(r>rp+1e-6&&isFinite(dil)&&dil>0)?Math.min(1,Math.max(.05,dil)):.3;cents+=600*Math.log2(ddil);
+ const adepth=r>rp?Math.min(1,Math.max(0,1-(r-rp)/5)):1;
+ Audio_.update(cents,cut,ddil,adepth,r<rp?1:0);
+ // adaptive resolution
+ fpsAcc+=dtw;fpsN++;fpsT+=dtw;if(fpsT>1){const fps=fpsN/fpsAcc;$('fps').textContent=fps.toFixed(0)+' fps · '+w+'×'+h;
+  if(S.auto&&!S.fixed){if(fps<24&&S.scale>.35)S.scale*=.85;else if(fps>50&&S.scale<1)S.scale=Math.min(1,S.scale*1.08);}fpsAcc=0;fpsN=0;fpsT=0;}
+ requestAnimationFrame(frame);}
+Object.assign(S.traj,PRESETS.default(S.a));syncTrajUI();buildShip();
+// test hook: ?tau=..&cam=..&grid=1&still=1
+if(qs.get('cam')){S.cam=qs.get('cam');$('selCam').value=S.cam;}if(qs.get('grid')){S.grid=true;$('cGrid').checked=true;}
+if(qs.get('spin')){S.a=+qs.get('spin');buildShip();}
+if(qs.get('preset')){S.traj.preset=qs.get('preset');Object.assign(S.traj,PRESETS[S.traj.preset](S.a));buildShip();}
+if(qs.get('traj')){$('traj').style.display='block';updatePreview();}
+if(qs.get('dop')){$('cDop').click();}
+for(const k of ['az','incl','dist','cyaw','cpitch','czoom','eyaw','epitch'])if(qs.get(k))S[k]=+qs.get(k);
+if(qs.get('tau')){const t=qs.get('tau');const v=t==='end'?ship.tauEnd:t.startsWith('h')?ship.crossOut+(+t.slice(1)):t.startsWith('c')?ship.crossIn+(+t.slice(1)):+t;
+ S.started=true;$('start').style.display='none';S.fixed={tau:Math.min(v,ship.tauEnd),discT:5,playing:false,scale:1,auto:false};if(qs.get('fin')){S.fixed.finale=true;S.fixed.finT=+qs.get('fin');}}
+if(qs.get('clim')!=null&&ship.tauClim!=null){const u=+qs.get('clim');S.started=true;$('start').style.display='none';S.fixed={tau:ship.tauClim+(ship.tauEnd-ship.tauClim)*(1-Math.pow(1-u,1.5)),climC:u,discT:5,playing:false,scale:1,auto:false};}
+if(qs.get('stage')!=null&&ship.stg){const v=+qs.get('stage');const i=Math.min(4,Math.floor(v)-1),f=v-Math.floor(v);S.started=true;$('start').style.display='none';S.fixed={tau:ship.stg[i]+(ship.stg[i+1]-ship.stg[i])*f,discT:5,playing:false,scale:1,auto:false};}
+if(qs.get('open'))qs.get('open').split(',').forEach(k=>{const d=$('d'+({Timeline:'Time',Trajectory:'Traj'}[k]||k));if(d)d.open=true;});
+if(qs.get('paused')){$('start').click();$('bPlay').click();}
+if(S.started)$('bPlay').textContent=S.playing&&!S.fixed?'❚❚ Pause':'▶ Resume';
+window.__ship=ship;if(qs.get('tau')!=null){S.started=true;$('start').style.display='none';}
+requestAnimationFrame(frame);
 </script></body></html>
