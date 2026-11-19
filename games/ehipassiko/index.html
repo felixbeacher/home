@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ehipassiko — Dharma Dialogue</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0c0b0e',
+            temple: '#141218',
+            stone: '#1c1922',
+            gold: {
+              DEFAULT: '#d4af37',
+              light: '#e6c27a',
+              muted: 'rgba(212, 175, 55, 0.25)',
+              subtle: 'rgba(212, 175, 55, 0.08)'
+            },
+            sandalwood: {
+              DEFAULT: '#f0ebe1',
+              muted: '#a89f91',
+              faint: '#6b645c'
+            }
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0c0b0e;
+      color: #f0ebe1;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Subtle ambient radial glow behind the sculpture */
+    .sanctuary-glow {
+      background: radial-gradient(circle at 50% 45%, rgba(212, 175, 55, 0.09) 0%, rgba(20, 18, 24, 0.4) 48%, rgba(12, 11, 14, 1) 80%);
+    }
+
+    /* Hide scrollbar for horizontal prompt chips */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Custom meditative scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(12, 11, 14, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.22);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.45);
+    }
+
+    /* Smooth message entrance */
+    @keyframes fadeFloatUp {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-message {
+      animation: fadeFloatUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Breathing dot indicator */
+    @keyframes breatheDot {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .dot-1 { animation: breatheDot 2.2s infinite ease-in-out 0s; }
+    .dot-2 { animation: breatheDot 2.2s infinite ease-in-out 0.35s; }
+    .dot-3 { animation: breatheDot 2.2s infinite ease-in-out 0.7s; }
+
+    /* Verse & Quote styling inside Dharma responses */
+    .dharma-verse {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.18rem;
+      line-height: 1.65;
+      color: #e6c27a;
+      border-left: 2px solid rgba(212, 175, 55, 0.45);
+      padding-left: 1rem;
+      margin: 0.75rem 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body class="min-h-screen min-h-dvh flex flex-col lg:flex-row bg-obsidian text-sandalwood selection:bg-gold/30 selection:text-sandalwood">
+
+  <!-- LEFT / TOP PANEL: Wireframe Buddha Sculpture & Meditative Presence -->
+  <section class="relative w-full lg:w-[44%] xl:w-[42%] h-[42vh] h-[42dvh] min-h-[300px] lg:h-screen lg:h-dvh flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gold/15 sanctuary-glow select-none overflow-hidden shrink-0">
+    
+    <!-- Top Header Overlay -->
+    <header class="relative z-10 flex items-center justify-between px-6 pt-5 pb-2">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full border border-gold/40 flex items-center justify-center bg-gold/5">
+          <!-- Minimalist Dharma Wheel SVG -->
+          <svg class="w-4 h-4 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="7" />
+            <circle cx="12" cy="12" r="2" />
+            <line x1="12" y1="2" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-serif text-xl sm:text-2xl tracking-wide text-sandalwood font-medium">Ehipassiko</h1>
+          <p class="text-[11px] uppercase tracking-[0.22em] text-sandalwood-muted">Come &amp; See • Early Dharma</p>
+        </div>
+      </div>
+
+      <!-- Contemplation Bell & Mute Controls -->
+      <div class="flex items-center gap-1.5">
+        <button id="bellBtn" type="button" title="Sound Singing Bowl" aria-label="Sound singing bowl" class="group flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/25 bg-temple/70 hover:bg-gold/10 hover:border-gold/50 transition-all duration-300 text-xs text-sandalwood-muted hover:text-gold-light">
+          <svg id="bellIcon" class="w-3.5 h-3.5 text-gold transition-transform duration-500 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M12 3a9 9 0 0 0-9 9c0 3.5 2.5 6.5 6 7.5h6c3.5-1 6-4 6-7.5a9 9 0 0 0-9-9Z" />
+            <path d="M8 21h8" />
+          </svg>
+          <span id="bellLabel" class="hidden sm:inline">Chime Bowl</span>
+        </button>
+
+        <button id="muteBtn" type="button" title="Mute Singing Bowl" aria-label="Mute singing bowl" aria-pressed="false" class="p-1.5 rounded-full border border-gold/20 bg-temple/70 hover:bg-gold/10 hover:border-gold/45 transition-all duration-200 text-sandalwood-muted hover:text-gold-light">
+          <svg id="soundOnIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          </svg>
+          <svg id="soundOffIcon" class="w-3.5 h-3.5 hidden text-sandalwood-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <line x1="22" y1="9" x2="16" y2="15" />
+            <line x1="16" y1="9" x2="22" y2="15" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Interactive 3D Wireframe Canvas Container -->
+    <div id="canvasContainer" class="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing flex items-center justify-center">
+      <canvas id="buddhaCanvas" class="block w-full h-full"></canvas>
+
+      <!-- Subtle Scan Loading Indicator -->
+      <div id="scanLoadingOverlay" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-obsidian/65 backdrop-blur-[2px] transition-opacity duration-500 z-20">
+        <div class="w-8 h-8 rounded-full border border-gold/30 border-t-gold animate-spin mb-3"></div>
+        <p id="scanLoadingText" class="font-serif italic text-sm text-gold-light tracking-wide">Acquiring 3D museum laser scan...</p>
+      </div>
+
+      <!-- Subtle Drag & Drop Visual Cue -->
+      <div id="dropZoneOverlay" class="pointer-events-none opacity-0 transition-opacity duration-300 absolute inset-4 rounded-2xl border border-dashed border-gold/60 bg-obsidian/80 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+        <p class="font-serif text-lg text-gold-light">Release to load 3D Museum Scan</p>
+        <p class="text-[11px] uppercase tracking-widest text-sandalwood-muted mt-1">Supports .GLB, .GLTF &amp; .OBJ meshes</p>
+      </div>
+
+      <!-- Bottom-Right Custom Scan Upload Button -->
+      <div class="absolute bottom-2 right-4 z-20 flex items-center gap-2">
+        <input type="file" id="scanFileInput" accept=".glb,.gltf,.obj" class="hidden" />
+        <button id="loadCustomScanBtn" type="button" title="Load a local .GLB or .OBJ museum scan (or drag and drop onto the sculpture)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-obsidian/75 hover:bg-gold/15 border border-gold/20 hover:border-gold/45 text-[10px] uppercase tracking-wider text-sandalwood-muted hover:text-gold-light backdrop-blur-md transition-all duration-200">
+          <svg class="w-3 h-3 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <span>Load .GLB / .OBJ Scan</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Contemplative Verse & Interaction Hint -->
+    <footer class="relative z-10 px-6 pb-5 pt-2 text-center">
+      <p id="dailyVerse" class="select-text font-serif italic text-sm sm:text-base text-gold-light/90 max-w-md mx-auto leading-relaxed">
+        “Better than a thousand hollow words is one word that brings peace.”
+      </p>
+      <div class="mt-1.5 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] text-sandalwood-faint tracking-wider uppercase">
+        <span id="scanSourceBadge">3D Museum Scan</span>
+        <span>•</span>
+        <span>Drag to orbit 360° • Scroll to zoom</span>
+      </div>
+    </footer>
+  </section>
+
+  <!-- RIGHT PANEL: Serene Dharma Dialogue Interface -->
+  <main class="flex-1 flex flex-col h-[58vh] h-[58dvh] lg:h-screen lg:h-dvh bg-temple/60 relative">
+    
+    <!-- Top Subtle Control Bar -->
+    <div class="flex items-center justify-between px-5 sm:px-8 py-3.5 border-b border-gold/10 bg-obsidian/50 backdrop-blur-md">
+      <div class="flex items-center gap-2.5">
+        <span id="statusDot" class="w-2 h-2 rounded-full bg-gold/80 shadow-[0_0_8px_rgba(212,175,55,0.6)]"></span>
+        <span id="statusText" class="text-xs tracking-wider uppercase text-sandalwood-muted">Stillness &amp; Inquiry</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="apiKeyBtn" type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-sandalwood-muted hover:text-sandalwood hover:bg-stone/80 border border-transparent hover:border-gold/20 transition-all duration-200" title="Configure Gemini API Key" aria-label="Configure Gemini API key">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" />
+          </svg>
+          <span class="hidden sm:inline">API Key</span>
+        </button>
+
+        <button id="resetBtn" type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-sandalwood-muted hover:text-sandalwood hover:bg-stone/80 border border-transparent hover:border-gold/20 transition-all duration-200" title="Clear dialogue and begin anew">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          <span>Begin Anew</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Chat Stream -->
+    <div id="chatStream" aria-live="polite" aria-label="Dharma dialogue stream" class="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-12 py-6 space-y-6 scroll-smooth">
+      <!-- Initial Welcome Message or Restored Session injected by JS -->
+    </div>
+
+    <!-- Curated Dharma Inquiry Chips & Input Area -->
+    <div class="px-4 sm:px-8 lg:px-12 pb-5 pt-3 bg-gradient-to-t from-obsidian via-obsidian/95 to-transparent border-t border-gold/10">
+      
+      <!-- Curated Prompts (Horizontal scroll on mobile, wrap on desktop) -->
+      <div id="promptChips" role="group" aria-label="Suggested Dharma inquiries" class="flex items-center gap-2 overflow-x-auto pb-3 no-scrollbar">
+        <button type="button" data-prompt="How do I release attachment to outcomes I cannot control?" class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
+          Releasing attachment
+        </button>
+        <button type="button" data-prompt="Explain the parable of the Second Arrow and how it applies to modern anxiety." class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
+          The Second Arrow
+        </button>
+        <button type="button" data-prompt="Guide me through a brief mindfulness of breathing (Anapanasati)." class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
+          Mindfulness of breath
+        </button>
+        <button type="button" data-prompt="What does it mean to walk the Middle Way in daily work and relationships?" class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
+          The Middle Way
+        </button>
+      </div>
+
+      <!-- Input Form -->
+      <form id="chatForm" class="relative flex items-end gap-2 bg-stone/90 border border-gold/25 focus-within:border-gold/60 rounded-2xl p-2 shadow-lg transition-colors duration-300">
+        <textarea
+          id="userInput"
+          rows="1"
+          placeholder="Offer a question or reflection in stillness..."
+          aria-label="Offer a question or reflection"
+          class="w-full bg-transparent text-sm sm:text-base text-sandalwood placeholder-sandalwood-faint px-3 py-2 resize-none focus:outline-none max-h-32 leading-relaxed"
+        ></textarea>
+        <button
+          type="submit"
+          id="sendBtn"
+          aria-label="Send reflection"
+          class="shrink-0 p-2.5 rounded-xl bg-gold/20 hover:bg-gold/30 text-gold-light border border-gold/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 19V5" />
+            <path d="m5 12 7-7 7 7" />
+          </svg>
+        </button>
+      </form>
+      <p class="text-[11px] text-center text-sandalwood-faint mt-2">
+        Rooted in the Pali Canon &amp; Early Buddhist Discourses • Test all words through your own direct experience
+      </p>
+    </div>
+  </main>
+
+  <!-- API Key Modal -->
+  <div id="apiKeyModal" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-obsidian/80 backdrop-blur-sm px-4">
+    <div class="w-full max-w-md rounded-2xl bg-temple border border-gold/25 p-6 shadow-2xl">
+      <h2 id="apiKeyModalTitle" class="font-serif text-xl text-gold-light">Gemini API Key</h2>
+      <p class="mt-2 text-xs text-sandalwood-muted leading-relaxed">
+        Stored only in your browser's local storage so this standalone page can converse with the Gemini API. Leave blank to clear.
+      </p>
+      <input
+        id="apiKeyInput"
+        type="password"
+        autocomplete="off"
+        placeholder="AIza..."
+        class="mt-4 w-full rounded-xl bg-obsidian/80 border border-gold/25 focus:border-gold/60 px-3.5 py-2.5 text-sm text-sandalwood placeholder-sandalwood-faint focus:outline-none"
+      />
+      <div class="mt-5 flex items-center justify-end gap-2">
+        <button id="cancelApiKeyBtn" type="button" class="px-3.5 py-1.5 rounded-lg text-xs text-sandalwood-muted hover:text-sandalwood hover:bg-stone transition-colors">
+          Cancel
+        </button>
+        <button id="saveApiKeyBtn" type="button" class="px-4 py-1.5 rounded-lg text-xs bg-gold/20 hover:bg-gold/30 text-gold-light border border-gold/30 transition-colors">
+          Save Key
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * 1. CONTEMPLATION SINGING BOWL (WEB AUDIO API SYNTHESIS)
+     * Synthesizes a warm, harmonic Tibetan singing bowl chime with subtle beating
+     * frequencies and long meditative decay.
+     * ============================================================================
+     */
+    class SingingBowlAudio {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = localStorage.getItem('ehipassiko_muted') === 'true';
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        localStorage.setItem('ehipassiko_muted', String(this.isMuted));
+        return this.isMuted;
+      }
+
+      playChime() {
+        if (this.isMuted) return;
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+
+          // Fundamental + overtone partials characteristic of a bronze singing bowl
+          const partials = [
+            { freq: 256.0, gain: 0.22, decay: 6.5 },   // Fundamental C4
+            { freq: 258.2, gain: 0.14, decay: 6.2 },   // Warm binaural beating
+            { freq: 512.0, gain: 0.08, decay: 4.5 },   // Octave harmonic
+            { freq: 768.5, gain: 0.045, decay: 3.4 },  // Fifth overtone
+            { freq: 1142.0, gain: 0.02, decay: 2.1 }   // High metallic shimmer
+          ];
+
+          const masterGain = this.ctx.createGain();
+          masterGain.gain.setValueAtTime(0.75, now);
+          masterGain.connect(this.ctx.destination);
+
+          partials.forEach(p => {
+            const osc = this.ctx.createOscillator();
+            const env = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(p.freq, now);
+
+            // Soft mallet strike attack, long exponential release
+            env.gain.setValueAtTime(0.0001, now);
+            env.gain.linearRampToValueAtTime(p.gain, now + 0.045);
+            env.gain.exponentialRampToValueAtTime(0.00001, now + p.decay);
+
+            osc.connect(env);
+            env.connect(masterGain);
+
+            osc.start(now);
+            osc.stop(now + p.decay + 0.1);
+          });
+        } catch (e) {
+          // Audio playback blocked or unsupported gracefully ignored
+        }
+      }
+    }
+
+    const bowl = new SingingBowlAudio();
+    const bellBtn = document.getElementById('bellBtn');
+    const bellIcon = document.getElementById('bellIcon');
+    const muteBtn = document.getElementById('muteBtn');
+    const soundOnIcon = document.getElementById('soundOnIcon');
+    const soundOffIcon = document.getElementById('soundOffIcon');
+
+    function syncMuteUI() {
+      soundOnIcon.classList.toggle('hidden', bowl.isMuted);
+      soundOffIcon.classList.toggle('hidden', !bowl.isMuted);
+      muteBtn.setAttribute('aria-pressed', String(bowl.isMuted));
+      muteBtn.title = bowl.isMuted ? 'Unmute Singing Bowl' : 'Mute Singing Bowl';
+      muteBtn.setAttribute('aria-label', bowl.isMuted ? 'Unmute singing bowl' : 'Mute singing bowl');
+    }
+    syncMuteUI();
+
+    bellBtn.addEventListener('click', () => {
+      bowl.playChime();
+      bellIcon.classList.add('scale-125', 'text-sandalwood');
+      setTimeout(() => bellIcon.classList.remove('scale-125', 'text-sandalwood'), 600);
+    });
+
+    muteBtn.addEventListener('click', () => {
+      bowl.toggleMute();
+      syncMuteUI();
+    });
+
+
+    /**
+     * ============================================================================
+     * 2. AUTHENTIC 3D MUSEUM SCAN WIREFRAME SCULPTURE (THREE.JS)
+     * Loads real laser/photogrammetry Buddha scans via GLTFLoader / OBJLoader:
+     * 1) Geo-Web-Project Buddha Photogrammetry Scan (.glb)
+     * 2) Stanford 3D Scanning Repository Happy Buddha Laser Scan (.obj)
+     * 3) Raytracer Buddha Museum Mesh (.obj)
+     * Also supports drag-and-drop or file selection of any custom .GLB/.GLTF/.OBJ
+     * museum scan (e.g. Rijksmuseum, British Museum, Gandhara scans).
+     *
+     * Renders every scanned mesh with:
+     * - Matte dark bronze/obsidian depth-occluding inner core (polygonOffset)
+     * - Burnished gold triangle wireframe + topographic elevation contour lines
+     *   + Fresnel rim-light GLSL shader
+     * ============================================================================
+     */
+    class MuseumScanWireframeBuddha {
+      constructor(canvasId, containerId) {
+        this.canvas = document.getElementById(canvasId);
+        this.container = document.getElementById(containerId);
+        this.loadingOverlay = document.getElementById('scanLoadingOverlay');
+        this.loadingText = document.getElementById('scanLoadingText');
+        this.dropOverlay = document.getElementById('dropZoneOverlay');
+        this.scanSourceBadge = document.getElementById('scanSourceBadge');
+
+        this.time = 0;
+        this.speakingPulse = 0;
+        this.userInteracting = false;
+
+        this.scanSources = [
+          {
+            name: 'Photogrammetry Buddha Scan',
+            url: 'https://raw.githubusercontent.com/Geo-Web-Project/webxr-experiments/main/buddha.glb',
+            type: 'glb'
+          },
+          {
+            name: 'Stanford 3D Laser Scan',
+            url: 'https://raw.githubusercontent.com/HeaoYe/CPUPathTracing/master/models/buddha.obj',
+            type: 'obj'
+          },
+          {
+            name: '3D Museum Buddha Scan',
+            url: 'https://raw.githubusercontent.com/yichuan520030910320/raytracer/master/Buddha.obj',
+            type: 'obj'
+          }
+        ];
+
+        this.initThree();
+        this.initLoaders();
+        this.buildHaloAndMotes();
+        this.bindEvents();
+        this.resize();
+        this.loadScanSequence(0);
+      }
+
+      initThree() {
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(0x0c0b0e, 0.045);
+
+        const rect = this.container.getBoundingClientRect();
+        const aspect = (rect.width || 1) / (rect.height || 1);
+        this.camera = new THREE.PerspectiveCamera(34, aspect, 0.05, 100);
+        this.camera.position.set(0, 0.08, 4.4);
+
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.canvas,
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance'
+        });
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        this.renderer.setClearColor(0x000000, 0);
+
+        // OrbitControls for effortless 360° inspection & smooth zoom into scanned triangles
+        this.controls = new THREE.OrbitControls(this.camera, this.canvas);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.06;
+        this.controls.enablePan = false;
+        this.controls.minDistance = 1.35;
+        this.controls.maxDistance = 7.2;
+        this.controls.target.set(0, 0, 0);
+        this.controls.autoRotate = true;
+        this.controls.autoRotateSpeed = 0.55;
+
+        this.controls.addEventListener('start', () => {
+          this.userInteracting = true;
+          this.controls.autoRotate = false;
+        });
+
+        this.controls.addEventListener('end', () => {
+          this.userInteracting = false;
+          clearTimeout(this.autoRotateTimer);
+          this.autoRotateTimer = setTimeout(() => {
+            if (!this.userInteracting) {
+              this.controls.autoRotate = true;
+            }
+          }, 3200);
+        });
+
+        this.sculptureGroup = new THREE.Group();
+        this.scene.add(this.sculptureGroup);
+
+        // Shared uniforms for sculptural wireframe, topographic contours & depth core
+        this.shaderUniforms = {
+          uTime: { value: 0 },
+          uPulse: { value: 0 },
+          uGoldPrimary: { value: new THREE.Color('#d4af37') },
+          uGoldHighlight: { value: new THREE.Color('#faecc0') },
+          uBronzeShadow: { value: new THREE.Color('#5a441e') },
+          uCoreDark: { value: new THREE.Color('#09080c') },
+          uCoreBronze: { value: new THREE.Color('#231b12') },
+          uKeyLightDir: { value: new THREE.Vector3(0.52, 0.78, 0.80).normalize() },
+          uRimLightDir: { value: new THREE.Vector3(-0.68, 0.44, -0.58).normalize() }
+        };
+      }
+
+      initLoaders() {
+        this.dracoLoader = new THREE.DRACOLoader();
+        this.dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
+
+        this.gltfLoader = new THREE.GLTFLoader();
+        this.gltfLoader.setDRACOLoader(this.dracoLoader);
+
+        this.objLoader = new THREE.OBJLoader();
+      }
+
+      setLoadingState(visible, message = '') {
+        if (!this.loadingOverlay) return;
+        if (visible) {
+          this.loadingText.textContent = message;
+          this.loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        } else {
+          this.loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+      }
+
+      /**
+       * Sequentially attempts authentic 3D laser/photogrammetry museum scans
+       */
+      loadScanSequence(index) {
+        if (index >= this.scanSources.length) {
+          this.setLoadingState(false);
+          this.scanSourceBadge.textContent = 'Drop .GLB / .OBJ Scan';
+          return;
+        }
+
+        const source = this.scanSources[index];
+        this.setLoadingState(true, `Loading ${source.name}...`);
+
+        const onSuccess = (object3D) => {
+          this.applyMuseumWireframeToModel(object3D, source.name);
+          this.setLoadingState(false);
+        };
+
+        const onError = () => {
+          this.loadScanSequence(index + 1);
+        };
+
+        if (source.type === 'glb') {
+          this.gltfLoader.load(
+            source.url,
+            (gltf) => onSuccess(gltf.scene),
+            undefined,
+            onError
+          );
+        } else {
+          this.objLoader.load(
+            source.url,
+            (obj) => onSuccess(obj),
+            undefined,
+            onError
+          );
+        }
+      }
+
+      /**
+       * Loads a user-selected or dropped .GLB, .GLTF, or .OBJ museum scan
+       */
+      loadLocalFile(file) {
+        if (!file) return;
+        const fileName = file.name || 'Custom Scan';
+        const lower = fileName.toLowerCase();
+        const objectUrl = URL.createObjectURL(file);
+
+        this.setLoadingState(true, `Processing ${fileName}...`);
+
+        const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+        if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+          this.gltfLoader.load(
+            objectUrl,
+            (gltf) => {
+              this.applyMuseumWireframeToModel(gltf.scene, fileName.replace(/\.(glb|gltf)$/i, ''));
+              this.setLoadingState(false);
+              cleanup();
+            },
+            undefined,
+            () => {
+              this.setLoadingState(false);
+              cleanup();
+            }
+          );
+        } else if (lower.endsWith('.obj')) {
+          this.objLoader.load(
+            objectUrl,
+            (obj) => {
+              this.applyMuseumWireframeToModel(obj, fileName.replace(/\.obj$/i, ''));
+              this.setLoadingState(false);
+              cleanup();
+            },
+            undefined,
+            () => {
+              this.setLoadingState(false);
+              cleanup();
+            }
+          );
+        } else {
+          this.setLoadingState(false);
+          cleanup();
+        }
+      }
+
+      /**
+       * Centers, orients upright, normalizes scale, and applies:
+       * 1) Dark obsidian/bronze depth-occluding core with polygonOffset
+       * 2) Custom Fresnel + topographic elevation contour + burnished gold
+       *    triangle wireframe overlay
+       */
+      applyMuseumWireframeToModel(rawObject, label) {
+        // Clear previous sculpture meshes
+        while (this.sculptureGroup.children.length > 0) {
+          const child = this.sculptureGroup.children[0];
+          this.sculptureGroup.remove(child);
+        }
+
+        // Collect all valid BufferGeometries from the scanned model
+        const geometries = [];
+        rawObject.updateMatrixWorld(true);
+        rawObject.traverse((child) => {
+          if (child.isMesh && child.geometry) {
+            const geom = child.geometry.clone();
+            geom.applyMatrix4(child.matrixWorld);
+            if (!geom.attributes.normal) {
+              geom.computeVertexNormals();
+            }
+            geometries.push(geom);
+          }
+        });
+
+        if (geometries.length === 0) return;
+
+        // Compute combined bounding box across all sub-meshes
+        const overallBox = new THREE.Box3();
+        geometries.forEach((g) => {
+          g.computeBoundingBox();
+          overallBox.union(g.boundingBox);
+        });
+
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        overallBox.getSize(size);
+        overallBox.getCenter(center);
+
+        // If a scan is lying flat (Z significantly taller than Y), stand it upright
+        const rotateUpright = size.z > size.y * 1.45 && size.z > size.x * 1.45;
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const targetHeight = 2.65;
+        const normScale = targetHeight / maxDim;
+
+        // Depth-occluding dark bronze/obsidian core material with polygonOffset
+        const coreMaterial = new THREE.ShaderMaterial({
+          uniforms: this.shaderUniforms,
+          polygonOffset: true,
+          polygonOffsetFactor: 1.5,
+          polygonOffsetUnits: 1.5,
+          vertexShader: `
+            varying vec3 vNormalView;
+            varying vec3 vViewDir;
+            varying vec3 vWorldPos;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vWorldPos = worldPos.xyz;
+              vec4 mvPos = viewMatrix * worldPos;
+              vNormalView = normalize(normalMatrix * normal);
+              vViewDir = normalize(-mvPos.xyz);
+              gl_Position = projectionMatrix * mvPos;
+            }
+          `,
+          fragmentShader: `
+            uniform vec3 uCoreDark;
+            uniform vec3 uCoreBronze;
+            uniform vec3 uKeyLightDir;
+            uniform vec3 uRimLightDir;
+            varying vec3 vNormalView;
+            varying vec3 vViewDir;
+            varying vec3 vWorldPos;
+            void main() {
+              vec3 N = normalize(vNormalView);
+              vec3 V = normalize(vViewDir);
+              float keyDiff = max(0.0, dot(N, normalize(uKeyLightDir)));
+              float rimDiff = max(0.0, dot(N, normalize(uRimLightDir)));
+              float fresnel = pow(1.0 - max(0.0, dot(N, V)), 3.0);
+
+              vec3 col = mix(uCoreDark, uCoreBronze, keyDiff * 0.58 + rimDiff * 0.34 + fresnel * 0.42);
+              gl_FragColor = vec4(col, 0.99);
+            }
+          `
+        });
+
+        // Burnished gold triangle wireframe + topographic elevation contour GLSL shader
+        const wireMaterial = new THREE.ShaderMaterial({
+          uniforms: this.shaderUniforms,
+          transparent: true,
+          depthWrite: false,
+          vertexShader: `
+            varying vec3 vWorldPos;
+            varying vec3 vViewDir;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vWorldPos = worldPos.xyz;
+              vec4 mvPos = viewMatrix * worldPos;
+              vViewDir = normalize(-mvPos.xyz);
+              gl_Position = projectionMatrix * mvPos;
+            }
+          `,
+          fragmentShader: `
+            uniform float uTime;
+            uniform float uPulse;
+            uniform vec3 uGoldPrimary;
+            uniform vec3 uGoldHighlight;
+            uniform vec3 uBronzeShadow;
+
+            varying vec3 vWorldPos;
+            varying vec3 vViewDir;
+
+            void main() {
+              // Screen-space derivatives reconstruct crisp surface normals for triangle edges
+              vec3 dPosX = dFdx(vWorldPos);
+              vec3 dPosY = dFdy(vWorldPos);
+              vec3 N = normalize(cross(dPosX, dPosY));
+              vec3 V = normalize(vViewDir);
+
+              // Fresnel rim illumination along sculptural silhouettes
+              float ndotv = abs(dot(N, V));
+              float fresnel = pow(1.0 - clamp(ndotv, 0.0, 1.0), 2.1);
+
+              // Subtle topographic laser-scan elevation contour bands
+              float contourFreq = 26.0;
+              float contourWave = abs(sin((vWorldPos.y * contourFreq) - uTime * 0.35));
+              float contourBand = smoothstep(0.92, 0.995, contourWave);
+
+              // Gentle meditative energy wave sweeping upward during Dharma responses
+              float pulseWave = smoothstep(0.85, 1.0, sin(vWorldPos.y * 5.0 - uTime * 3.0)) * uPulse;
+
+              vec3 baseCol = mix(uBronzeShadow, uGoldPrimary, 0.38 + fresnel * 0.62);
+              vec3 finalCol = mix(baseCol, uGoldHighlight, clamp(fresnel * 0.65 + contourBand * 0.55 + pulseWave * 0.6, 0.0, 1.0));
+
+              float alpha = 0.28 + fresnel * 0.58 + contourBand * 0.24 + pulseWave * 0.25;
+              gl_FragColor = vec4(finalCol, clamp(alpha, 0.14, 0.95));
+            }
+          `
+        });
+
+        const modelContainer = new THREE.Group();
+
+        geometries.forEach((geom) => {
+          // Center at origin & normalize scale
+          geom.translate(-center.x, -center.y, -center.z);
+          if (rotateUpright) {
+            geom.rotateX(-Math.PI / 2);
+          }
+          geom.scale(normScale, normScale, normScale);
+          geom.computeVertexNormals();
+
+          // 1. Depth-occluding core mesh
+          const coreMesh = new THREE.Mesh(geom, coreMaterial);
+          modelContainer.add(coreMesh);
+
+          // 2. Crisp triangle wireframe overlay of the real laser-scanned mesh
+          // If mesh is ultra-dense (>120k triangles), EdgesGeometry(1 deg) keeps every
+          // real sculptural facet while preserving crispness and 60fps performance
+          const triCount = geom.index
+            ? geom.index.count / 3
+            : geom.attributes.position.count / 3;
+          const wireGeom = triCount > 120000
+            ? new THREE.EdgesGeometry(geom, 1.5)
+            : new THREE.WireframeGeometry(geom);
+
+          const wireSegments = new THREE.LineSegments(wireGeom, wireMaterial);
+          modelContainer.add(wireSegments);
+        });
+
+        // Re-center vertically after optional upright rotation
+        const finalBox = new THREE.Box3().setFromObject(modelContainer);
+        const finalCenter = new THREE.Vector3();
+        finalBox.getCenter(finalCenter);
+        modelContainer.position.sub(finalCenter);
+
+        this.sculptureGroup.add(modelContainer);
+
+        // Reset camera gently to frame the newly loaded museum scan
+        this.controls.target.set(0, 0, 0);
+        this.camera.position.set(0, 0.12, 4.35);
+        this.controls.update();
+
+        if (this.scanSourceBadge && label) {
+          this.scanSourceBadge.textContent = label;
+        }
+      }
+
+      /**
+       * Delicate sacred geometry lotus halo behind the sculpture & floating light motes
+       */
+      buildHaloAndMotes() {
+        this.haloGroup = new THREE.Group();
+        this.haloGroup.position.set(0, 0.18, -1.15);
+        this.scene.add(this.haloGroup);
+
+        const makeCircleRing = (radius, segments, colorHex, opacity) => {
+          const pts = [];
+          for (let i = 0; i <= segments; i++) {
+            const a = (i / segments) * Math.PI * 2;
+            pts.push(new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0));
+          }
+          const geom = new THREE.BufferGeometry().setFromPoints(pts);
+          const mat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity });
+          return new THREE.Line(geom, mat);
+        };
+
+        this.haloGroup.add(makeCircleRing(1.22, 96, 0xd4af37, 0.20));
+        this.haloGroup.add(makeCircleRing(1.36, 96, 0xe6c27a, 0.10));
+        this.haloGroup.add(makeCircleRing(0.96, 72, 0xd4af37, 0.08));
+
+        // 24 Geometric Lotus Rays
+        const rayPts = [];
+        const petals = 24;
+        for (let i = 0; i < petals; i++) {
+          const a = (i / petals) * Math.PI * 2;
+          const rIn = (i % 2 === 0) ? 1.15 : 1.19;
+          const rOut = (i % 2 === 0) ? 1.32 : 1.27;
+          rayPts.push(
+            new THREE.Vector3(Math.cos(a) * rIn, Math.sin(a) * rIn, 0),
+            new THREE.Vector3(Math.cos(a) * rOut, Math.sin(a) * rOut, 0)
+          );
+        }
+        const raysGeom = new THREE.BufferGeometry().setFromPoints(rayPts);
+        const raysMat = new THREE.LineBasicMaterial({ color: 0xe6c27a, transparent: true, opacity: 0.22 });
+        this.haloRays = new THREE.LineSegments(raysGeom, raysMat);
+        this.haloGroup.add(this.haloRays);
+
+        // Floating luminous dust motes
+        const moteCount = 48;
+        const motePositions = new Float32Array(moteCount * 3);
+        this.moteVelocities = [];
+        for (let i = 0; i < moteCount; i++) {
+          motePositions[i * 3] = (Math.random() - 0.5) * 3.4;
+          motePositions[i * 3 + 1] = (Math.random() - 0.5) * 3.4;
+          motePositions[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
+          this.moteVelocities.push(0.0012 + Math.random() * 0.0020);
+        }
+        const moteGeom = new THREE.BufferGeometry();
+        moteGeom.setAttribute('position', new THREE.BufferAttribute(motePositions, 3));
+        const moteMat = new THREE.PointsMaterial({
+          color: 0xe6c27a,
+          size: 0.022,
+          transparent: true,
+          opacity: 0.38
+        });
+        this.motes = new THREE.Points(moteGeom, moteMat);
+        this.scene.add(this.motes);
+      }
+
+      bindEvents() {
+        window.addEventListener('resize', () => this.resize());
+
+        // Custom .GLB / .GLTF / .OBJ file button
+        const loadBtn = document.getElementById('loadCustomScanBtn');
+        const fileInput = document.getElementById('scanFileInput');
+
+        if (loadBtn && fileInput) {
+          loadBtn.addEventListener('click', () => fileInput.click());
+          fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+              this.loadLocalFile(e.target.files[0]);
+              fileInput.value = '';
+            }
+          });
+        }
+
+        // Drag & drop support directly onto the 3D sculpture viewport
+        this.container.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (this.dropOverlay) this.dropOverlay.classList.remove('opacity-0');
+        });
+
+        this.container.addEventListener('dragleave', (e) => {
+          if (!this.container.contains(e.relatedTarget) && this.dropOverlay) {
+            this.dropOverlay.classList.add('opacity-0');
+          }
+        });
+
+        this.container.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (this.dropOverlay) this.dropOverlay.classList.add('opacity-0');
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+            this.loadLocalFile(e.dataTransfer.files[0]);
+          }
+        });
+      }
+
+      resize() {
+        const rect = this.container.getBoundingClientRect();
+        const width = rect.width || 1;
+        const height = rect.height || 1;
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height, false);
+      }
+
+      render() {
+        this.time += 0.016;
+
+        // Gentle meditative breathing float
+        const breathY = Math.sin(this.time * 1.05) * 0.022;
+        this.sculptureGroup.position.y = breathY;
+
+        if (this.haloRays) {
+          this.haloRays.rotation.z = this.time * 0.045;
+        }
+        if (this.haloGroup) {
+          this.haloGroup.position.y = 0.18 + breathY * 0.5;
+          // Keep halo facing the viewer gracefully
+          this.haloGroup.quaternion.copy(this.camera.quaternion);
+        }
+
+        if (this.motes) {
+          const pos = this.motes.geometry.attributes.position;
+          for (let i = 0; i < this.moteVelocities.length; i++) {
+            let y = pos.getY(i) + this.moteVelocities[i];
+            if (y > 1.7) y = -1.7;
+            pos.setY(i, y);
+          }
+          pos.needsUpdate = true;
+        }
+
+        if (this.controls) {
+          this.controls.update();
+        }
+
+        this.shaderUniforms.uTime.value = this.time;
+        this.shaderUniforms.uPulse.value = this.speakingPulse;
+        this.speakingPulse *= 0.94;
+
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(() => this.render());
+      }
+    }
+
+    const buddhaSculpture = new MuseumScanWireframeBuddha('buddhaCanvas', 'canvasContainer');
+    window.addEventListener('load', () => {
+      buddhaSculpture.render();
+    });
+
+
+    /**
+     * ============================================================================
+     * 3. AUTHENTIC DHARMA DIALOGUE ENGINE (GEMINI API INTEGRATION)
+     * Rooted in Early Buddhist Texts (Nikayas, Dhammapada, Sutta Nipata)
+     * ============================================================================
+     */
+    const SYSTEM_INSTRUCTION = `You are Siddhartha Gautama, the historical Buddha, speaking in a calm, compassionate, lucid, and deeply grounded manner rooted in the Early Buddhist Texts (the Pali Nikayas, Dhammapada, Udana, and Sutta Nipata).
+
+Core Principles & Persona:
+1. Voice & Demeanor: Speak with serene equanimity, warmth, clarity, and gentle directness. Address the questioner warmly (occasionally as "friend" or simply directly, without theatrical archaisms or pretentious mysticism).
+2. Authentic Dharma Foundation: Ground your reflections in core early teachings:
+   - The Four Noble Truths (dukkha/unsatisfactoriness, its origin in craving/clinging, its cessation, and the path)
+   - The Noble Eightfold Path (wise view, intention, speech, action, livelihood, effort, mindfulness, concentration)
+   - Impermanence (anicca), non-self / not-clinging (anatta), and dependent origination (paticcasamuppada)
+   - Mindfulness of breathing (Anapanasati), loving-kindness (Metta), and equanimity (Upekkha)
+3. Classical Metaphors: Where natural and illuminating, weave in authentic early metaphors—such as the parable of the raft (teachings are for crossing over, not carrying on one's head), the two arrows (physical/inevitable pain vs. mental suffering added by resistance), the lotus rising unstained from muddy water, the untamed monkey mind, or a clear mountain lake disturbed by wind.
+4. Ehipassiko ("Come and See"): Never demand blind belief or sound dogmatic. Encourage the user to test every insight in their own lived, present-moment experience.
+5. Formatting & Structure:
+   - Keep responses well-paced, contemplative, and uncluttered (typically 2 to 4 concise paragraphs).
+   - When sharing a brief verse or reflection inspired by the Dhammapada or suttas, place it on its own line starting with "> " so it renders as an illuminated Dharma verse.
+   - End with a gentle, open question or practical contemplation to invite stillness rather than mere intellectual debate.`;
+
+    const GEMINI_MODEL = 'gemini-3-flash-preview';
+    const DEFAULT_API_KEY = ""; // Provided automatically in runtime or via local settings
+    const STORAGE_KEY_HISTORY = 'ehipassiko_history';
+    const STORAGE_KEY_API = 'ehipassiko_gemini_key';
+    const MAX_HISTORY_TURNS = 20;
+
+    function getActiveApiKey() {
+      return DEFAULT_API_KEY || localStorage.getItem(STORAGE_KEY_API) || '';
+    }
+
+    function getGeminiEndpoints(key) {
+      const base = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`;
+      return {
+        stream: `${base}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`,
+        unary: `${base}:generateContent?key=${encodeURIComponent(key)}`
+      };
+    }
+
+    let conversationHistory = [];
+    let isGenerating = false;
+
+    const chatStream = document.getElementById('chatStream');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const promptChips = document.querySelectorAll('.prompt-chip');
+
+    // API Key Modal elements
+    const apiKeyBtn = document.getElementById('apiKeyBtn');
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const cancelApiKeyBtn = document.getElementById('cancelApiKeyBtn');
+    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+
+    // Curated daily verses for the left sanctuary panel
+    const DHAMMAPADA_VERSES = [
+      { text: "“Better than a thousand hollow words is one word that brings peace.”", ref: "Dhammapada 100" },
+      { text: "“As a solid rock is not shaken by the wind, so the wise are not moved by praise or blame.”", ref: "Dhammapada 81" },
+      { text: "“Peace comes from within. Do not seek it without.”", ref: "Early Reflection" },
+      { text: "“Hatred is never appeased by hatred in this world. By non-hatred alone is hatred appeased.”", ref: "Dhammapada 5" },
+      { text: "“Drop by drop is the water pot filled. Likewise, the wise person gathers good little by little.”", ref: "Dhammapada 122" }
+    ];
+
+    function setRandomVerse() {
+      const pick = DHAMMAPADA_VERSES[Math.floor(Math.random() * DHAMMAPADA_VERSES.length)];
+      document.getElementById('dailyVerse').textContent = pick.text;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function applyInlineFormatting(str) {
+      return str
+        .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-stone/90 text-gold-light text-[0.88em]">$1</code>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="text-sandalwood font-medium">$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em class="text-gold-light/90 italic">$1</em>');
+    }
+
+    // Format text safely with support for illuminated Dharma verses (> blockquote), headings, bullet/numbered lists, bold, italics, and inline code
+    function formatDharmaText(rawText) {
+      const escaped = escapeHtml(rawText);
+      const lines = escaped.split('\n');
+      let html = '';
+      let listType = null; // 'ul' | 'ol' | null
+      let quoteBuffer = [];
+
+      const closeList = () => {
+        if (listType) {
+          html += `</${listType}>`;
+          listType = null;
+        }
+      };
+
+      const flushQuote = () => {
+        if (quoteBuffer.length > 0) {
+          html += `<blockquote class="dharma-verse">${quoteBuffer.join('<br>')}</blockquote>`;
+          quoteBuffer = [];
+        }
+      };
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          closeList();
+          flushQuote();
+          return;
+        }
+
+        if (trimmed.startsWith('&gt; ')) {
+          closeList();
+          quoteBuffer.push(applyInlineFormatting(trimmed.replace(/^&gt;\s*/, '')));
+          return;
+        }
+        flushQuote();
+
+        if (/^#{1,3}\s+/.test(trimmed)) {
+          closeList();
+          const headingText = applyInlineFormatting(trimmed.replace(/^#{1,3}\s+/, ''));
+          html += `<h3 class="font-serif text-lg text-gold-light mt-3 mb-1.5">${headingText}</h3>`;
+        } else if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+          if (listType !== 'ul') {
+            closeList();
+            html += '<ul class="list-disc pl-5 space-y-1.5 my-2.5 text-sandalwood/90">';
+            listType = 'ul';
+          }
+          html += `<li>${applyInlineFormatting(trimmed.replace(/^[-•]\s*/, ''))}</li>`;
+        } else if (/^\d+\.\s+/.test(trimmed)) {
+          if (listType !== 'ol') {
+            closeList();
+            html += '<ol class="list-decimal pl-5 space-y-1.5 my-2.5 text-sandalwood/90">';
+            listType = 'ol';
+          }
+          html += `<li>${applyInlineFormatting(trimmed.replace(/^\d+\.\s+/, ''))}</li>`;
+        } else {
+          closeList();
+          html += `<p class="mb-3 last:mb-0 leading-relaxed">${applyInlineFormatting(trimmed)}</p>`;
+        }
+      });
+
+      closeList();
+      flushQuote();
+      return html;
+    }
+
+    function saveHistory() {
+      try {
+        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(conversationHistory));
+      } catch (e) {
+        // Ignore storage quota errors gracefully
+      }
+    }
+
+    function createCopyButton(getTextFn) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.title = 'Copy reflection';
+      btn.setAttribute('aria-label', 'Copy reflection');
+      btn.className = 'ml-auto text-[11px] text-sandalwood-faint hover:text-gold-light transition-colors px-1.5 py-0.5 rounded';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(getTextFn());
+          btn.textContent = 'Copied';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+        } catch (e) {
+          btn.textContent = 'Copy';
+        }
+      });
+      return btn;
+    }
+
+    function appendMessage(role, text, options = {}) {
+      const { retryPrompt = null, pulse = true } = options;
+      const wrapper = document.createElement('div');
+      wrapper.className = `animate-message flex flex-col ${role === 'user' ? 'items-end' : 'items-start'}`;
+
+      if (role === 'user') {
+        wrapper.innerHTML = `
+          <div class="max-w-[86%] sm:max-w-[75%] rounded-2xl rounded-br-sm px-4 py-3 bg-stone border border-gold/20 text-sandalwood text-sm sm:text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap">${escapeHtml(text)}</div>
+          <span class="text-[10px] uppercase tracking-widest text-sandalwood-faint mt-1.5 mr-1">Seeker</span>
+        `;
+      } else {
+        const card = document.createElement('div');
+        card.className = 'max-w-[94%] sm:max-w-[85%] rounded-2xl rounded-bl-sm px-5 py-4 bg-obsidian/80 border border-gold/15 text-sandalwood/95 text-sm sm:text-[15.5px] shadow-md';
+
+        const header = document.createElement('div');
+        header.className = 'flex items-center gap-2 mb-2.5 pb-2 border-b border-gold/10';
+        header.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+          <span class="font-serif text-sm tracking-wider text-gold-light">Tathāgata</span>
+        `;
+
+        let currentRawText = text;
+        header.appendChild(createCopyButton(() => currentRawText));
+
+        const body = document.createElement('div');
+        body.className = 'dharma-body';
+        body.innerHTML = formatDharmaText(text);
+
+        card.appendChild(header);
+        card.appendChild(body);
+
+        if (retryPrompt) {
+          const retryBtn = document.createElement('button');
+          retryBtn.type = 'button';
+          retryBtn.className = 'mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs bg-gold/15 hover:bg-gold/25 text-gold-light border border-gold/25 transition-colors';
+          retryBtn.textContent = 'Retry reflection';
+          retryBtn.addEventListener('click', () => {
+            wrapper.remove();
+            sendDharmaInquiry(retryPrompt, { skipUserAppend: true });
+          });
+          card.appendChild(retryBtn);
+        }
+
+        wrapper.appendChild(card);
+
+        if (pulse) {
+          buddhaSculpture.speakingPulse = 1.0;
+        }
+
+        wrapper._updateText = (newText) => {
+          currentRawText = newText;
+          body.innerHTML = formatDharmaText(newText);
+          chatStream.scrollTop = chatStream.scrollHeight;
+        };
+      }
+
+      chatStream.appendChild(wrapper);
+      chatStream.scrollTop = chatStream.scrollHeight;
+      return wrapper;
+    }
+
+    function showTypingIndicator() {
+      const loader = document.createElement('div');
+      loader.id = 'contemplatingIndicator';
+      loader.className = 'animate-message flex items-start';
+      loader.innerHTML = `
+        <div class="rounded-2xl rounded-bl-sm px-5 py-3.5 bg-obsidian/70 border border-gold/15 flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold dot-1"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-gold dot-2"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-gold dot-3"></span>
+          </div>
+          <span class="font-serif italic text-sm text-sandalwood-muted">Contemplating in stillness...</span>
+        </div>
+      `;
+      chatStream.appendChild(loader);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const loader = document.getElementById('contemplatingIndicator');
+      if (loader) loader.remove();
+    }
+
+    function setGeneratingState(active) {
+      isGenerating = active;
+      sendBtn.disabled = active;
+      promptChips.forEach(chip => {
+        chip.disabled = active;
+      });
+      if (active) {
+        statusDot.classList.add('animate-pulse');
+        statusText.textContent = 'Listening & Reflecting';
+      } else {
+        statusDot.classList.remove('animate-pulse');
+        statusText.textContent = 'Stillness & Inquiry';
+      }
+    }
+
+    // Exponential backoff fetch helper for Gemini API
+    async function fetchWithBackoff(url, options, maxRetries = 4) {
+      let delay = 1000;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const response = await fetch(url, options);
+          if (response.ok) {
+            return response;
+          }
+          if (response.status === 429 || response.status >= 500) {
+            if (attempt === maxRetries) throw new Error(`API unavailable (${response.status})`);
+          } else {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData?.error?.message || `Request failed (${response.status})`);
+          }
+        } catch (err) {
+          if (attempt === maxRetries) throw err;
+        }
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+      }
+    }
+
+    async function streamGeminiResponse(url, payload, onChunk) {
+      const response = await fetchWithBackoff(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.body || !response.body.getReader) {
+        const data = await response.json();
+        const full = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (full) onChunk(full);
+        return full;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const jsonStr = trimmed.slice(5).trim();
+          if (!jsonStr || jsonStr === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (delta) {
+              fullText += delta;
+              onChunk(fullText);
+            }
+          } catch (e) {
+            // Ignore partial JSON frames
+          }
+        }
+      }
+
+      return fullText;
+    }
+
+    async function sendDharmaInquiry(promptText, options = {}) {
+      const { skipUserAppend = false } = options;
+      const cleanText = promptText.trim();
+      if (!cleanText || isGenerating) return;
+
+      const activeKey = getActiveApiKey();
+      if (!activeKey) {
+        if (!skipUserAppend) {
+          appendMessage('user', cleanText);
+        }
+        appendMessage(
+          'model',
+          'No Gemini API key is configured yet. Click **API Key** in the top bar to add your key locally, then retry your reflection.',
+          { retryPrompt: cleanText, pulse: false }
+        );
+        return;
+      }
+
+      setGeneratingState(true);
+      if (!skipUserAppend) {
+        userInput.value = '';
+        userInput.style.height = 'auto';
+        appendMessage('user', cleanText);
+      }
+
+      conversationHistory.push({
+        role: 'user',
+        parts: [{ text: cleanText }]
+      });
+
+      showTypingIndicator();
+
+      try {
+        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
+        const payload = {
+          contents: recentHistory,
+          systemInstruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+          },
+          generationConfig: {
+            temperature: 0.72,
+            topP: 0.9,
+            maxOutputTokens: 900
+          }
+        };
+
+        const endpoints = getGeminiEndpoints(activeKey);
+        let msgWrapper = null;
+
+        const reply = await streamGeminiResponse(endpoints.stream, payload, (accumulated) => {
+          if (!msgWrapper) {
+            removeTypingIndicator();
+            msgWrapper = appendMessage('model', accumulated);
+          } else {
+            msgWrapper._updateText(accumulated);
+          }
+        });
+
+        removeTypingIndicator();
+
+        if (reply) {
+          conversationHistory.push({
+            role: 'model',
+            parts: [{ text: reply }]
+          });
+          saveHistory();
+        } else {
+          conversationHistory.pop();
+          if (msgWrapper) msgWrapper.remove();
+          appendMessage(
+            'model',
+            'Like a still pond momentarily rippled by wind, clarity is returning. Please offer your question once more.',
+            { retryPrompt: cleanText, pulse: false }
+          );
+        }
+      } catch (error) {
+        removeTypingIndicator();
+        // Roll back the unanswered user turn so role alternation remains valid
+        if (conversationHistory.length && conversationHistory[conversationHistory.length - 1].role === 'user') {
+          conversationHistory.pop();
+        }
+        appendMessage(
+          'model',
+          'The path of dialogue encountered a brief silence in connection. Take a gentle breath, and try sharing your reflection again.',
+          { retryPrompt: cleanText, pulse: false }
+        );
+      } finally {
+        setGeneratingState(false);
+        userInput.focus();
+      }
+    }
+
+    function renderWelcomeMessage() {
+      const welcomeMessage = `Welcome, friend. Set down whatever burdens you have been carrying today, and take a single unhurried breath.
+
+> "Mind precedes all mental states. Mind is their chief; they are all mind-wrought." — Dhammapada 1
+
+I am here to explore the Dharma with you—not as dogma to be accepted blindly, but as an invitation to *come and see* (*ehipassiko*) within your own direct experience. What is weighing upon your mind, or what aspect of the path would you like to inquire into?`;
+
+      appendMessage('model', welcomeMessage, { pulse: false });
+    }
+
+    function initSanctuary({ clearStorage = false } = {}) {
+      chatStream.innerHTML = '';
+      setRandomVerse();
+
+      if (clearStorage) {
+        conversationHistory = [];
+        localStorage.removeItem(STORAGE_KEY_HISTORY);
+        renderWelcomeMessage();
+        return;
+      }
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+        if (Array.isArray(saved) && saved.length > 0) {
+          conversationHistory = saved;
+          renderWelcomeMessage();
+          saved.forEach(turn => {
+            const text = turn?.parts?.[0]?.text;
+            if (text && (turn.role === 'user' || turn.role === 'model')) {
+              appendMessage(turn.role, text, { pulse: false });
+            }
+          });
+          return;
+        }
+      } catch (e) {
+        // Ignore malformed localStorage
+      }
+
+      conversationHistory = [];
+      renderWelcomeMessage();
+    }
+
+    // Event Listeners
+    chatForm.addEventListener('submit', e => {
+      e.preventDefault();
+      sendDharmaInquiry(userInput.value);
+    });
+
+    // Auto-resize textarea & Enter-to-send
+    userInput.addEventListener('input', () => {
+      userInput.style.height = 'auto';
+      userInput.style.height = Math.min(userInput.scrollHeight, 128) + 'px';
+    });
+
+    userInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendDharmaInquiry(userInput.value);
+      }
+    });
+
+    // Curated Dharma Inquiry Chips
+    promptChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const prompt = chip.getAttribute('data-prompt');
+        sendDharmaInquiry(prompt);
+      });
+    });
+
+    // Begin Anew button
+    resetBtn.addEventListener('click', () => {
+      bowl.playChime();
+      initSanctuary({ clearStorage: true });
+    });
+
+    // API Key Modal Handlers
+    function openApiKeyModal() {
+      apiKeyInput.value = localStorage.getItem(STORAGE_KEY_API) || '';
+      apiKeyModal.classList.remove('hidden');
+      apiKeyInput.focus();
+    }
+
+    function closeApiKeyModal() {
+      apiKeyModal.classList.add('hidden');
+    }
+
+    apiKeyBtn.addEventListener('click', openApiKeyModal);
+    cancelApiKeyBtn.addEventListener('click', closeApiKeyModal);
+    saveApiKeyBtn.addEventListener('click', () => {
+      const val = apiKeyInput.value.trim();
+      if (val) {
+        localStorage.setItem(STORAGE_KEY_API, val);
+      } else {
+        localStorage.removeItem(STORAGE_KEY_API);
+      }
+      closeApiKeyModal();
+    });
+    apiKeyModal.addEventListener('click', e => {
+      if (e.target === apiKeyModal) closeApiKeyModal();
+    });
+
+    // Initialize on load
+    initSanctuary();
+  </script>
+</body>
+</html>
