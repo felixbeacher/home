@@ -415,7 +415,9 @@
       setLoadingState(visible, message = '') {
         if (!this.loadingOverlay) return;
         if (visible) {
-          this.loadingText.textContent = message;
+          if (this.loadingText) {
+            this.loadingText.textContent = message;
+          }
           this.loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
         } else {
           this.loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
