@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ehipassiko — Dharma Dialogue</title>
+  <title>Dharma</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -122,51 +122,33 @@
 </head>
 <body class="min-h-screen min-h-dvh flex flex-col lg:flex-row bg-obsidian text-sandalwood selection:bg-gold/30 selection:text-sandalwood">
 
-  <!-- LEFT / TOP PANEL: Wireframe Buddha Sculpture & Meditative Presence -->
-  <section class="relative w-full lg:w-[44%] xl:w-[42%] h-[42vh] h-[42dvh] min-h-[300px] lg:h-screen lg:h-dvh flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gold/15 sanctuary-glow select-none overflow-hidden shrink-0">
-    
-    <!-- Top Header Overlay -->
+  <!-- LEFT / TOP PANEL: 3D Buddha Sculpture -->
+  <section class="relative w-full lg:w-[46%] xl:w-[44%] h-[44vh] h-[44dvh] min-h-[280px] lg:h-screen lg:h-dvh flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gold/15 sanctuary-glow select-none overflow-hidden shrink-0">
+
+    <!-- Minimal Top Controls -->
     <header class="relative z-10 flex items-center justify-between px-6 pt-5 pb-2">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full border border-gold/40 flex items-center justify-center bg-gold/5">
-          <!-- Minimalist Dharma Wheel SVG -->
-          <svg class="w-4 h-4 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <circle cx="12" cy="12" r="7" />
-            <circle cx="12" cy="12" r="2" />
-            <line x1="12" y1="2" x2="12" y2="22" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-            <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="font-serif text-xl sm:text-2xl tracking-wide text-sandalwood font-medium">Ehipassiko</h1>
-          <p class="text-[11px] uppercase tracking-[0.22em] text-sandalwood-muted">Come &amp; See • Early Dharma</p>
-        </div>
+      <div class="w-8 h-8 rounded-full border border-gold/35 flex items-center justify-center bg-gold/5">
+        <svg class="w-4 h-4 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="7" />
+          <circle cx="12" cy="12" r="2" />
+          <line x1="12" y1="2" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+          <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+        </svg>
       </div>
 
-      <!-- Contemplation Bell & Mute Controls -->
-      <div class="flex items-center gap-1.5">
-        <button id="bellBtn" type="button" title="Sound Singing Bowl" aria-label="Sound singing bowl" class="group flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/25 bg-temple/70 hover:bg-gold/10 hover:border-gold/50 transition-all duration-300 text-xs text-sandalwood-muted hover:text-gold-light">
-          <svg id="bellIcon" class="w-3.5 h-3.5 text-gold transition-transform duration-500 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-            <path d="M12 3a9 9 0 0 0-9 9c0 3.5 2.5 6.5 6 7.5h6c3.5-1 6-4 6-7.5a9 9 0 0 0-9-9Z" />
-            <path d="M8 21h8" />
-          </svg>
-          <span id="bellLabel" class="hidden sm:inline">Chime Bowl</span>
-        </button>
-
-        <button id="muteBtn" type="button" title="Mute Singing Bowl" aria-label="Mute singing bowl" aria-pressed="false" class="p-1.5 rounded-full border border-gold/20 bg-temple/70 hover:bg-gold/10 hover:border-gold/45 transition-all duration-200 text-sandalwood-muted hover:text-gold-light">
-          <svg id="soundOnIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-          </svg>
-          <svg id="soundOffIcon" class="w-3.5 h-3.5 hidden text-sandalwood-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-            <line x1="22" y1="9" x2="16" y2="15" />
-            <line x1="16" y1="9" x2="22" y2="15" />
-          </svg>
-        </button>
-      </div>
+      <button id="muteBtn" type="button" title="Mute Singing Bowl" aria-label="Mute singing bowl" aria-pressed="false" class="p-2 rounded-full border border-gold/20 bg-temple/70 hover:bg-gold/10 hover:border-gold/45 transition-all duration-200 text-sandalwood-muted hover:text-gold-light">
+        <svg id="soundOnIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </svg>
+        <svg id="soundOffIcon" class="w-4 h-4 hidden text-sandalwood-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <line x1="22" y1="9" x2="16" y2="15" />
+          <line x1="16" y1="9" x2="22" y2="15" />
+        </svg>
+      </button>
     </header>
 
     <!-- Interactive 3D Wireframe Canvas Container -->
@@ -176,145 +158,38 @@
       <!-- Subtle Scan Loading Indicator -->
       <div id="scanLoadingOverlay" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-obsidian/65 backdrop-blur-[2px] transition-opacity duration-500 z-20">
         <div class="w-8 h-8 rounded-full border border-gold/30 border-t-gold animate-spin mb-3"></div>
-        <p id="scanLoadingText" class="font-serif italic text-sm text-gold-light tracking-wide">Acquiring 3D museum laser scan...</p>
       </div>
 
       <!-- Subtle Drag & Drop Visual Cue -->
       <div id="dropZoneOverlay" class="pointer-events-none opacity-0 transition-opacity duration-300 absolute inset-4 rounded-2xl border border-dashed border-gold/60 bg-obsidian/80 backdrop-blur-sm flex flex-col items-center justify-center z-30">
-        <p class="font-serif text-lg text-gold-light">Release to load 3D Museum Scan</p>
-        <p class="text-[11px] uppercase tracking-widest text-sandalwood-muted mt-1">Supports .GLB, .GLTF &amp; .OBJ meshes</p>
-      </div>
-
-      <!-- Bottom-Right Custom Scan Upload Button -->
-      <div class="absolute bottom-2 right-4 z-20 flex items-center gap-2">
-        <input type="file" id="scanFileInput" accept=".glb,.gltf,.obj" class="hidden" />
-        <button id="loadCustomScanBtn" type="button" title="Load a local .GLB or .OBJ museum scan (or drag and drop onto the sculpture)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-obsidian/75 hover:bg-gold/15 border border-gold/20 hover:border-gold/45 text-[10px] uppercase tracking-wider text-sandalwood-muted hover:text-gold-light backdrop-blur-md transition-all duration-200">
-          <svg class="w-3 h-3 text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          <span>Load .GLB / .OBJ Scan</span>
-        </button>
+        <p class="font-serif text-lg text-gold-light">Drop .GLB or .OBJ</p>
       </div>
     </div>
-
-    <!-- Bottom Contemplative Verse & Interaction Hint -->
-    <footer class="relative z-10 px-6 pb-5 pt-2 text-center">
-      <p id="dailyVerse" class="select-text font-serif italic text-sm sm:text-base text-gold-light/90 max-w-md mx-auto leading-relaxed">
-        “Better than a thousand hollow words is one word that brings peace.”
-      </p>
-      <div class="mt-1.5 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] text-sandalwood-faint tracking-wider uppercase">
-        <span id="scanSourceBadge">3D Museum Scan</span>
-        <span>•</span>
-        <span>Drag to orbit 360° • Scroll to zoom</span>
-      </div>
-    </footer>
   </section>
 
-  <!-- RIGHT PANEL: Serene Dharma Dialogue Interface -->
-  <main class="flex-1 flex flex-col h-[58vh] h-[58dvh] lg:h-screen lg:h-dvh bg-temple/60 relative">
-    
-    <!-- Top Subtle Control Bar -->
-    <div class="flex items-center justify-between px-5 sm:px-8 py-3.5 border-b border-gold/10 bg-obsidian/50 backdrop-blur-md">
-      <div class="flex items-center gap-2.5">
-        <span id="statusDot" class="w-2 h-2 rounded-full bg-gold/80 shadow-[0_0_8px_rgba(212,175,55,0.6)]"></span>
-        <span id="statusText" class="text-xs tracking-wider uppercase text-sandalwood-muted">Stillness &amp; Inquiry</span>
+  <!-- RIGHT PANEL: Minimalist Teaching Sanctuary -->
+  <main class="flex-1 flex flex-col items-center justify-center h-[56vh] h-[56dvh] lg:h-screen lg:h-dvh bg-temple/60 px-6 sm:px-12 lg:px-16 relative">
+    <div class="w-full max-w-xl flex flex-col items-center text-center space-y-10">
+
+      <!-- Single Random Teaching Display -->
+      <div id="teachingCard" aria-live="polite" class="min-h-[140px] flex flex-col items-center justify-center">
+        <p id="teachingText" class="font-serif text-xl sm:text-2xl lg:text-[1.7rem] text-sandalwood/90 leading-relaxed tracking-wide">
+          Hit the chime bowl for a teaching.
+        </p>
+        <p id="teachingSource" class="mt-4 text-xs uppercase tracking-[0.2em] text-gold-light/70 hidden"></p>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button id="apiKeyBtn" type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-sandalwood-muted hover:text-sandalwood hover:bg-stone/80 border border-transparent hover:border-gold/20 transition-all duration-200" title="Configure Gemini API Key" aria-label="Configure Gemini API key">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-            <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" />
-          </svg>
-          <span class="hidden sm:inline">API Key</span>
-        </button>
+      <!-- Hit Chime Bowl Button -->
+      <button id="bellBtn" type="button" aria-label="Hit chime bowl for a teaching" class="group flex items-center gap-3 px-6 py-3 rounded-full border border-gold/35 bg-obsidian/60 hover:bg-gold/10 hover:border-gold/70 active:scale-[0.98] transition-all duration-300 text-sm tracking-wider text-gold-light shadow-[0_0_25px_rgba(212,175,55,0.08)] hover:shadow-[0_0_30px_rgba(212,175,55,0.18)]">
+        <svg id="bellIcon" class="w-5 h-5 text-gold transition-transform duration-500 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M12 3a9 9 0 0 0-9 9c0 3.5 2.5 6.5 6 7.5h6c3.5-1 6-4 6-7.5a9 9 0 0 0-9-9Z" />
+          <path d="M8 21h8" />
+        </svg>
+        <span>Hit Chime Bowl</span>
+      </button>
 
-        <button id="resetBtn" type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-sandalwood-muted hover:text-sandalwood hover:bg-stone/80 border border-transparent hover:border-gold/20 transition-all duration-200" title="Clear dialogue and begin anew">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-          </svg>
-          <span>Begin Anew</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Scrollable Chat Stream -->
-    <div id="chatStream" aria-live="polite" aria-label="Dharma dialogue stream" class="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-12 py-6 space-y-6 scroll-smooth">
-      <!-- Initial Welcome Message or Restored Session injected by JS -->
-    </div>
-
-    <!-- Curated Dharma Inquiry Chips & Input Area -->
-    <div class="px-4 sm:px-8 lg:px-12 pb-5 pt-3 bg-gradient-to-t from-obsidian via-obsidian/95 to-transparent border-t border-gold/10">
-      
-      <!-- Curated Prompts (Horizontal scroll on mobile, wrap on desktop) -->
-      <div id="promptChips" role="group" aria-label="Suggested Dharma inquiries" class="flex items-center gap-2 overflow-x-auto pb-3 no-scrollbar">
-        <button type="button" data-prompt="How do I release attachment to outcomes I cannot control?" class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
-          Releasing attachment
-        </button>
-        <button type="button" data-prompt="Explain the parable of the Second Arrow and how it applies to modern anxiety." class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
-          The Second Arrow
-        </button>
-        <button type="button" data-prompt="Guide me through a brief mindfulness of breathing (Anapanasati)." class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
-          Mindfulness of breath
-        </button>
-        <button type="button" data-prompt="What does it mean to walk the Middle Way in daily work and relationships?" class="prompt-chip shrink-0 text-xs px-3.5 py-2 rounded-full bg-stone/90 hover:bg-gold/15 text-sandalwood-muted hover:text-gold-light border border-gold/15 hover:border-gold/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 text-left">
-          The Middle Way
-        </button>
-      </div>
-
-      <!-- Input Form -->
-      <form id="chatForm" class="relative flex items-end gap-2 bg-stone/90 border border-gold/25 focus-within:border-gold/60 rounded-2xl p-2 shadow-lg transition-colors duration-300">
-        <textarea
-          id="userInput"
-          rows="1"
-          placeholder="Offer a question or reflection in stillness..."
-          aria-label="Offer a question or reflection"
-          class="w-full bg-transparent text-sm sm:text-base text-sandalwood placeholder-sandalwood-faint px-3 py-2 resize-none focus:outline-none max-h-32 leading-relaxed"
-        ></textarea>
-        <button
-          type="submit"
-          id="sendBtn"
-          aria-label="Send reflection"
-          class="shrink-0 p-2.5 rounded-xl bg-gold/20 hover:bg-gold/30 text-gold-light border border-gold/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M12 19V5" />
-            <path d="m5 12 7-7 7 7" />
-          </svg>
-        </button>
-      </form>
-      <p class="text-[11px] text-center text-sandalwood-faint mt-2">
-        Rooted in the Pali Canon &amp; Early Buddhist Discourses • Test all words through your own direct experience
-      </p>
     </div>
   </main>
-
-  <!-- API Key Modal -->
-  <div id="apiKeyModal" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-obsidian/80 backdrop-blur-sm px-4">
-    <div class="w-full max-w-md rounded-2xl bg-temple border border-gold/25 p-6 shadow-2xl">
-      <h2 id="apiKeyModalTitle" class="font-serif text-xl text-gold-light">Gemini API Key</h2>
-      <p class="mt-2 text-xs text-sandalwood-muted leading-relaxed">
-        Stored only in your browser's local storage so this standalone page can converse with the Gemini API. Leave blank to clear.
-      </p>
-      <input
-        id="apiKeyInput"
-        type="password"
-        autocomplete="off"
-        placeholder="AIza..."
-        class="mt-4 w-full rounded-xl bg-obsidian/80 border border-gold/25 focus:border-gold/60 px-3.5 py-2.5 text-sm text-sandalwood placeholder-sandalwood-faint focus:outline-none"
-      />
-      <div class="mt-5 flex items-center justify-end gap-2">
-        <button id="cancelApiKeyBtn" type="button" class="px-3.5 py-1.5 rounded-lg text-xs text-sandalwood-muted hover:text-sandalwood hover:bg-stone transition-colors">
-          Cancel
-        </button>
-        <button id="saveApiKeyBtn" type="button" class="px-4 py-1.5 rounded-lg text-xs bg-gold/20 hover:bg-gold/30 text-gold-light border border-gold/30 transition-colors">
-          Save Key
-        </button>
-      </div>
-    </div>
-  </div>
 
   <script>
     /**
@@ -404,12 +279,6 @@
       muteBtn.setAttribute('aria-label', bowl.isMuted ? 'Unmute singing bowl' : 'Mute singing bowl');
     }
     syncMuteUI();
-
-    bellBtn.addEventListener('click', () => {
-      bowl.playChime();
-      bellIcon.classList.add('scale-125', 'text-sandalwood');
-      setTimeout(() => bellIcon.classList.remove('scale-125', 'text-sandalwood'), 600);
-    });
 
     muteBtn.addEventListener('click', () => {
       bowl.toggleMute();
@@ -559,7 +428,9 @@
       loadScanSequence(index) {
         if (index >= this.scanSources.length) {
           this.setLoadingState(false);
-          this.scanSourceBadge.textContent = 'Drop .GLB / .OBJ Scan';
+          if (this.scanSourceBadge) {
+            this.scanSourceBadge.textContent = 'Drop .GLB / .OBJ Scan';
+          }
           return;
         }
 
@@ -983,549 +854,112 @@
 
     /**
      * ============================================================================
-     * 3. AUTHENTIC DHARMA DIALOGUE ENGINE (GEMINI API INTEGRATION)
-     * Rooted in Early Buddhist Texts (Nikayas, Dhammapada, Sutta Nipata)
+     * 3. MINIMALIST RANDOM TEACHING ENGINE
      * ============================================================================
      */
-    const SYSTEM_INSTRUCTION = `You are Siddhartha Gautama, the historical Buddha, speaking in a calm, compassionate, lucid, and deeply grounded manner rooted in the Early Buddhist Texts (the Pali Nikayas, Dhammapada, Udana, and Sutta Nipata).
-
-Core Principles & Persona:
-1. Voice & Demeanor: Speak with serene equanimity, warmth, clarity, and gentle directness. Address the questioner warmly (occasionally as "friend" or simply directly, without theatrical archaisms or pretentious mysticism).
-2. Authentic Dharma Foundation: Ground your reflections in core early teachings:
-   - The Four Noble Truths (dukkha/unsatisfactoriness, its origin in craving/clinging, its cessation, and the path)
-   - The Noble Eightfold Path (wise view, intention, speech, action, livelihood, effort, mindfulness, concentration)
-   - Impermanence (anicca), non-self / not-clinging (anatta), and dependent origination (paticcasamuppada)
-   - Mindfulness of breathing (Anapanasati), loving-kindness (Metta), and equanimity (Upekkha)
-3. Classical Metaphors: Where natural and illuminating, weave in authentic early metaphors—such as the parable of the raft (teachings are for crossing over, not carrying on one's head), the two arrows (physical/inevitable pain vs. mental suffering added by resistance), the lotus rising unstained from muddy water, the untamed monkey mind, or a clear mountain lake disturbed by wind.
-4. Ehipassiko ("Come and See"): Never demand blind belief or sound dogmatic. Encourage the user to test every insight in their own lived, present-moment experience.
-5. Formatting & Structure:
-   - Keep responses well-paced, contemplative, and uncluttered (typically 2 to 4 concise paragraphs).
-   - When sharing a brief verse or reflection inspired by the Dhammapada or suttas, place it on its own line starting with "> " so it renders as an illuminated Dharma verse.
-   - End with a gentle, open question or practical contemplation to invite stillness rather than mere intellectual debate.`;
-
-    const GEMINI_MODEL = 'gemini-3-flash-preview';
-    const DEFAULT_API_KEY = ""; // Provided automatically in runtime or via local settings
-    const STORAGE_KEY_HISTORY = 'ehipassiko_history';
-    const STORAGE_KEY_API = 'ehipassiko_gemini_key';
-    const MAX_HISTORY_TURNS = 20;
-
-    function getActiveApiKey() {
-      return DEFAULT_API_KEY || localStorage.getItem(STORAGE_KEY_API) || '';
-    }
-
-    function getGeminiEndpoints(key) {
-      const base = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`;
-      return {
-        stream: `${base}:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`,
-        unary: `${base}:generateContent?key=${encodeURIComponent(key)}`
-      };
-    }
-
-    let conversationHistory = [];
-    let isGenerating = false;
-
-    const chatStream = document.getElementById('chatStream');
-    const chatForm = document.getElementById('chatForm');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const statusDot = document.getElementById('statusDot');
-    const statusText = document.getElementById('statusText');
-    const promptChips = document.querySelectorAll('.prompt-chip');
-
-    // API Key Modal elements
-    const apiKeyBtn = document.getElementById('apiKeyBtn');
-    const apiKeyModal = document.getElementById('apiKeyModal');
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    const cancelApiKeyBtn = document.getElementById('cancelApiKeyBtn');
-    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-
-    // Curated daily verses for the left sanctuary panel
-    const DHAMMAPADA_VERSES = [
-      { text: "“Better than a thousand hollow words is one word that brings peace.”", ref: "Dhammapada 100" },
-      { text: "“As a solid rock is not shaken by the wind, so the wise are not moved by praise or blame.”", ref: "Dhammapada 81" },
-      { text: "“Peace comes from within. Do not seek it without.”", ref: "Early Reflection" },
-      { text: "“Hatred is never appeased by hatred in this world. By non-hatred alone is hatred appeased.”", ref: "Dhammapada 5" },
-      { text: "“Drop by drop is the water pot filled. Likewise, the wise person gathers good little by little.”", ref: "Dhammapada 122" }
+    const TEACHINGS = [
+      {
+        text: "Better than a thousand hollow words is one word that brings peace.",
+        source: "Dhammapada 100"
+      },
+      {
+        text: "Mind precedes all mental states. Mind is their chief; they are all mind-wrought.",
+        source: "Dhammapada 1"
+      },
+      {
+        text: "As a solid rock is not shaken by the wind, so the wise are not moved by praise or blame.",
+        source: "Dhammapada 81"
+      },
+      {
+        text: "Hatred is never appeased by hatred in this world. By non-hatred alone is hatred appeased.",
+        source: "Dhammapada 5"
+      },
+      {
+        text: "Drop by drop is the water pot filled. Likewise, the wise person gathers good little by little.",
+        source: "Dhammapada 122"
+      },
+      {
+        text: "Just as a lotus flower born in water, grown in water, rises above the water and stands unsullied by it—so too, remain unsullied by the world.",
+        source: "Aṅguttara Nikāya 10.81"
+      },
+      {
+        text: "Do not dwell in the past, do not dream of the future; concentrate the mind on the present moment.",
+        source: "Majjhima Nikāya 131"
+      },
+      {
+        text: "When touched by a feeling of pain, the wise do not sorrow, grieve, or lament. They feel only one arrow—the bodily pain—not the second arrow of resistance.",
+        source: "Saṃyutta Nikāya 36.6"
+      },
+      {
+        text: "The teaching is like a raft: it is for crossing over, not for holding onto.",
+        source: "Majjhima Nikāya 22"
+      },
+      {
+        text: "Conquer anger through gentleness, unkindness through kindness, greed through generosity, and falsehood through truth.",
+        source: "Dhammapada 223"
+      },
+      {
+        text: "Look upon the world as empty, ever mindful; uproot the view of self, and so cross beyond sorrow.",
+        source: "Sutta Nipāta 1119"
+      },
+      {
+        text: "Whatever is subject to arising is all subject to cessation.",
+        source: "Saṃyutta Nikāya 56.11"
+      },
+      {
+        text: "In the seen there is only the seen; in the heard, only the heard; in the sensed, only the sensed; in the cognized, only the cognized.",
+        source: "Udāna 1.10"
+      },
+      {
+        text: "Radiate boundless goodwill toward the entire world—above, below, and across—unhindered, without ill will, without enmity.",
+        source: "Sutta Nipāta 1.8"
+      },
+      {
+        text: "All conditioned things are impermanent. Strive on with mindfulness.",
+        source: "Dīgha Nikāya 16"
+      },
+      {
+        text: "Though one may conquer a thousand times a thousand men in battle, the noblest victor is the one who conquers oneself.",
+        source: "Dhammapada 103"
+      },
+      {
+        text: "Be an island unto yourself, a refuge unto yourself, seeking no external refuge.",
+        source: "Dīgha Nikāya 16"
+      },
+      {
+        text: "Health is the greatest gift, contentment the greatest wealth, trust the best kinship, and peace the highest bliss.",
+        source: "Dhammapada 204"
+      }
     ];
 
-    function setRandomVerse() {
-      const pick = DHAMMAPADA_VERSES[Math.floor(Math.random() * DHAMMAPADA_VERSES.length)];
-      document.getElementById('dailyVerse').textContent = pick.text;
-    }
+    const teachingCard = document.getElementById("teachingCard");
+    const teachingText = document.getElementById("teachingText");
+    const teachingSource = document.getElementById("teachingSource");
+    let lastTeachingIndex = -1;
 
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-
-    function applyInlineFormatting(str) {
-      return str
-        .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-stone/90 text-gold-light text-[0.88em]">$1</code>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong class="text-sandalwood font-medium">$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em class="text-gold-light/90 italic">$1</em>');
-    }
-
-    // Format text safely with support for illuminated Dharma verses (> blockquote), headings, bullet/numbered lists, bold, italics, and inline code
-    function formatDharmaText(rawText) {
-      const escaped = escapeHtml(rawText);
-      const lines = escaped.split('\n');
-      let html = '';
-      let listType = null; // 'ul' | 'ol' | null
-      let quoteBuffer = [];
-
-      const closeList = () => {
-        if (listType) {
-          html += `</${listType}>`;
-          listType = null;
-        }
-      };
-
-      const flushQuote = () => {
-        if (quoteBuffer.length > 0) {
-          html += `<blockquote class="dharma-verse">${quoteBuffer.join('<br>')}</blockquote>`;
-          quoteBuffer = [];
-        }
-      };
-
-      lines.forEach(line => {
-        const trimmed = line.trim();
-        if (!trimmed) {
-          closeList();
-          flushQuote();
-          return;
-        }
-
-        if (trimmed.startsWith('&gt; ')) {
-          closeList();
-          quoteBuffer.push(applyInlineFormatting(trimmed.replace(/^&gt;\s*/, '')));
-          return;
-        }
-        flushQuote();
-
-        if (/^#{1,3}\s+/.test(trimmed)) {
-          closeList();
-          const headingText = applyInlineFormatting(trimmed.replace(/^#{1,3}\s+/, ''));
-          html += `<h3 class="font-serif text-lg text-gold-light mt-3 mb-1.5">${headingText}</h3>`;
-        } else if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-          if (listType !== 'ul') {
-            closeList();
-            html += '<ul class="list-disc pl-5 space-y-1.5 my-2.5 text-sandalwood/90">';
-            listType = 'ul';
-          }
-          html += `<li>${applyInlineFormatting(trimmed.replace(/^[-•]\s*/, ''))}</li>`;
-        } else if (/^\d+\.\s+/.test(trimmed)) {
-          if (listType !== 'ol') {
-            closeList();
-            html += '<ol class="list-decimal pl-5 space-y-1.5 my-2.5 text-sandalwood/90">';
-            listType = 'ol';
-          }
-          html += `<li>${applyInlineFormatting(trimmed.replace(/^\d+\.\s+/, ''))}</li>`;
-        } else {
-          closeList();
-          html += `<p class="mb-3 last:mb-0 leading-relaxed">${applyInlineFormatting(trimmed)}</p>`;
-        }
-      });
-
-      closeList();
-      flushQuote();
-      return html;
-    }
-
-    function saveHistory() {
-      try {
-        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(conversationHistory));
-      } catch (e) {
-        // Ignore storage quota errors gracefully
+    function showRandomTeaching() {
+      let nextIndex = Math.floor(Math.random() * TEACHINGS.length);
+      if (TEACHINGS.length > 1 && nextIndex === lastTeachingIndex) {
+        nextIndex = (nextIndex + 1 + Math.floor(Math.random() * (TEACHINGS.length - 1))) % TEACHINGS.length;
       }
+      lastTeachingIndex = nextIndex;
+      const pick = TEACHINGS[nextIndex];
+
+      teachingCard.classList.remove("animate-message");
+      void teachingCard.offsetWidth;
+      teachingText.textContent = `“${pick.text}”`;
+      teachingSource.textContent = pick.source;
+      teachingSource.classList.remove("hidden");
+      teachingCard.classList.add("animate-message");
     }
 
-    function createCopyButton(getTextFn) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.title = 'Copy reflection';
-      btn.setAttribute('aria-label', 'Copy reflection');
-      btn.className = 'ml-auto text-[11px] text-sandalwood-faint hover:text-gold-light transition-colors px-1.5 py-0.5 rounded';
-      btn.textContent = 'Copy';
-      btn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(getTextFn());
-          btn.textContent = 'Copied';
-          setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
-        } catch (e) {
-          btn.textContent = 'Copy';
-        }
-      });
-      return btn;
-    }
-
-    function appendMessage(role, text, options = {}) {
-      const { retryPrompt = null, pulse = true } = options;
-      const wrapper = document.createElement('div');
-      wrapper.className = `animate-message flex flex-col ${role === 'user' ? 'items-end' : 'items-start'}`;
-
-      if (role === 'user') {
-        wrapper.innerHTML = `
-          <div class="max-w-[86%] sm:max-w-[75%] rounded-2xl rounded-br-sm px-4 py-3 bg-stone border border-gold/20 text-sandalwood text-sm sm:text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap">${escapeHtml(text)}</div>
-          <span class="text-[10px] uppercase tracking-widest text-sandalwood-faint mt-1.5 mr-1">Seeker</span>
-        `;
-      } else {
-        const card = document.createElement('div');
-        card.className = 'max-w-[94%] sm:max-w-[85%] rounded-2xl rounded-bl-sm px-5 py-4 bg-obsidian/80 border border-gold/15 text-sandalwood/95 text-sm sm:text-[15.5px] shadow-md';
-
-        const header = document.createElement('div');
-        header.className = 'flex items-center gap-2 mb-2.5 pb-2 border-b border-gold/10';
-        header.innerHTML = `
-          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
-          <span class="font-serif text-sm tracking-wider text-gold-light">Tathāgata</span>
-        `;
-
-        let currentRawText = text;
-        header.appendChild(createCopyButton(() => currentRawText));
-
-        const body = document.createElement('div');
-        body.className = 'dharma-body';
-        body.innerHTML = formatDharmaText(text);
-
-        card.appendChild(header);
-        card.appendChild(body);
-
-        if (retryPrompt) {
-          const retryBtn = document.createElement('button');
-          retryBtn.type = 'button';
-          retryBtn.className = 'mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs bg-gold/15 hover:bg-gold/25 text-gold-light border border-gold/25 transition-colors';
-          retryBtn.textContent = 'Retry reflection';
-          retryBtn.addEventListener('click', () => {
-            wrapper.remove();
-            sendDharmaInquiry(retryPrompt, { skipUserAppend: true });
-          });
-          card.appendChild(retryBtn);
-        }
-
-        wrapper.appendChild(card);
-
-        if (pulse) {
-          buddhaSculpture.speakingPulse = 1.0;
-        }
-
-        wrapper._updateText = (newText) => {
-          currentRawText = newText;
-          body.innerHTML = formatDharmaText(newText);
-          chatStream.scrollTop = chatStream.scrollHeight;
-        };
-      }
-
-      chatStream.appendChild(wrapper);
-      chatStream.scrollTop = chatStream.scrollHeight;
-      return wrapper;
-    }
-
-    function showTypingIndicator() {
-      const loader = document.createElement('div');
-      loader.id = 'contemplatingIndicator';
-      loader.className = 'animate-message flex items-start';
-      loader.innerHTML = `
-        <div class="rounded-2xl rounded-bl-sm px-5 py-3.5 bg-obsidian/70 border border-gold/15 flex items-center gap-3">
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-gold dot-1"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-gold dot-2"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-gold dot-3"></span>
-          </div>
-          <span class="font-serif italic text-sm text-sandalwood-muted">Contemplating in stillness...</span>
-        </div>
-      `;
-      chatStream.appendChild(loader);
-      chatStream.scrollTop = chatStream.scrollHeight;
-    }
-
-    function removeTypingIndicator() {
-      const loader = document.getElementById('contemplatingIndicator');
-      if (loader) loader.remove();
-    }
-
-    function setGeneratingState(active) {
-      isGenerating = active;
-      sendBtn.disabled = active;
-      promptChips.forEach(chip => {
-        chip.disabled = active;
-      });
-      if (active) {
-        statusDot.classList.add('animate-pulse');
-        statusText.textContent = 'Listening & Reflecting';
-      } else {
-        statusDot.classList.remove('animate-pulse');
-        statusText.textContent = 'Stillness & Inquiry';
-      }
-    }
-
-    // Exponential backoff fetch helper for Gemini API
-    async function fetchWithBackoff(url, options, maxRetries = 4) {
-      let delay = 1000;
-      for (let attempt = 0; attempt <= maxRetries; attempt++) {
-        try {
-          const response = await fetch(url, options);
-          if (response.ok) {
-            return response;
-          }
-          if (response.status === 429 || response.status >= 500) {
-            if (attempt === maxRetries) throw new Error(`API unavailable (${response.status})`);
-          } else {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData?.error?.message || `Request failed (${response.status})`);
-          }
-        } catch (err) {
-          if (attempt === maxRetries) throw err;
-        }
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2;
-      }
-    }
-
-    async function streamGeminiResponse(url, payload, onChunk) {
-      const response = await fetchWithBackoff(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.body || !response.body.getReader) {
-        const data = await response.json();
-        const full = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (full) onChunk(full);
-        return full;
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let fullText = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith('data:')) continue;
-          const jsonStr = trimmed.slice(5).trim();
-          if (!jsonStr || jsonStr === '[DONE]') continue;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const delta = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (delta) {
-              fullText += delta;
-              onChunk(fullText);
-            }
-          } catch (e) {
-            // Ignore partial JSON frames
-          }
-        }
-      }
-
-      return fullText;
-    }
-
-    async function sendDharmaInquiry(promptText, options = {}) {
-      const { skipUserAppend = false } = options;
-      const cleanText = promptText.trim();
-      if (!cleanText || isGenerating) return;
-
-      const activeKey = getActiveApiKey();
-      if (!activeKey) {
-        if (!skipUserAppend) {
-          appendMessage('user', cleanText);
-        }
-        appendMessage(
-          'model',
-          'No Gemini API key is configured yet. Click **API Key** in the top bar to add your key locally, then retry your reflection.',
-          { retryPrompt: cleanText, pulse: false }
-        );
-        return;
-      }
-
-      setGeneratingState(true);
-      if (!skipUserAppend) {
-        userInput.value = '';
-        userInput.style.height = 'auto';
-        appendMessage('user', cleanText);
-      }
-
-      conversationHistory.push({
-        role: 'user',
-        parts: [{ text: cleanText }]
-      });
-
-      showTypingIndicator();
-
-      try {
-        const recentHistory = conversationHistory.slice(-MAX_HISTORY_TURNS);
-        const payload = {
-          contents: recentHistory,
-          systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
-          },
-          generationConfig: {
-            temperature: 0.72,
-            topP: 0.9,
-            maxOutputTokens: 900
-          }
-        };
-
-        const endpoints = getGeminiEndpoints(activeKey);
-        let msgWrapper = null;
-
-        const reply = await streamGeminiResponse(endpoints.stream, payload, (accumulated) => {
-          if (!msgWrapper) {
-            removeTypingIndicator();
-            msgWrapper = appendMessage('model', accumulated);
-          } else {
-            msgWrapper._updateText(accumulated);
-          }
-        });
-
-        removeTypingIndicator();
-
-        if (reply) {
-          conversationHistory.push({
-            role: 'model',
-            parts: [{ text: reply }]
-          });
-          saveHistory();
-        } else {
-          conversationHistory.pop();
-          if (msgWrapper) msgWrapper.remove();
-          appendMessage(
-            'model',
-            'Like a still pond momentarily rippled by wind, clarity is returning. Please offer your question once more.',
-            { retryPrompt: cleanText, pulse: false }
-          );
-        }
-      } catch (error) {
-        removeTypingIndicator();
-        // Roll back the unanswered user turn so role alternation remains valid
-        if (conversationHistory.length && conversationHistory[conversationHistory.length - 1].role === 'user') {
-          conversationHistory.pop();
-        }
-        appendMessage(
-          'model',
-          'The path of dialogue encountered a brief silence in connection. Take a gentle breath, and try sharing your reflection again.',
-          { retryPrompt: cleanText, pulse: false }
-        );
-      } finally {
-        setGeneratingState(false);
-        userInput.focus();
-      }
-    }
-
-    function renderWelcomeMessage() {
-      const welcomeMessage = `Welcome, friend. Set down whatever burdens you have been carrying today, and take a single unhurried breath.
-
-> "Mind precedes all mental states. Mind is their chief; they are all mind-wrought." — Dhammapada 1
-
-I am here to explore the Dharma with you—not as dogma to be accepted blindly, but as an invitation to *come and see* (*ehipassiko*) within your own direct experience. What is weighing upon your mind, or what aspect of the path would you like to inquire into?`;
-
-      appendMessage('model', welcomeMessage, { pulse: false });
-    }
-
-    function initSanctuary({ clearStorage = false } = {}) {
-      chatStream.innerHTML = '';
-      setRandomVerse();
-
-      if (clearStorage) {
-        conversationHistory = [];
-        localStorage.removeItem(STORAGE_KEY_HISTORY);
-        renderWelcomeMessage();
-        return;
-      }
-
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
-        if (Array.isArray(saved) && saved.length > 0) {
-          conversationHistory = saved;
-          renderWelcomeMessage();
-          saved.forEach(turn => {
-            const text = turn?.parts?.[0]?.text;
-            if (text && (turn.role === 'user' || turn.role === 'model')) {
-              appendMessage(turn.role, text, { pulse: false });
-            }
-          });
-          return;
-        }
-      } catch (e) {
-        // Ignore malformed localStorage
-      }
-
-      conversationHistory = [];
-      renderWelcomeMessage();
-    }
-
-    // Event Listeners
-    chatForm.addEventListener('submit', e => {
-      e.preventDefault();
-      sendDharmaInquiry(userInput.value);
-    });
-
-    // Auto-resize textarea & Enter-to-send
-    userInput.addEventListener('input', () => {
-      userInput.style.height = 'auto';
-      userInput.style.height = Math.min(userInput.scrollHeight, 128) + 'px';
-    });
-
-    userInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendDharmaInquiry(userInput.value);
-      }
-    });
-
-    // Curated Dharma Inquiry Chips
-    promptChips.forEach(chip => {
-      chip.addEventListener('click', () => {
-        const prompt = chip.getAttribute('data-prompt');
-        sendDharmaInquiry(prompt);
-      });
-    });
-
-    // Begin Anew button
-    resetBtn.addEventListener('click', () => {
+    bellBtn.addEventListener("click", () => {
       bowl.playChime();
-      initSanctuary({ clearStorage: true });
+      buddhaSculpture.speakingPulse = 1.0;
+      bellIcon.classList.add("scale-125", "text-sandalwood");
+      setTimeout(() => bellIcon.classList.remove("scale-125", "text-sandalwood"), 600);
+      showRandomTeaching();
     });
-
-    // API Key Modal Handlers
-    function openApiKeyModal() {
-      apiKeyInput.value = localStorage.getItem(STORAGE_KEY_API) || '';
-      apiKeyModal.classList.remove('hidden');
-      apiKeyInput.focus();
-    }
-
-    function closeApiKeyModal() {
-      apiKeyModal.classList.add('hidden');
-    }
-
-    apiKeyBtn.addEventListener('click', openApiKeyModal);
-    cancelApiKeyBtn.addEventListener('click', closeApiKeyModal);
-    saveApiKeyBtn.addEventListener('click', () => {
-      const val = apiKeyInput.value.trim();
-      if (val) {
-        localStorage.setItem(STORAGE_KEY_API, val);
-      } else {
-        localStorage.removeItem(STORAGE_KEY_API);
-      }
-      closeApiKeyModal();
-    });
-    apiKeyModal.addEventListener('click', e => {
-      if (e.target === apiKeyModal) closeApiKeyModal();
-    });
-
-    // Initialize on load
-    initSanctuary();
   </script>
 </body>
 </html>
