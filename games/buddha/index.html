@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dharma</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0c0b0e',
+            temple: '#141218',
+            stone: '#1c1922',
+            gold: {
+              DEFAULT: '#d4af37',
+              light: '#e6c27a',
+              muted: 'rgba(212, 175, 55, 0.25)',
+              subtle: 'rgba(212, 175, 55, 0.08)'
+            },
+            sandalwood: {
+              DEFAULT: '#f0ebe1',
+              muted: '#a89f91',
+              faint: '#6b645c'
+            }
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0c0b0e;
+      color: #f0ebe1;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Subtle ambient radial glow behind the sculpture */
+    .sanctuary-glow {
+      background: radial-gradient(circle at 50% 45%, rgba(212, 175, 55, 0.09) 0%, rgba(20, 18, 24, 0.4) 48%, rgba(12, 11, 14, 1) 80%);
+    }
+
+    /* Hide scrollbar for horizontal prompt chips */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Custom meditative scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(12, 11, 14, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.22);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.45);
+    }
+
+    /* Smooth message entrance */
+    @keyframes fadeFloatUp {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-message {
+      animation: fadeFloatUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Breathing dot indicator */
+    @keyframes breatheDot {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .dot-1 { animation: breatheDot 2.2s infinite ease-in-out 0s; }
+    .dot-2 { animation: breatheDot 2.2s infinite ease-in-out 0.35s; }
+    .dot-3 { animation: breatheDot 2.2s infinite ease-in-out 0.7s; }
+
+    /* Verse & Quote styling inside Dharma responses */
+    .dharma-verse {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.18rem;
+      line-height: 1.65;
+      color: #e6c27a;
+      border-left: 2px solid rgba(212, 175, 55, 0.45);
+      padding-left: 1rem;
+      margin: 0.75rem 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body class="min-h-screen min-h-dvh flex flex-col lg:flex-row bg-obsidian text-sandalwood selection:bg-gold/30 selection:text-sandalwood">
+
+  <!-- LEFT / TOP PANEL: 3D Buddha Sculpture -->
+  <section class="relative w-full lg:w-[46%] xl:w-[44%] h-[44vh] h-[44dvh] min-h-[280px] lg:h-screen lg:h-dvh flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gold/15 sanctuary-glow select-none overflow-hidden shrink-0">
+
+    <!-- Minimal Top Controls -->
+    <header class="relative z-10 flex items-center justify-between px-6 pt-5 pb-2">
+      <div class="w-8 h-8 rounded-full border border-gold/35 flex items-center justify-center bg-gold/5">
+        <svg class="w-4 h-4 text-gold-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="7" />
+          <circle cx="12" cy="12" r="2" />
+          <line x1="12" y1="2" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+          <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+        </svg>
+      </div>
+
+      <button id="muteBtn" type="button" title="Mute Singing Bowl" aria-label="Mute singing bowl" aria-pressed="false" class="p-2 rounded-full border border-gold/20 bg-temple/70 hover:bg-gold/10 hover:border-gold/45 transition-all duration-200 text-sandalwood-muted hover:text-gold-light">
+        <svg id="soundOnIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </svg>
+        <svg id="soundOffIcon" class="w-4 h-4 hidden text-sandalwood-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <line x1="22" y1="9" x2="16" y2="15" />
+          <line x1="16" y1="9" x2="22" y2="15" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Interactive 3D Wireframe Canvas Container -->
+    <div id="canvasContainer" class="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing flex items-center justify-center">
+      <canvas id="buddhaCanvas" class="block w-full h-full"></canvas>
+
+      <!-- Subtle Scan Loading Indicator -->
+      <div id="scanLoadingOverlay" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-obsidian/65 backdrop-blur-[2px] transition-opacity duration-500 z-20">
+        <div class="w-8 h-8 rounded-full border border-gold/30 border-t-gold animate-spin mb-3"></div>
+      </div>
+
+      <!-- Subtle Drag & Drop Visual Cue -->
+      <div id="dropZoneOverlay" class="pointer-events-none opacity-0 transition-opacity duration-300 absolute inset-4 rounded-2xl border border-dashed border-gold/60 bg-obsidian/80 backdrop-blur-sm flex flex-col items-center justify-center z-30">
+        <p class="font-serif text-lg text-gold-light">Drop .GLB or .OBJ</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT PANEL: Minimalist Teaching Sanctuary -->
+  <main class="flex-1 flex flex-col items-center justify-center h-[56vh] h-[56dvh] lg:h-screen lg:h-dvh bg-temple/60 px-6 sm:px-12 lg:px-16 relative">
+    <div class="w-full max-w-xl flex flex-col items-center text-center space-y-10">
+
+      <!-- Single Random Teaching Display -->
+      <div id="teachingCard" aria-live="polite" class="min-h-[140px] flex flex-col items-center justify-center">
+        <p id="teachingText" class="font-serif text-xl sm:text-2xl lg:text-[1.7rem] text-sandalwood/90 leading-relaxed tracking-wide">
+          Hit the chime bowl for a teaching.
+        </p>
+        <p id="teachingSource" class="mt-4 text-xs uppercase tracking-[0.2em] text-gold-light/70 hidden"></p>
+      </div>
+
+      <!-- Hit Chime Bowl Button -->
+      <button id="bellBtn" type="button" aria-label="Hit chime bowl for a teaching" class="group flex items-center gap-3 px-6 py-3 rounded-full border border-gold/35 bg-obsidian/60 hover:bg-gold/10 hover:border-gold/70 active:scale-[0.98] transition-all duration-300 text-sm tracking-wider text-gold-light shadow-[0_0_25px_rgba(212,175,55,0.08)] hover:shadow-[0_0_30px_rgba(212,175,55,0.18)]">
+        <svg id="bellIcon" class="w-5 h-5 text-gold transition-transform duration-500 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M12 3a9 9 0 0 0-9 9c0 3.5 2.5 6.5 6 7.5h6c3.5-1 6-4 6-7.5a9 9 0 0 0-9-9Z" />
+          <path d="M8 21h8" />
+        </svg>
+        <span>Hit Chime Bowl</span>
+      </button>
+
+    </div>
+  </main>
+
+  <script>
+    /**
+     * ============================================================================
+     * 1. CONTEMPLATION SINGING BOWL (WEB AUDIO API SYNTHESIS)
+     * Synthesizes a warm, harmonic Tibetan singing bowl chime with subtle beating
+     * frequencies and long meditative decay.
+     * ============================================================================
+     */
+    class SingingBowlAudio {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = localStorage.getItem('ehipassiko_muted') === 'true';
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.isMuted = !this.isMuted;
+        localStorage.setItem('ehipassiko_muted', String(this.isMuted));
+        return this.isMuted;
+      }
+
+      playChime() {
+        if (this.isMuted) return;
+        try {
+          this.init();
+          const now = this.ctx.currentTime;
+
+          // Fundamental + overtone partials characteristic of a bronze singing bowl
+          const partials = [
+            { freq: 256.0, gain: 0.22, decay: 6.5 },   // Fundamental C4
+            { freq: 258.2, gain: 0.14, decay: 6.2 },   // Warm binaural beating
+            { freq: 512.0, gain: 0.08, decay: 4.5 },   // Octave harmonic
+            { freq: 768.5, gain: 0.045, decay: 3.4 },  // Fifth overtone
+            { freq: 1142.0, gain: 0.02, decay: 2.1 }   // High metallic shimmer
+          ];
+
+          const masterGain = this.ctx.createGain();
+          masterGain.gain.setValueAtTime(0.75, now);
+          masterGain.connect(this.ctx.destination);
+
+          partials.forEach(p => {
+            const osc = this.ctx.createOscillator();
+            const env = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(p.freq, now);
+
+            // Soft mallet strike attack, long exponential release
+            env.gain.setValueAtTime(0.0001, now);
+            env.gain.linearRampToValueAtTime(p.gain, now + 0.045);
+            env.gain.exponentialRampToValueAtTime(0.00001, now + p.decay);
+
+            osc.connect(env);
+            env.connect(masterGain);
+
+            osc.start(now);
+            osc.stop(now + p.decay + 0.1);
+          });
+        } catch (e) {
+          // Audio playback blocked or unsupported gracefully ignored
+        }
+      }
+    }
+
+    const bowl = new SingingBowlAudio();
+    const bellBtn = document.getElementById('bellBtn');
+    const bellIcon = document.getElementById('bellIcon');
+    const muteBtn = document.getElementById('muteBtn');
+    const soundOnIcon = document.getElementById('soundOnIcon');
+    const soundOffIcon = document.getElementById('soundOffIcon');
+
+    function syncMuteUI() {
+      soundOnIcon.classList.toggle('hidden', bowl.isMuted);
+      soundOffIcon.classList.toggle('hidden', !bowl.isMuted);
+      muteBtn.setAttribute('aria-pressed', String(bowl.isMuted));
+      muteBtn.title = bowl.isMuted ? 'Unmute Singing Bowl' : 'Mute Singing Bowl';
+      muteBtn.setAttribute('aria-label', bowl.isMuted ? 'Unmute singing bowl' : 'Mute singing bowl');
+    }
+    syncMuteUI();
+
+    muteBtn.addEventListener('click', () => {
+      bowl.toggleMute();
+      syncMuteUI();
+    });
+
+
+    /**
+     * ============================================================================
+     * 2. AUTHENTIC 3D MUSEUM SCAN WIREFRAME SCULPTURE (THREE.JS)
+     * Loads real laser/photogrammetry Buddha scans via GLTFLoader / OBJLoader:
+     * 1) Geo-Web-Project Buddha Photogrammetry Scan (.glb)
+     * 2) Stanford 3D Scanning Repository Happy Buddha Laser Scan (.obj)
+     * 3) Raytracer Buddha Museum Mesh (.obj)
+     * Also supports drag-and-drop or file selection of any custom .GLB/.GLTF/.OBJ
+     * museum scan (e.g. Rijksmuseum, British Museum, Gandhara scans).
+     *
+     * Renders every scanned mesh with:
+     * - Matte dark bronze/obsidian depth-occluding inner core (polygonOffset)
+     * - Burnished gold triangle wireframe + topographic elevation contour lines
+     *   + Fresnel rim-light GLSL shader
+     * ============================================================================
+     */
+    class MuseumScanWireframeBuddha {
+      constructor(canvasId, containerId) {
+        this.canvas = document.getElementById(canvasId);
+        this.container = document.getElementById(containerId);
+        this.loadingOverlay = document.getElementById('scanLoadingOverlay');
+        this.loadingText = document.getElementById('scanLoadingText');
+        this.dropOverlay = document.getElementById('dropZoneOverlay');
+        this.scanSourceBadge = document.getElementById('scanSourceBadge');
+
+        this.time = 0;
+        this.speakingPulse = 0;
+        this.userInteracting = false;
+
+        this.scanSources = [
+          {
+            name: 'Photogrammetry Buddha Scan',
+            url: 'https://raw.githubusercontent.com/Geo-Web-Project/webxr-experiments/main/buddha.glb',
+            type: 'glb'
+          },
+          {
+            name: 'Stanford 3D Laser Scan',
+            url: 'https://raw.githubusercontent.com/HeaoYe/CPUPathTracing/master/models/buddha.obj',
+            type: 'obj'
+          },
+          {
+            name: '3D Museum Buddha Scan',
+            url: 'https://raw.githubusercontent.com/yichuan520030910320/raytracer/master/Buddha.obj',
+            type: 'obj'
+          }
+        ];
+
+        this.initThree();
+        this.initLoaders();
+        this.buildHaloAndMotes();
+        this.bindEvents();
+        this.resize();
+        this.loadScanSequence(0);
+      }
+
+      initThree() {
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(0x0c0b0e, 0.045);
+
+        const rect = this.container.getBoundingClientRect();
+        const aspect = (rect.width || 1) / (rect.height || 1);
+        this.camera = new THREE.PerspectiveCamera(34, aspect, 0.05, 100);
+        this.camera.position.set(0, 0.08, 4.4);
+
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.canvas,
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance'
+        });
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        this.renderer.setClearColor(0x000000, 0);
+
+        // OrbitControls for effortless 360° inspection & smooth zoom into scanned triangles
+        this.controls = new THREE.OrbitControls(this.camera, this.canvas);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.06;
+        this.controls.enablePan = false;
+        this.controls.minDistance = 1.35;
+        this.controls.maxDistance = 7.2;
+        this.controls.target.set(0, 0, 0);
+        this.controls.autoRotate = true;
+        this.controls.autoRotateSpeed = 0.55;
+
+        this.controls.addEventListener('start', () => {
+          this.userInteracting = true;
+          this.controls.autoRotate = false;
+        });
+
+        this.controls.addEventListener('end', () => {
+          this.userInteracting = false;
+          clearTimeout(this.autoRotateTimer);
+          this.autoRotateTimer = setTimeout(() => {
+            if (!this.userInteracting) {
+              this.controls.autoRotate = true;
+            }
+          }, 3200);
+        });
+
+        this.sculptureGroup = new THREE.Group();
+        this.scene.add(this.sculptureGroup);
+
+        // Shared uniforms for sculptural wireframe, topographic contours & depth core
+        this.shaderUniforms = {
+          uTime: { value: 0 },
+          uPulse: { value: 0 },
+          uGoldPrimary: { value: new THREE.Color('#d4af37') },
+          uGoldHighlight: { value: new THREE.Color('#faecc0') },
+          uBronzeShadow: { value: new THREE.Color('#5a441e') },
+          uCoreDark: { value: new THREE.Color('#09080c') },
+          uCoreBronze: { value: new THREE.Color('#231b12') },
+          uKeyLightDir: { value: new THREE.Vector3(0.52, 0.78, 0.80).normalize() },
+          uRimLightDir: { value: new THREE.Vector3(-0.68, 0.44, -0.58).normalize() }
+        };
+      }
+
+      initLoaders() {
+        this.dracoLoader = new THREE.DRACOLoader();
+        this.dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
+
+        this.gltfLoader = new THREE.GLTFLoader();
+        this.gltfLoader.setDRACOLoader(this.dracoLoader);
+
+        this.objLoader = new THREE.OBJLoader();
+      }
+
+      setLoadingState(visible, message = '') {
+        if (!this.loadingOverlay) return;
+        if (visible) {
+          this.loadingText.textContent = message;
+          this.loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        } else {
+          this.loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+      }
+
+      /**
+       * Sequentially attempts authentic 3D laser/photogrammetry museum scans
+       */
+      loadScanSequence(index) {
+        if (index >= this.scanSources.length) {
+          this.setLoadingState(false);
+          if (this.scanSourceBadge) {
+            this.scanSourceBadge.textContent = 'Drop .GLB / .OBJ Scan';
+          }
+          return;
+        }
+
+        const source = this.scanSources[index];
+        this.setLoadingState(true, `Loading ${source.name}...`);
+
+        const onSuccess = (object3D) => {
+          this.applyMuseumWireframeToModel(object3D, source.name);
+          this.setLoadingState(false);
+        };
+
+        const onError = () => {
+          this.loadScanSequence(index + 1);
+        };
+
+        if (source.type === 'glb') {
+          this.gltfLoader.load(
+            source.url,
+            (gltf) => onSuccess(gltf.scene),
+            undefined,
+            onError
+          );
+        } else {
+          this.objLoader.load(
+            source.url,
+            (obj) => onSuccess(obj),
+            undefined,
+            onError
+          );
+        }
+      }
+
+      /**
+       * Loads a user-selected or dropped .GLB, .GLTF, or .OBJ museum scan
+       */
+      loadLocalFile(file) {
+        if (!file) return;
+        const fileName = file.name || 'Custom Scan';
+        const lower = fileName.toLowerCase();
+        const objectUrl = URL.createObjectURL(file);
+
+        this.setLoadingState(true, `Processing ${fileName}...`);
+
+        const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+        if (lower.endsWith('.glb') || lower.endsWith('.gltf')) {
+          this.gltfLoader.load(
+            objectUrl,
+            (gltf) => {
+              this.applyMuseumWireframeToModel(gltf.scene, fileName.replace(/\.(glb|gltf)$/i, ''));
+              this.setLoadingState(false);
+              cleanup();
+            },
+            undefined,
+            () => {
+              this.setLoadingState(false);
+              cleanup();
+            }
+          );
+        } else if (lower.endsWith('.obj')) {
+          this.objLoader.load(
+            objectUrl,
+            (obj) => {
+              this.applyMuseumWireframeToModel(obj, fileName.replace(/\.obj$/i, ''));
+              this.setLoadingState(false);
+              cleanup();
+            },
+            undefined,
+            () => {
+              this.setLoadingState(false);
+              cleanup();
+            }
+          );
+        } else {
+          this.setLoadingState(false);
+          cleanup();
+        }
+      }
+
+      /**
+       * Centers, orients upright, normalizes scale, and applies:
+       * 1) Dark obsidian/bronze depth-occluding core with polygonOffset
+       * 2) Custom Fresnel + topographic elevation contour + burnished gold
+       *    triangle wireframe overlay
+       */
+      applyMuseumWireframeToModel(rawObject, label) {
+        // Clear previous sculpture meshes
+        while (this.sculptureGroup.children.length > 0) {
+          const child = this.sculptureGroup.children[0];
+          this.sculptureGroup.remove(child);
+        }
+
+        // Collect all valid BufferGeometries from the scanned model
+        const geometries = [];
+        rawObject.updateMatrixWorld(true);
+        rawObject.traverse((child) => {
+          if (child.isMesh && child.geometry) {
+            const geom = child.geometry.clone();
+            geom.applyMatrix4(child.matrixWorld);
+            if (!geom.attributes.normal) {
+              geom.computeVertexNormals();
+            }
+            geometries.push(geom);
+          }
+        });
+
+        if (geometries.length === 0) return;
+
+        // Compute combined bounding box across all sub-meshes
+        const overallBox = new THREE.Box3();
+        geometries.forEach((g) => {
+          g.computeBoundingBox();
+          overallBox.union(g.boundingBox);
+        });
+
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        overallBox.getSize(size);
+        overallBox.getCenter(center);
+
+        // If a scan is lying flat (Z significantly taller than Y), stand it upright
+        const rotateUpright = size.z > size.y * 1.45 && size.z > size.x * 1.45;
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const targetHeight = 2.65;
+        const normScale = targetHeight / maxDim;
+
+        // Depth-occluding dark bronze/obsidian core material with polygonOffset
+        const coreMaterial = new THREE.ShaderMaterial({
+          uniforms: this.shaderUniforms,
+          polygonOffset: true,
+          polygonOffsetFactor: 1.5,
+          polygonOffsetUnits: 1.5,
+          vertexShader: `
+            varying vec3 vNormalView;
+            varying vec3 vViewDir;
+            varying vec3 vWorldPos;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vWorldPos = worldPos.xyz;
+              vec4 mvPos = viewMatrix * worldPos;
+              vNormalView = normalize(normalMatrix * normal);
+              vViewDir = normalize(-mvPos.xyz);
+              gl_Position = projectionMatrix * mvPos;
+            }
+          `,
+          fragmentShader: `
+            uniform vec3 uCoreDark;
+            uniform vec3 uCoreBronze;
+            uniform vec3 uKeyLightDir;
+            uniform vec3 uRimLightDir;
+            varying vec3 vNormalView;
+            varying vec3 vViewDir;
+            varying vec3 vWorldPos;
+            void main() {
+              vec3 N = normalize(vNormalView);
+              vec3 V = normalize(vViewDir);
+              float keyDiff = max(0.0, dot(N, normalize(uKeyLightDir)));
+              float rimDiff = max(0.0, dot(N, normalize(uRimLightDir)));
+              float fresnel = pow(1.0 - max(0.0, dot(N, V)), 3.0);
+
+              vec3 col = mix(uCoreDark, uCoreBronze, keyDiff * 0.58 + rimDiff * 0.34 + fresnel * 0.42);
+              gl_FragColor = vec4(col, 0.99);
+            }
+          `
+        });
+
+        // Burnished gold triangle wireframe + topographic elevation contour GLSL shader
+        const wireMaterial = new THREE.ShaderMaterial({
+          uniforms: this.shaderUniforms,
+          transparent: true,
+          depthWrite: false,
+          vertexShader: `
+            varying vec3 vWorldPos;
+            varying vec3 vViewDir;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vWorldPos = worldPos.xyz;
+              vec4 mvPos = viewMatrix * worldPos;
+              vViewDir = normalize(-mvPos.xyz);
+              gl_Position = projectionMatrix * mvPos;
+            }
+          `,
+          fragmentShader: `
+            uniform float uTime;
+            uniform float uPulse;
+            uniform vec3 uGoldPrimary;
+            uniform vec3 uGoldHighlight;
+            uniform vec3 uBronzeShadow;
+
+            varying vec3 vWorldPos;
+            varying vec3 vViewDir;
+
+            void main() {
+              // Screen-space derivatives reconstruct crisp surface normals for triangle edges
+              vec3 dPosX = dFdx(vWorldPos);
+              vec3 dPosY = dFdy(vWorldPos);
+              vec3 N = normalize(cross(dPosX, dPosY));
+              vec3 V = normalize(vViewDir);
+
+              // Fresnel rim illumination along sculptural silhouettes
+              float ndotv = abs(dot(N, V));
+              float fresnel = pow(1.0 - clamp(ndotv, 0.0, 1.0), 2.1);
+
+              // Subtle topographic laser-scan elevation contour bands
+              float contourFreq = 26.0;
+              float contourWave = abs(sin((vWorldPos.y * contourFreq) - uTime * 0.35));
+              float contourBand = smoothstep(0.92, 0.995, contourWave);
+
+              // Gentle meditative energy wave sweeping upward during Dharma responses
+              float pulseWave = smoothstep(0.85, 1.0, sin(vWorldPos.y * 5.0 - uTime * 3.0)) * uPulse;
+
+              vec3 baseCol = mix(uBronzeShadow, uGoldPrimary, 0.38 + fresnel * 0.62);
+              vec3 finalCol = mix(baseCol, uGoldHighlight, clamp(fresnel * 0.65 + contourBand * 0.55 + pulseWave * 0.6, 0.0, 1.0));
+
+              float alpha = 0.28 + fresnel * 0.58 + contourBand * 0.24 + pulseWave * 0.25;
+              gl_FragColor = vec4(finalCol, clamp(alpha, 0.14, 0.95));
+            }
+          `
+        });
+
+        const modelContainer = new THREE.Group();
+
+        geometries.forEach((geom) => {
+          // Center at origin & normalize scale
+          geom.translate(-center.x, -center.y, -center.z);
+          if (rotateUpright) {
+            geom.rotateX(-Math.PI / 2);
+          }
+          geom.scale(normScale, normScale, normScale);
+          geom.computeVertexNormals();
+
+          // 1. Depth-occluding core mesh
+          const coreMesh = new THREE.Mesh(geom, coreMaterial);
+          modelContainer.add(coreMesh);
+
+          // 2. Crisp triangle wireframe overlay of the real laser-scanned mesh
+          // If mesh is ultra-dense (>120k triangles), EdgesGeometry(1 deg) keeps every
+          // real sculptural facet while preserving crispness and 60fps performance
+          const triCount = geom.index
+            ? geom.index.count / 3
+            : geom.attributes.position.count / 3;
+          const wireGeom = triCount > 120000
+            ? new THREE.EdgesGeometry(geom, 1.5)
+            : new THREE.WireframeGeometry(geom);
+
+          const wireSegments = new THREE.LineSegments(wireGeom, wireMaterial);
+          modelContainer.add(wireSegments);
+        });
+
+        // Re-center vertically after optional upright rotation
+        const finalBox = new THREE.Box3().setFromObject(modelContainer);
+        const finalCenter = new THREE.Vector3();
+        finalBox.getCenter(finalCenter);
+        modelContainer.position.sub(finalCenter);
+
+        this.sculptureGroup.add(modelContainer);
+
+        // Reset camera gently to frame the newly loaded museum scan
+        this.controls.target.set(0, 0, 0);
+        this.camera.position.set(0, 0.12, 4.35);
+        this.controls.update();
+
+        if (this.scanSourceBadge && label) {
+          this.scanSourceBadge.textContent = label;
+        }
+      }
+
+      /**
+       * Delicate sacred geometry lotus halo behind the sculpture & floating light motes
+       */
+      buildHaloAndMotes() {
+        this.haloGroup = new THREE.Group();
+        this.haloGroup.position.set(0, 0.18, -1.15);
+        this.scene.add(this.haloGroup);
+
+        const makeCircleRing = (radius, segments, colorHex, opacity) => {
+          const pts = [];
+          for (let i = 0; i <= segments; i++) {
+            const a = (i / segments) * Math.PI * 2;
+            pts.push(new THREE.Vector3(Math.cos(a) * radius, Math.sin(a) * radius, 0));
+          }
+          const geom = new THREE.BufferGeometry().setFromPoints(pts);
+          const mat = new THREE.LineBasicMaterial({ color: colorHex, transparent: true, opacity });
+          return new THREE.Line(geom, mat);
+        };
+
+        this.haloGroup.add(makeCircleRing(1.22, 96, 0xd4af37, 0.20));
+        this.haloGroup.add(makeCircleRing(1.36, 96, 0xe6c27a, 0.10));
+        this.haloGroup.add(makeCircleRing(0.96, 72, 0xd4af37, 0.08));
+
+        // 24 Geometric Lotus Rays
+        const rayPts = [];
+        const petals = 24;
+        for (let i = 0; i < petals; i++) {
+          const a = (i / petals) * Math.PI * 2;
+          const rIn = (i % 2 === 0) ? 1.15 : 1.19;
+          const rOut = (i % 2 === 0) ? 1.32 : 1.27;
+          rayPts.push(
+            new THREE.Vector3(Math.cos(a) * rIn, Math.sin(a) * rIn, 0),
+            new THREE.Vector3(Math.cos(a) * rOut, Math.sin(a) * rOut, 0)
+          );
+        }
+        const raysGeom = new THREE.BufferGeometry().setFromPoints(rayPts);
+        const raysMat = new THREE.LineBasicMaterial({ color: 0xe6c27a, transparent: true, opacity: 0.22 });
+        this.haloRays = new THREE.LineSegments(raysGeom, raysMat);
+        this.haloGroup.add(this.haloRays);
+
+        // Floating luminous dust motes
+        const moteCount = 48;
+        const motePositions = new Float32Array(moteCount * 3);
+        this.moteVelocities = [];
+        for (let i = 0; i < moteCount; i++) {
+          motePositions[i * 3] = (Math.random() - 0.5) * 3.4;
+          motePositions[i * 3 + 1] = (Math.random() - 0.5) * 3.4;
+          motePositions[i * 3 + 2] = (Math.random() - 0.5) * 2.2;
+          this.moteVelocities.push(0.0012 + Math.random() * 0.0020);
+        }
+        const moteGeom = new THREE.BufferGeometry();
+        moteGeom.setAttribute('position', new THREE.BufferAttribute(motePositions, 3));
+        const moteMat = new THREE.PointsMaterial({
+          color: 0xe6c27a,
+          size: 0.022,
+          transparent: true,
+          opacity: 0.38
+        });
+        this.motes = new THREE.Points(moteGeom, moteMat);
+        this.scene.add(this.motes);
+      }
+
+      bindEvents() {
+        window.addEventListener('resize', () => this.resize());
+
+        // Custom .GLB / .GLTF / .OBJ file button
+        const loadBtn = document.getElementById('loadCustomScanBtn');
+        const fileInput = document.getElementById('scanFileInput');
+
+        if (loadBtn && fileInput) {
+          loadBtn.addEventListener('click', () => fileInput.click());
+          fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+              this.loadLocalFile(e.target.files[0]);
+              fileInput.value = '';
+            }
+          });
+        }
+
+        // Drag & drop support directly onto the 3D sculpture viewport
+        this.container.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (this.dropOverlay) this.dropOverlay.classList.remove('opacity-0');
+        });
+
+        this.container.addEventListener('dragleave', (e) => {
+          if (!this.container.contains(e.relatedTarget) && this.dropOverlay) {
+            this.dropOverlay.classList.add('opacity-0');
+          }
+        });
+
+        this.container.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (this.dropOverlay) this.dropOverlay.classList.add('opacity-0');
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+            this.loadLocalFile(e.dataTransfer.files[0]);
+          }
+        });
+      }
+
+      resize() {
+        const rect = this.container.getBoundingClientRect();
+        const width = rect.width || 1;
+        const height = rect.height || 1;
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height, false);
+      }
+
+      render() {
+        this.time += 0.016;
+
+        // Gentle meditative breathing float
+        const breathY = Math.sin(this.time * 1.05) * 0.022;
+        this.sculptureGroup.position.y = breathY;
+
+        if (this.haloRays) {
+          this.haloRays.rotation.z = this.time * 0.045;
+        }
+        if (this.haloGroup) {
+          this.haloGroup.position.y = 0.18 + breathY * 0.5;
+          // Keep halo facing the viewer gracefully
+          this.haloGroup.quaternion.copy(this.camera.quaternion);
+        }
+
+        if (this.motes) {
+          const pos = this.motes.geometry.attributes.position;
+          for (let i = 0; i < this.moteVelocities.length; i++) {
+            let y = pos.getY(i) + this.moteVelocities[i];
+            if (y > 1.7) y = -1.7;
+            pos.setY(i, y);
+          }
+          pos.needsUpdate = true;
+        }
+
+        if (this.controls) {
+          this.controls.update();
+        }
+
+        this.shaderUniforms.uTime.value = this.time;
+        this.shaderUniforms.uPulse.value = this.speakingPulse;
+        this.speakingPulse *= 0.94;
+
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(() => this.render());
+      }
+    }
+
+    const buddhaSculpture = new MuseumScanWireframeBuddha('buddhaCanvas', 'canvasContainer');
+    window.addEventListener('load', () => {
+      buddhaSculpture.render();
+    });
+
+
+    /**
+     * ============================================================================
+     * 3. MINIMALIST RANDOM TEACHING ENGINE
+     * ============================================================================
+     */
+    const TEACHINGS = [
+      {
+        text: "Better than a thousand hollow words is one word that brings peace.",
+        source: "Dhammapada 100"
+      },
+      {
+        text: "Mind precedes all mental states. Mind is their chief; they are all mind-wrought.",
+        source: "Dhammapada 1"
+      },
+      {
+        text: "As a solid rock is not shaken by the wind, so the wise are not moved by praise or blame.",
+        source: "Dhammapada 81"
+      },
+      {
+        text: "Hatred is never appeased by hatred in this world. By non-hatred alone is hatred appeased.",
+        source: "Dhammapada 5"
+      },
+      {
+        text: "Drop by drop is the water pot filled. Likewise, the wise person gathers good little by little.",
+        source: "Dhammapada 122"
+      },
+      {
+        text: "Just as a lotus flower born in water, grown in water, rises above the water and stands unsullied by it—so too, remain unsullied by the world.",
+        source: "Aṅguttara Nikāya 10.81"
+      },
+      {
+        text: "Do not dwell in the past, do not dream of the future; concentrate the mind on the present moment.",
+        source: "Majjhima Nikāya 131"
+      },
+      {
+        text: "When touched by a feeling of pain, the wise do not sorrow, grieve, or lament. They feel only one arrow—the bodily pain—not the second arrow of resistance.",
+        source: "Saṃyutta Nikāya 36.6"
+      },
+      {
+        text: "The teaching is like a raft: it is for crossing over, not for holding onto.",
+        source: "Majjhima Nikāya 22"
+      },
+      {
+        text: "Conquer anger through gentleness, unkindness through kindness, greed through generosity, and falsehood through truth.",
+        source: "Dhammapada 223"
+      },
+      {
+        text: "Look upon the world as empty, ever mindful; uproot the view of self, and so cross beyond sorrow.",
+        source: "Sutta Nipāta 1119"
+      },
+      {
+        text: "Whatever is subject to arising is all subject to cessation.",
+        source: "Saṃyutta Nikāya 56.11"
+      },
+      {
+        text: "In the seen there is only the seen; in the heard, only the heard; in the sensed, only the sensed; in the cognized, only the cognized.",
+        source: "Udāna 1.10"
+      },
+      {
+        text: "Radiate boundless goodwill toward the entire world—above, below, and across—unhindered, without ill will, without enmity.",
+        source: "Sutta Nipāta 1.8"
+      },
+      {
+        text: "All conditioned things are impermanent. Strive on with mindfulness.",
+        source: "Dīgha Nikāya 16"
+      },
+      {
+        text: "Though one may conquer a thousand times a thousand men in battle, the noblest victor is the one who conquers oneself.",
+        source: "Dhammapada 103"
+      },
+      {
+        text: "Be an island unto yourself, a refuge unto yourself, seeking no external refuge.",
+        source: "Dīgha Nikāya 16"
+      },
+      {
+        text: "Health is the greatest gift, contentment the greatest wealth, trust the best kinship, and peace the highest bliss.",
+        source: "Dhammapada 204"
+      }
+    ];
+
+    const teachingCard = document.getElementById("teachingCard");
+    const teachingText = document.getElementById("teachingText");
+    const teachingSource = document.getElementById("teachingSource");
+    let lastTeachingIndex = -1;
+
+    function showRandomTeaching() {
+      let nextIndex = Math.floor(Math.random() * TEACHINGS.length);
+      if (TEACHINGS.length > 1 && nextIndex === lastTeachingIndex) {
+        nextIndex = (nextIndex + 1 + Math.floor(Math.random() * (TEACHINGS.length - 1))) % TEACHINGS.length;
+      }
+      lastTeachingIndex = nextIndex;
+      const pick = TEACHINGS[nextIndex];
+
+      teachingCard.classList.remove("animate-message");
+      void teachingCard.offsetWidth;
+      teachingText.textContent = `“${pick.text}”`;
+      teachingSource.textContent = pick.source;
+      teachingSource.classList.remove("hidden");
+      teachingCard.classList.add("animate-message");
+    }
+
+    bellBtn.addEventListener("click", () => {
+      bowl.playChime();
+      buddhaSculpture.speakingPulse = 1.0;
+      bellIcon.classList.add("scale-125", "text-sandalwood");
+      setTimeout(() => bellIcon.classList.remove("scale-125", "text-sandalwood"), 600);
+      showRandomTeaching();
+    });
+  </script>
+</body>
+</html>
